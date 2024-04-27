@@ -45,15 +45,6 @@ public final class AppliedE {
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN =
             ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
-    /*
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register(
-            "cable_emc_interface",
-            () -> Util.make(() -> {
-                PartModels.registerModels(PartModelsHelper.createModels(EMCInterfacePart.class));
-                return new PartItem<>(new Item.Properties(), EMCInterfacePart.class, EMCInterfacePart::new);
-            }));
-     */
-
     public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
 
     public AppliedE() {
