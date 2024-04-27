@@ -20,7 +20,9 @@ information on stored EMC and transmutable items. Can be placed anywhere at all 
 ![EMC module crafting recipe](img/module2.png)
 
 Multiple modules may be placed down on one network by any number of different players / knowledge providers, but only
-one module per knowledge provider will contribute to the stored EMC figure and available "craftable" known items.
+one module per knowledge provider will contribute to the stored EMC figure and available "craftable" known items. If
+multiple knowledge providers are employed by the modules on a network, any inserted and extracted EMC will be equally
+(as is possible) distributed among all providers.
 
 ![EMC and displayed transmutable items](img/module3.png)
 ![Displayed EMC](img/module4.png)
