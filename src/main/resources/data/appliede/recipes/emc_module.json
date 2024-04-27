@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "projecte:dark_matter_block"
+    },
+    "R": {
+      "item": "projecte:red_matter_block"
+    },
+    "S": {
+      "item": "ae2:singularity"
+    },
+    "T": {
+      "item": "projecte:transmutation_tablet"
+    }
+  },
+  "pattern": ["DRD", "STS", "DRD"],
+  "result": {
+    "item": "appliede:emc_module"
+  }
+}

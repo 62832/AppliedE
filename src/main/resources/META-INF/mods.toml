@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+
+logoFile = "icon.png"
+authors = "90"
+license = "LGPLv3.0"
+
+issueTrackerURL = "https://github.com/62832/AppliedE/issues"
+displayURL = "https://github.com/62832/AppliedE"
+
+[[mods]]
+modId = "appliede"
+version = "$version"
+displayName = "AppliedE"
+description = "Direct EMC integration with Applied Energistics 2."
+
+[[dependencies]]
+modId = "ae2"
+type = "required"
+versionRange = "[$ae2Version,$ae2VersionEnd)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies]]
+modId = "projecte"
+type = "required"
+versionRange = "[$projectEVersion,)"
+ordering = "AFTER"
+side = "BOTH"
