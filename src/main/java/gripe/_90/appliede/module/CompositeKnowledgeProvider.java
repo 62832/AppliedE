@@ -32,6 +32,7 @@ import gripe._90.appliede.pattern.TransmutationPattern;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class CompositeKnowledgeProvider implements IKnowledgeProvider {
@@ -42,7 +43,7 @@ public class CompositeKnowledgeProvider implements IKnowledgeProvider {
     private final Set<IGridNode> moduleNodes = new ObjectLinkedOpenHashSet<>();
     private final List<IPatternDetails> patterns = new ObjectArrayList<>();
 
-    public CompositeKnowledgeProvider() {
+    CompositeKnowledgeProvider() {
         MinecraftForge.EVENT_BUS.addListener((PlayerEvent event) -> {
             if (event instanceof PlayerEvent.PlayerLoggedInEvent || event instanceof PlayerEvent.PlayerLoggedOutEvent) {
                 cachedProviders.clear();
@@ -54,6 +55,12 @@ public class CompositeKnowledgeProvider implements IKnowledgeProvider {
                         cachedProviders.put(uuid, ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
                     }
                 }
+            }
+        });
+
+        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
+            if (cachedProviders.get(event.getPlayerUUID()) != null) {
+                recalculatePatterns();
             }
         });
     }
