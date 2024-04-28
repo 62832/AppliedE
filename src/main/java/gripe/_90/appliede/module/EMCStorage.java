@@ -68,34 +68,39 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         }
 
         var knowledge = service.getKnowledge();
-        var extracted = BigInteger.ZERO;
+        var extracted = 0L;
         var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
 
         var providers = new ArrayList<>(knowledge.getProviders());
-        Collections.shuffle(providers);
 
-        var toExtract = BigInteger.valueOf(amount).multiply(multiplier);
-        var divisor = BigInteger.valueOf(knowledge.getProviders().size());
-        var quotient = toExtract.divide(divisor);
-        var remainder = toExtract.remainder(divisor).longValue();
+        while (!providers.isEmpty() && extracted < amount) {
+            Collections.shuffle(providers);
 
-        for (var p = 0; p < providers.size(); p++) {
-            var provider = providers.get(p);
-            var currentEmc = provider.getEmc();
-            var toExtractFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
+            var toExtract = BigInteger.valueOf(amount - extracted).multiply(multiplier);
+            var divisor = BigInteger.valueOf(knowledge.getProviders().size());
+            var quotient = toExtract.divide(divisor);
+            var remainder = toExtract.remainder(divisor).longValue();
 
-            if (currentEmc.compareTo(toExtractFrom) <= 0) {
-                if (mode == Actionable.MODULATE) {
-                    provider.setEmc(BigInteger.ZERO);
+            for (var p = 0; p < providers.size(); p++) {
+                var provider = providers.get(p);
+                var currentEmc = provider.getEmc();
+                var toExtractFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
+
+                if (currentEmc.compareTo(toExtractFrom) <= 0) {
+                    if (mode == Actionable.MODULATE) {
+                        provider.setEmc(BigInteger.ZERO);
+                    }
+
+                    extracted += currentEmc.divide(multiplier).longValue();
+                    // provider exhausted, remove from providers and re-extract deficit from remaining providers
+                    providers.remove(provider);
+                } else {
+                    if (mode == Actionable.MODULATE) {
+                        provider.setEmc(currentEmc.subtract(toExtractFrom));
+                    }
+
+                    extracted += toExtractFrom.divide(multiplier).longValue();
                 }
-
-                extracted = extracted.add(currentEmc.divide(multiplier));
-            } else {
-                if (mode == Actionable.MODULATE) {
-                    provider.setEmc(currentEmc.subtract(toExtractFrom));
-                }
-
-                extracted = extracted.add(toExtractFrom.divide(multiplier));
             }
         }
 
@@ -103,7 +108,7 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             service.syncEmc();
         }
 
-        return extracted.min(AppliedE.TIER_LIMIT).longValue();
+        return extracted;
     }
 
     @Override
