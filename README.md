@@ -7,7 +7,7 @@ tightly-coupled integration between the two mods. Unlike conventional add-ons in
 works by turning ProjectE's *EMC* into a distinct "key type" able to be displayed, reported and manipulated by an ME
 network and converted into items upon request via AE2's auto-crafting facilities.
 
-Currently, the mod is in **alpha stages**. Beware of any critical bugs, particularly on multiplayer servers, and please
+Currently, the mod is in **early beta stages**. Beware of any critical bugs, particularly on multiplayer servers, and please
 report them on the [issue tracker][issues] as they arise.
 
 ## Features
