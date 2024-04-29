@@ -11,7 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
 
 import appeng.api.config.Actionable;
 import appeng.api.crafting.IPatternDetails;
@@ -42,8 +41,6 @@ import appeng.parts.PartModel;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.service.KnowledgeService;
 
-import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
-
 public final class EMCModulePart extends AEBasePart
         implements IStorageProvider, ICraftingProvider, IPriorityHost, IGridTickable {
     @PartModels
@@ -62,9 +59,6 @@ public final class EMCModulePart extends AEBasePart
                 .addService(ICraftingProvider.class, this)
                 .addService(IGridTickable.class, this)
                 .setIdlePowerUsage(5.0);
-
-        MinecraftForge.EVENT_BUS.addListener(
-                (PlayerKnowledgeChangeEvent event) -> ICraftingProvider.requestUpdate(getMainNode()));
     }
 
     @Override

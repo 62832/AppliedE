@@ -7,21 +7,30 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.MinecraftForge;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
+import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
 import gripe._90.appliede.module.EMCModulePart;
+
+import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final CompositeKnowledgeProvider knowledge = new CompositeKnowledgeProvider();
     private final MEStorage storage = new EMCStorage(this);
     private final List<EMCModulePart> modules = new ArrayList<>();
     private MinecraftServer server;
+
+    public KnowledgeService() {
+        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) ->
+                modules.forEach(module -> ICraftingProvider.requestUpdate(module.getMainNode())));
+    }
 
     @Override
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
