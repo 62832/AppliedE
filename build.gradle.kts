@@ -62,6 +62,7 @@ dependencies {
 
     runtimeOnly(fg.deobf(libs.projectex.get()))
     runtimeOnly(fg.deobf(libs.teampe.get()))
+    runtimeOnly(fg.deobf(libs.jade.get()))
 }
 
 tasks {

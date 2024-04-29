@@ -12,9 +12,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
 
-import appeng.api.behaviors.GenericInternalInventory;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.GridFlags;
@@ -31,6 +32,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.storage.MEStorage;
 import appeng.capabilities.Capabilities;
+import appeng.helpers.externalstorage.GenericStackItemStorage;
 import appeng.me.storage.DelegatingMEInventory;
 import appeng.util.ConfigInventory;
 import appeng.util.Platform;
@@ -55,7 +57,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     private final GenericStack[] plannedWork;
     private int priority = 0;
 
-    private final LazyOptional<GenericInternalInventory> storageHolder;
+    private final LazyOptional<IItemHandler> storageHolder;
     private final LazyOptional<MEStorage> localInvHolder;
 
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host) {
@@ -73,7 +75,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         config.useRegisteredCapacities();
         storage.useRegisteredCapacities();
 
-        storageHolder = LazyOptional.of(() -> storage);
+        storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
         localInvHolder = LazyOptional.of(this::getInventory);
     }
 
@@ -331,7 +333,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     }
 
     public <T> LazyOptional<T> getCapability(Capability<T> cap) {
-        if (cap == Capabilities.GENERIC_INTERNAL_INV) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return storageHolder.cast();
         } else if (cap == Capabilities.STORAGE) {
             return localInvHolder.cast();
