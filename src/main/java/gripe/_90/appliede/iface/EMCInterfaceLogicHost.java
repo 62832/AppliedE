@@ -3,6 +3,8 @@ package gripe._90.appliede.iface;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.IGridNodeListener;
 import appeng.helpers.IConfigInvHost;
 import appeng.helpers.IPriorityHost;
 import appeng.helpers.externalstorage.GenericStackInv;
@@ -11,9 +13,28 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocator;
 
 public interface EMCInterfaceLogicHost extends IPriorityHost, IConfigInvHost {
+    IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {
+        @Override
+        public void onSaveChanges(EMCInterfaceLogicHost host, IGridNode node) {
+            host.saveChanges();
+        }
+
+        @Override
+        public void onStateChanged(EMCInterfaceLogicHost host, IGridNode node, State state) {
+            host.onMainNodeStateChanged(state);
+        }
+
+        @Override
+        public void onGridChanged(EMCInterfaceLogicHost host, IGridNode node) {
+            host.getInterfaceLogic().notifyNeighbours();
+        }
+    };
+
     BlockEntity getBlockEntity();
 
     void saveChanges();
+
+    void onMainNodeStateChanged(IGridNodeListener.State reason);
 
     EMCInterfaceLogic getInterfaceLogic();
 

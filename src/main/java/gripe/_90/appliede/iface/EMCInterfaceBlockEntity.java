@@ -15,22 +15,13 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
 import appeng.api.networking.GridHelper;
-import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IManagedGridNode;
 import appeng.blockentity.grid.AENetworkBlockEntity;
-import appeng.me.helpers.BlockEntityNodeListener;
 
 import gripe._90.appliede.AppliedE;
 
 public class EMCInterfaceBlockEntity extends AENetworkBlockEntity implements EMCInterfaceLogicHost {
-    private static final IGridNodeListener<EMCInterfaceBlockEntity> NODE_LISTENER = new BlockEntityNodeListener<>() {
-        @Override
-        public void onGridChanged(EMCInterfaceBlockEntity nodeOwner, IGridNode node) {
-            nodeOwner.logic.notifyNeighbours();
-        }
-    };
-
     private final EMCInterfaceLogic logic = createLogic();
 
     public EMCInterfaceBlockEntity(BlockPos pos, BlockState blockState) {

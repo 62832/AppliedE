@@ -43,48 +43,36 @@ import gripe._90.appliede.service.KnowledgeService;
 @Mod(AppliedE.MODID)
 public final class AppliedE {
     public static final String MODID = "appliede";
-
-    public static ResourceLocation id(String path) {
-        return new ResourceLocation(MODID, path);
-    }
-
     public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
 
+    // spotless:off
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-    private static final DeferredRegister<BlockEntityType<?>> BE_TYPES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
-    private static final DeferredRegister<MenuType<?>> MENU_TYPES =
-            DeferredRegister.create(ForgeRegistries.MENU_TYPES, AppEng.MOD_ID);
-    private static final DeferredRegister<CreativeModeTab> TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    private static final DeferredRegister<BlockEntityType<?>> BE_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, AppEng.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final RegistryObject<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
         return part(EMCModulePart.class, EMCModulePart::new);
     });
-    public static final RegistryObject<Item> TRANSMUTATION_PATTERN =
-            ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
+    public static final RegistryObject<Item> TRANSMUTATION_PATTERN = ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
     public static final RegistryObject<EMCInterfaceBlock> EMC_INTERFACE = BLOCKS.register("emc_interface", () -> {
         var block = new EMCInterfaceBlock();
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE =
-            ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
 
     @SuppressWarnings("DataFlowIssue")
-    public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE =
-            BE_TYPES.register("emc_interface", () -> {
-                var type = BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get())
-                        .build(null);
-                EMC_INTERFACE.get().setBlockEntity(EMCInterfaceBlockEntity.class, type, null, null);
-                AEBaseBlockEntity.registerBlockEntityItem(
-                        type, EMC_INTERFACE.get().asItem());
-                return type;
-            });
+    public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
+        var type = BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get()).build(null);
+        EMC_INTERFACE.get().setBlockEntity(EMCInterfaceBlockEntity.class, type, null, null);
+        AEBaseBlockEntity.registerBlockEntityItem(type, EMC_INTERFACE.get().asItem());
+        return type;
+    });
 
     static {
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
@@ -98,6 +86,7 @@ public final class AppliedE {
                 })
                 .build());
     }
+    // spotless:on
 
     public AppliedE() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -111,6 +100,10 @@ public final class AppliedE {
             bus.addListener(EMCRenderer::register);
             bus.addListener(EMCInterfaceScreen::register);
         }
+    }
+
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MODID, path);
     }
 
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {

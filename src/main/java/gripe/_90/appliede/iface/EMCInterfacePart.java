@@ -12,7 +12,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
 import appeng.api.networking.GridHelper;
-import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IManagedGridNode;
 import appeng.api.parts.IPartCollisionHelper;
@@ -28,13 +27,6 @@ import appeng.parts.PartModel;
 import gripe._90.appliede.AppliedE;
 
 public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHost {
-    private static final IGridNodeListener<EMCInterfacePart> NODE_LISTENER = new AEBasePart.NodeListener<>() {
-        @Override
-        public void onGridChanged(EMCInterfacePart nodeOwner, IGridNode node) {
-            nodeOwner.getInterfaceLogic().notifyNeighbours();
-        }
-    };
-
     private static final ResourceLocation MODEL_BASE = AppliedE.id("part/emc_interface");
 
     @PartModels
@@ -68,7 +60,7 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     }
 
     @Override
-    protected void onMainNodeStateChanged(IGridNodeListener.State reason) {
+    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
         super.onMainNodeStateChanged(reason);
 
         if (getMainNode().hasGridBooted()) {
