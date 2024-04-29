@@ -1,4 +1,4 @@
-package gripe._90.appliede.module;
+package gripe._90.appliede.service;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -27,6 +27,7 @@ import appeng.api.networking.IGridNode;
 import appeng.api.stacks.AEItemKey;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.module.TransmutationPattern;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;

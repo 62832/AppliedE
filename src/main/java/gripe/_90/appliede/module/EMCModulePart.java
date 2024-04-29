@@ -40,6 +40,7 @@ import appeng.parts.AEBasePart;
 import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.service.KnowledgeService;
 
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 
@@ -95,7 +96,7 @@ public final class EMCModulePart extends AEBasePart
         var grid = getMainNode().getGrid();
 
         if (grid != null) {
-            mounts.mount(grid.getService(KnowledgeService.class).getStorageToMount(this));
+            mounts.mount(grid.getService(KnowledgeService.class).getStorage(this));
         }
     }
 

@@ -36,7 +36,7 @@ import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
 import gripe._90.appliede.key.EMCKey;
-import gripe._90.appliede.module.KnowledgeService;
+import gripe._90.appliede.service.KnowledgeService;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
 

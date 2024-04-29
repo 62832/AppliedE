@@ -36,8 +36,8 @@ import gripe._90.appliede.iface.EMCInterfaceScreen;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.key.EMCRenderer;
 import gripe._90.appliede.module.EMCModulePart;
-import gripe._90.appliede.module.KnowledgeService;
 import gripe._90.appliede.module.TransmutationPatternItem;
+import gripe._90.appliede.service.KnowledgeService;
 
 @Mod(AppliedE.MODID)
 public final class AppliedE {

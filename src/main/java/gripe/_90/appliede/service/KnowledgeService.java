@@ -1,4 +1,4 @@
-package gripe._90.appliede.module;
+package gripe._90.appliede.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,8 @@ import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
+
+import gripe._90.appliede.module.EMCModulePart;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final CompositeKnowledgeProvider knowledge = new CompositeKnowledgeProvider();
@@ -49,7 +51,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return storage;
     }
 
-    MEStorage getStorageToMount(EMCModulePart module) {
+    public MEStorage getStorage(EMCModulePart module) {
         return !modules.isEmpty() && module.equals(modules.get(0)) ? storage : NullInventory.of();
     }
 
