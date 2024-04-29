@@ -27,7 +27,6 @@ import appeng.api.networking.IGridNode;
 import appeng.api.stacks.AEItemKey;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.pattern.TransmutationPattern;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;

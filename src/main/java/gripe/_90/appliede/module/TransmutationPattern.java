@@ -1,4 +1,4 @@
-package gripe._90.appliede.pattern;
+package gripe._90.appliede.module;
 
 import java.util.Objects;
 
@@ -73,7 +73,7 @@ public final class TransmutationPattern implements IPatternDetails {
         return new GenericStack[] {
             item != null
                     ? new GenericStack(item, 1)
-                    : new GenericStack(new EMCKey(tier - 1), AppliedE.TIER_LIMIT.longValue())
+                    : new GenericStack(EMCKey.tier(tier - 1), AppliedE.TIER_LIMIT.longValue())
         };
     }
 
@@ -90,7 +90,7 @@ public final class TransmutationPattern implements IPatternDetails {
     private record Input(long amount, int tier) implements IInput {
         @Override
         public GenericStack[] getPossibleInputs() {
-            return new GenericStack[] {new GenericStack(new EMCKey(tier), amount)};
+            return new GenericStack[] {new GenericStack(EMCKey.tier(tier), amount)};
         }
 
         @Override

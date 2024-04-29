@@ -28,12 +28,12 @@ public final class EMCKeyType extends AEKeyType {
 
     @Override
     public AEKey readFromPacket(FriendlyByteBuf input) {
-        return new EMCKey(input.readVarInt());
+        return EMCKey.tier(input.readVarInt());
     }
 
     @Override
     public AEKey loadKeyFromTag(CompoundTag tag) {
-        return new EMCKey(tag.getInt("tier"));
+        return EMCKey.tier(tag.getInt("tier"));
     }
 
     @Override

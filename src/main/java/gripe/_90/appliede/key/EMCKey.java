@@ -19,12 +19,20 @@ import gripe._90.appliede.AppliedE;
 public final class EMCKey extends AEKey {
     private final int tier;
 
-    public EMCKey(int tier) {
+    private EMCKey(int tier) {
         if (tier <= 0) {
             throw new IllegalArgumentException("Tier must be positive");
         }
 
         this.tier = tier;
+    }
+
+    public static EMCKey tier(int tier) {
+        return new EMCKey(tier);
+    }
+
+    public static EMCKey base() {
+        return tier(1);
     }
 
     public int getTier() {

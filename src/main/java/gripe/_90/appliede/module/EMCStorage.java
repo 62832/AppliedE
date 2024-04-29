@@ -22,12 +22,12 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         var currentTier = 1;
 
         while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
-            out.add(new EMCKey(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
+            out.add(EMCKey.tier(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
             emc = emc.divide(AppliedE.TIER_LIMIT);
             currentTier++;
         }
 
-        out.add(new EMCKey(currentTier), emc.min(AppliedE.TIER_LIMIT).longValue());
+        out.add(EMCKey.tier(currentTier), emc.min(AppliedE.TIER_LIMIT).longValue());
     }
 
     @Override

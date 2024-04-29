@@ -1,4 +1,4 @@
-package gripe._90.appliede.pattern;
+package gripe._90.appliede.module;
 
 import org.jetbrains.annotations.Nullable;
 

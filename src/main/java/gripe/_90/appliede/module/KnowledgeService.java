@@ -45,7 +45,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return knowledge;
     }
 
-    public MEStorage getStorage(EMCModulePart module) {
+    public MEStorage getStorage() {
+        return storage;
+    }
+
+    MEStorage getStorageToMount(EMCModulePart module) {
         return !modules.isEmpty() && module.equals(modules.get(0)) ? storage : NullInventory.of();
     }
 

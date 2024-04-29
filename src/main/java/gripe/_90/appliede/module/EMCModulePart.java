@@ -40,14 +40,13 @@ import appeng.parts.AEBasePart;
 import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.pattern.TransmutationPattern;
 
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 
 public final class EMCModulePart extends AEBasePart
         implements IStorageProvider, ICraftingProvider, IPriorityHost, IGridTickable {
     @PartModels
-    public static final IPartModel MODEL = new PartModel(AppliedE.id("part/emc_module"));
+    private static final IPartModel MODEL = new PartModel(AppliedE.id("part/emc_module"));
 
     private final Object2LongMap<AEKey> outputs = new Object2LongOpenHashMap<>();
 
@@ -96,7 +95,7 @@ public final class EMCModulePart extends AEBasePart
         var grid = getMainNode().getGrid();
 
         if (grid != null) {
-            mounts.mount(grid.getService(KnowledgeService.class).getStorage(this));
+            mounts.mount(grid.getService(KnowledgeService.class).getStorageToMount(this));
         }
     }
 
