@@ -18,6 +18,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.features.IPlayerRegistry;
+import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
@@ -37,9 +38,10 @@ import moze_intel.projecte.api.proxy.ITransmutationProxy;
 public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final List<EMCModulePart> modules = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
-    private final MEStorage storage = new EMCStorage(this);
+    private final EMCStorage storage = new EMCStorage(this);
 
     private MinecraftServer server;
+    private IGrid grid;
 
     public KnowledgeService() {
         MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
@@ -53,6 +55,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
         if (server == null) {
             server = gridNode.getLevel().getServer();
+        }
+
+        if (grid == null) {
+            grid = gridNode.getGrid();
         }
 
         if (gridNode.getOwner() instanceof EMCModulePart module) {
@@ -81,7 +87,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return providers.values().stream().collect(Collectors.toUnmodifiableSet());
     }
 
-    public MEStorage getStorage() {
+    public EMCStorage getStorage() {
         return storage;
     }
 
@@ -113,6 +119,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         return patterns;
+    }
+
+    @Nullable
+    public IGrid getGrid() {
+        return grid;
     }
 
     public BigInteger getEmc() {

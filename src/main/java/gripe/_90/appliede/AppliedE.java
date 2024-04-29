@@ -106,6 +106,10 @@ public final class AppliedE {
         return new ResourceLocation(MODID, path);
     }
 
+    public static long clampedLong(BigInteger toClamp) {
+        return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
+    }
+
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
         PartModels.registerModels(PartModelsHelper.createModels(partClass));
         return new PartItem<>(new Item.Properties(), partClass, factory);

@@ -7,13 +7,17 @@ import java.util.Collections;
 import net.minecraft.network.chat.Component;
 
 import appeng.api.config.Actionable;
+import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.security.IActionSource;
+import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.key.EMCKey;
+
+import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public record EMCStorage(KnowledgeService service) implements MEStorage {
     @Override
@@ -58,7 +62,15 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount == 0 || !(what instanceof EMCKey emc)) {
+        if (amount == 0) {
+            return 0;
+        }
+
+        if (what instanceof AEItemKey item && source.player().isPresent()) {
+            return extractItem(item, amount, mode, source);
+        }
+
+        if (!(what instanceof EMCKey emc)) {
             return 0;
         }
 
@@ -104,6 +116,50 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         }
 
         return extracted;
+    }
+
+    public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+        var grid = service.getGrid();
+
+        if (grid == null) {
+            return 0;
+        }
+
+        var energy = grid.getEnergyService();
+        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.getItem()));
+        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
+        var acquiredItems = 0L;
+
+        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
+            var toWithdraw = AppliedE.clampedLong(totalEmc);
+            var canWithdraw = extract(EMCKey.base(), toWithdraw, Actionable.SIMULATE, source);
+
+            if (canWithdraw < toWithdraw) {
+                break;
+            }
+
+            var energyToExpend = PowerMultiplier.CONFIG.multiply(toWithdraw);
+            var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+
+            if (availablePower < energyToExpend) {
+                break;
+            }
+
+            BigInteger withdrawn;
+
+            if (mode == Actionable.MODULATE) {
+                energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+                extract(EMCKey.base(), toWithdraw, Actionable.MODULATE, source);
+                withdrawn = BigInteger.valueOf(toWithdraw);
+            } else {
+                withdrawn = BigInteger.valueOf(canWithdraw);
+            }
+
+            acquiredItems += withdrawn.divide(itemEmc).longValue();
+            totalEmc = totalEmc.subtract(withdrawn).add(withdrawn.remainder(itemEmc));
+        }
+
+        return acquiredItems;
     }
 
     @Override

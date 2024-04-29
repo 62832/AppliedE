@@ -265,39 +265,13 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     }
 
     private boolean acquireFromNetwork(IGrid grid, int slot, AEKey what, long amount) {
-        if (!(what instanceof AEItemKey itemKey)) {
+        if (!(what instanceof AEItemKey item)) {
             return false;
         }
 
-        var emcStorage = grid.getService(KnowledgeService.class).getStorage();
-        var energy = grid.getEnergyService();
-
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(itemKey.getItem()));
-        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var acquiredItems = 0L;
-
-        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-            var toWithdraw = clampedLong(totalEmc);
-            var canWithdraw = emcStorage.extract(EMCKey.base(), toWithdraw, Actionable.SIMULATE, requestSource);
-
-            if (canWithdraw < toWithdraw) {
-                break;
-            }
-
-            var energyToExpend = PowerMultiplier.CONFIG.multiply(toWithdraw);
-            var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-
-            if (availablePower < energyToExpend) {
-                break;
-            }
-
-            energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-            emcStorage.extract(EMCKey.base(), toWithdraw, Actionable.MODULATE, requestSource);
-
-            var withdrawn = BigInteger.valueOf(toWithdraw);
-            acquiredItems += withdrawn.divide(itemEmc).longValue();
-            totalEmc = totalEmc.subtract(withdrawn).add(withdrawn.remainder(itemEmc));
-        }
+        var acquiredItems = grid.getService(KnowledgeService.class)
+                .getStorage()
+                .extractItem(item, amount, Actionable.MODULATE, requestSource);
 
         if (acquiredItems > 0) {
             var inserted = storage.insert(slot, what, acquiredItems, Actionable.MODULATE);
