@@ -42,8 +42,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private MinecraftServer server;
 
     public KnowledgeService() {
-        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) ->
-                modules.forEach(module -> ICraftingProvider.requestUpdate(module.getMainNode())));
+        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
+            for (var module : modules) {
+                ICraftingProvider.requestUpdate(module.getMainNode());
+            }
+        });
     }
 
     @Override
