@@ -138,7 +138,7 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
                 break;
             }
 
-            var energyToExpend = PowerMultiplier.CONFIG.multiply(toWithdraw);
+            var energyToExpend = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(toWithdraw);
             var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 
             if (mode == Actionable.MODULATE) {
