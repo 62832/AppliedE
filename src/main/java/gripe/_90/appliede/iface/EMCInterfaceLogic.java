@@ -217,7 +217,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
         var knowledge = grid.getService(KnowledgeService.class);
 
-        if (!knowledge.getKnowledge().knowsItem(itemKey)) {
+        if (!knowledge.knowsItem(itemKey)) {
             return false;
         }
 

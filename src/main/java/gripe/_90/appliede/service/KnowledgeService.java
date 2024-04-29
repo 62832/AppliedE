@@ -1,7 +1,13 @@
 package gripe._90.appliede.service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 
 import appeng.api.crafting.IPatternDetails;
+import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
@@ -23,12 +30,15 @@ import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPattern;
 
+import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
+import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
-    private final CompositeKnowledgeProvider knowledge = new CompositeKnowledgeProvider();
-    private final MEStorage storage = new EMCStorage(this);
     private final List<EMCModulePart> modules = new ArrayList<>();
+    private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
+    private final MEStorage storage = new EMCStorage(this);
+
     private MinecraftServer server;
 
     public KnowledgeService() {
@@ -44,7 +54,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
         if (gridNode.getOwner() instanceof EMCModulePart module) {
             modules.add(module);
-            knowledge.addNode(gridNode);
+            var uuid = gridNode.getOwningPlayerProfileId();
+
+            if (uuid != null) {
+                providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
+            }
         }
     }
 
@@ -52,12 +66,16 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     public void removeNode(IGridNode gridNode) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
             modules.remove(module);
-            knowledge.removeNode(gridNode);
+            var uuid = gridNode.getOwningPlayerProfileId();
+
+            if (uuid != null) {
+                providers.remove(uuid);
+            }
         }
     }
 
-    public CompositeKnowledgeProvider getKnowledge() {
-        return knowledge;
+    public Set<Supplier<IKnowledgeProvider>> getProviders() {
+        return providers.values().stream().collect(Collectors.toUnmodifiableSet());
     }
 
     public MEStorage getStorage() {
@@ -70,7 +88,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     public List<IPatternDetails> getPatterns() {
         var patterns = new ArrayList<IPatternDetails>();
-        var emc = knowledge.getEmc();
+        var emc = getEmc();
         var highestTier = 1;
 
         while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
@@ -82,7 +100,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             patterns.add(new TransmutationPattern(null, tier));
         }
 
-        var knownItems = knowledge.getProviders().stream()
+        var knownItems = getProviders().stream()
                 .flatMap(provider -> provider.get().getKnowledge().stream())
                 .map(item -> AEItemKey.of(item.getItem()))
                 .collect(Collectors.toSet());
@@ -94,9 +112,26 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return patterns;
     }
 
+    public BigInteger getEmc() {
+        return getProviders().stream()
+                .map(provider -> provider.get().getEmc())
+                .reduce(BigInteger.ZERO, BigInteger::add);
+    }
+
+    public boolean knowsItem(AEItemKey item) {
+        return getProviders().stream().anyMatch(provider -> provider.get().hasKnowledge(item.toStack()));
+    }
+
     public void syncEmc() {
         if (server != null) {
-            knowledge.syncAllEmc(server);
+            providers.forEach((uuid, provider) -> {
+                var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
+                var player = IPlayerRegistry.getConnected(server, id);
+
+                if (player != null) {
+                    provider.get().syncEmc(player);
+                }
+            });
         }
     }
 }

@@ -18,7 +18,7 @@ import gripe._90.appliede.key.EMCKey;
 public record EMCStorage(KnowledgeService service) implements MEStorage {
     @Override
     public void getAvailableStacks(KeyCounter out) {
-        var emc = service.getKnowledge().getEmc();
+        var emc = service.getEmc();
         var currentTier = 1;
 
         while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
@@ -40,13 +40,12 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             var bigAmount = BigInteger.valueOf(amount);
             var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
 
-            var knowledge = service.getKnowledge();
             var toInsert = bigAmount.multiply(multiplier);
 
-            var providers = new ArrayList<>(knowledge.getProviders());
+            var providers = new ArrayList<>(service.getProviders());
             Collections.shuffle(providers);
 
-            var divisor = BigInteger.valueOf(knowledge.getProviders().size());
+            var divisor = BigInteger.valueOf(service.getProviders().size());
             var quotient = toInsert.divide(divisor);
             var remainder = toInsert.remainder(divisor).longValue();
 
@@ -67,17 +66,16 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             return 0;
         }
 
-        var knowledge = service.getKnowledge();
         var extracted = 0L;
         var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
 
-        var providers = new ArrayList<>(knowledge.getProviders());
+        var providers = new ArrayList<>(service.getProviders());
 
         while (!providers.isEmpty() && extracted < amount) {
             Collections.shuffle(providers);
 
             var toExtract = BigInteger.valueOf(amount - extracted).multiply(multiplier);
-            var divisor = BigInteger.valueOf(knowledge.getProviders().size());
+            var divisor = BigInteger.valueOf(service.getProviders().size());
             var quotient = toExtract.divide(divisor);
             var remainder = toExtract.remainder(divisor).longValue();
 
