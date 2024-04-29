@@ -145,16 +145,12 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
                 break;
             }
 
-            BigInteger withdrawn;
-
             if (mode == Actionable.MODULATE) {
                 energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
                 extract(EMCKey.base(), toWithdraw, Actionable.MODULATE, source);
-                withdrawn = BigInteger.valueOf(toWithdraw);
-            } else {
-                withdrawn = BigInteger.valueOf(canWithdraw);
             }
 
+            var withdrawn = BigInteger.valueOf(toWithdraw);
             acquiredItems += withdrawn.divide(itemEmc).longValue();
             totalEmc = totalEmc.subtract(withdrawn).add(withdrawn.remainder(itemEmc));
         }
