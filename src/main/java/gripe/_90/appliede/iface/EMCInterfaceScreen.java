@@ -41,7 +41,7 @@ public class EMCInterfaceScreen extends AEBaseScreen<EMCInterfaceMenu> {
 
     public static void register(FMLClientSetupEvent event) {
         event.enqueueWork(() -> InitScreens.register(
-                EMCInterfaceMenu.TYPE, EMCInterfaceScreen::new, "screens/appliede/emc_interface.json"));
+                EMCInterfaceMenu.TYPE, EMCInterfaceScreen::new, "/screens/appliede/emc_interface.json"));
     }
 
     @Override
