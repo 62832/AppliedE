@@ -3,9 +3,11 @@ package gripe._90.appliede;
 import java.math.BigInteger;
 
 import net.minecraft.Util;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -24,8 +26,6 @@ import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.KnowledgeService;
 import gripe._90.appliede.pattern.TransmutationPatternItem;
 
-import moze_intel.projecte.gameObjs.registries.PECreativeTabs;
-
 @Mod(AppliedE.MODID)
 public final class AppliedE {
     public static final String MODID = "appliede";
@@ -34,7 +34,11 @@ public final class AppliedE {
         return new ResourceLocation(MODID, path);
     }
 
+    public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
+
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    private static final DeferredRegister<CreativeModeTab> TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final RegistryObject<Item> EMC_MODULE = ITEMS.register(
             "emc_module",
@@ -45,24 +49,23 @@ public final class AppliedE {
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN =
             ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
-    public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
+    @SuppressWarnings("unused")
+    private static final RegistryObject<CreativeModeTab> TAB = TABS.register(MODID, () -> CreativeModeTab.builder()
+            .title(Component.translatable("mod." + MODID))
+            .icon(() -> EMC_MODULE.get().getDefaultInstance())
+            .displayItems((params, output) -> output.accept(EMC_MODULE.get()))
+            .build());
 
     public AppliedE() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(bus);
+        TABS.register(bus);
         bus.addListener(EMCKeyType::register);
-        bus.addListener(this::addToCreativeTab);
 
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
 
         if (FMLEnvironment.dist.isClient()) {
             EMCRenderer.register();
-        }
-    }
-
-    private void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTab().equals(PECreativeTabs.PROJECTE.get())) {
-            event.accept(EMC_MODULE::get);
         }
     }
 }
