@@ -2,6 +2,7 @@ package gripe._90.appliede.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,10 +15,13 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
 import appeng.api.networking.crafting.ICraftingProvider;
+import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.module.EMCModulePart;
+import gripe._90.appliede.module.TransmutationPattern;
 
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 
@@ -65,7 +69,29 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public List<IPatternDetails> getPatterns() {
-        return knowledge.getPatterns();
+        var patterns = new ArrayList<IPatternDetails>();
+        var emc = knowledge.getEmc();
+        var highestTier = 1;
+
+        while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
+            emc = emc.divide(AppliedE.TIER_LIMIT);
+            highestTier++;
+        }
+
+        for (var tier = highestTier; tier > 1; tier--) {
+            patterns.add(new TransmutationPattern(null, tier));
+        }
+
+        var knownItems = knowledge.getProviders().stream()
+                .flatMap(provider -> provider.get().getKnowledge().stream())
+                .map(item -> AEItemKey.of(item.getItem()))
+                .collect(Collectors.toSet());
+
+        for (var item : knownItems) {
+            patterns.add(new TransmutationPattern(item, 1));
+        }
+
+        return patterns;
     }
 
     public void syncEmc() {
