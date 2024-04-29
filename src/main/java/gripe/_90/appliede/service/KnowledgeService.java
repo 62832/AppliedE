@@ -77,7 +77,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
     }
 
-    public Set<Supplier<IKnowledgeProvider>> getProviders() {
+    Set<Supplier<IKnowledgeProvider>> getProviders() {
         return providers.values().stream().collect(Collectors.toUnmodifiableSet());
     }
 
@@ -125,7 +125,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return getProviders().stream().anyMatch(provider -> provider.get().hasKnowledge(item.toStack()));
     }
 
-    public void syncEmc() {
+    void syncEmc() {
         if (server != null) {
             providers.forEach((uuid, provider) -> {
                 var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
