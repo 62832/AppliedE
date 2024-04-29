@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -182,9 +181,7 @@ public final class EMCModulePart extends AEBasePart
 
     @Override
     public void returnToMainMenu(Player player, ISubMenu subMenu) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.closeContainer();
-        }
+        player.closeContainer();
     }
 
     @Override
