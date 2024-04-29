@@ -6,20 +6,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.items.IItemHandler;
 
 import appeng.api.crafting.IPatternDetails;
@@ -39,34 +38,19 @@ public class CompositeKnowledgeProvider implements IKnowledgeProvider {
     private static final String UNSUPPORTED_SETTER = "Attempted to call setter method on composite provider";
     private static final String UNSUPPORTED_FUNCTIONALITY = "Composite provider does not support method %s";
 
-    private final Map<UUID, IKnowledgeProvider> cachedProviders = new Object2ObjectLinkedOpenHashMap<>();
-    private final Set<IGridNode> moduleNodes = new ObjectLinkedOpenHashSet<>();
+    private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new Object2ObjectLinkedOpenHashMap<>();
     private final List<IPatternDetails> patterns = new ObjectArrayList<>();
 
     CompositeKnowledgeProvider() {
-        MinecraftForge.EVENT_BUS.addListener((PlayerEvent event) -> {
-            if (event instanceof PlayerEvent.PlayerLoggedInEvent || event instanceof PlayerEvent.PlayerLoggedOutEvent) {
-                cachedProviders.clear();
-
-                for (var node : moduleNodes) {
-                    var uuid = node.getOwningPlayerProfileId();
-
-                    if (uuid != null) {
-                        cachedProviders.put(uuid, ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
-                    }
-                }
-            }
-        });
-
         MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
-            if (cachedProviders.get(event.getPlayerUUID()) != null) {
+            if (providers.get(event.getPlayerUUID()) != null) {
                 recalculatePatterns();
             }
         });
     }
 
-    Set<IKnowledgeProvider> getProviders() {
-        return cachedProviders.values().stream().collect(Collectors.toUnmodifiableSet());
+    Set<Supplier<IKnowledgeProvider>> getProviders() {
+        return providers.values().stream().collect(Collectors.toUnmodifiableSet());
     }
 
     List<IPatternDetails> getPatterns() {
@@ -74,22 +58,20 @@ public class CompositeKnowledgeProvider implements IKnowledgeProvider {
     }
 
     void addNode(IGridNode node) {
-        moduleNodes.add(node);
         var uuid = node.getOwningPlayerProfileId();
 
         if (uuid != null) {
-            cachedProviders.put(uuid, ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
+            providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
         }
 
         recalculatePatterns();
     }
 
     void removeNode(IGridNode node) {
-        moduleNodes.remove(node);
         var uuid = node.getOwningPlayerProfileId();
 
         if (uuid != null) {
-            cachedProviders.remove(uuid);
+            providers.remove(uuid);
         }
 
         recalculatePatterns();
@@ -115,36 +97,38 @@ public class CompositeKnowledgeProvider implements IKnowledgeProvider {
     }
 
     void syncAllEmc(MinecraftServer server) {
-        cachedProviders.forEach((uuid, provider) -> {
+        providers.forEach((uuid, provider) -> {
             var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
             var player = IPlayerRegistry.getConnected(server, id);
 
             if (player != null) {
-                provider.syncEmc(player);
+                provider.get().syncEmc(player);
             }
         });
     }
 
     @Override
     public boolean hasKnowledge(@NotNull ItemInfo itemInfo) {
-        return getProviders().stream().anyMatch(provider -> provider.hasKnowledge(itemInfo));
+        return getProviders().stream().anyMatch(provider -> provider.get().hasKnowledge(itemInfo));
     }
 
     @Override
     public boolean hasFullKnowledge() {
-        return getProviders().stream().anyMatch(IKnowledgeProvider::hasFullKnowledge);
+        return getProviders().stream().anyMatch(provider -> provider.get().hasFullKnowledge());
     }
 
     @Override
     public @NotNull Set<ItemInfo> getKnowledge() {
         return getProviders().stream()
-                .flatMap(provider -> provider.getKnowledge().stream())
+                .flatMap(provider -> provider.get().getKnowledge().stream())
                 .collect(Collectors.toSet());
     }
 
     @Override
     public BigInteger getEmc() {
-        return getProviders().stream().map(IKnowledgeProvider::getEmc).reduce(BigInteger.ZERO, BigInteger::add);
+        return getProviders().stream()
+                .map(provider -> provider.get().getEmc())
+                .reduce(BigInteger.ZERO, BigInteger::add);
     }
 
     @Override

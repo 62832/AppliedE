@@ -51,7 +51,7 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             var remainder = toInsert.remainder(divisor).longValue();
 
             for (var p = 0; p < providers.size(); p++) {
-                var provider = providers.get(p);
+                var provider = providers.get(p).get();
                 provider.setEmc(provider.getEmc().add(quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO)));
             }
 
@@ -82,7 +82,9 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             var remainder = toExtract.remainder(divisor).longValue();
 
             for (var p = 0; p < providers.size(); p++) {
-                var provider = providers.get(p);
+                var providerSupplier = providers.get(p);
+                var provider = providerSupplier.get();
+
                 var currentEmc = provider.getEmc();
                 var toExtractFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
 
@@ -93,7 +95,7 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
 
                     extracted += currentEmc.divide(multiplier).longValue();
                     // provider exhausted, remove from providers and re-extract deficit from remaining providers
-                    providers.remove(provider);
+                    providers.remove(providerSupplier);
                 } else {
                     if (mode == Actionable.MODULATE) {
                         provider.setEmc(currentEmc.subtract(toExtractFrom));
