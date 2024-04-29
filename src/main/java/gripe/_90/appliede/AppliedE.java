@@ -23,6 +23,7 @@ import appeng.api.networking.GridServices;
 import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.PartModels;
+import appeng.api.stacks.AEKeyTypes;
 import appeng.blockentity.AEBaseBlockEntity;
 import appeng.core.AppEng;
 import appeng.items.parts.PartItem;
@@ -58,8 +59,11 @@ public final class AppliedE {
     private static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    public static final RegistryObject<Item> EMC_MODULE =
-            ITEMS.register("emc_module", () -> part(EMCModulePart.class, EMCModulePart::new));
+    public static final RegistryObject<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
+        AEKeyTypes.register(EMCKeyType.TYPE);
+        GridServices.register(KnowledgeService.class, KnowledgeService.class);
+        return part(EMCModulePart.class, EMCModulePart::new);
+    });
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN =
             ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
@@ -102,9 +106,6 @@ public final class AppliedE {
         MENU_TYPES.register(bus);
         BE_TYPES.register(bus);
         TABS.register(bus);
-        bus.addListener(EMCKeyType::register);
-
-        GridServices.register(KnowledgeService.class, KnowledgeService.class);
 
         if (FMLEnvironment.dist.isClient()) {
             bus.addListener(EMCRenderer::register);
