@@ -24,6 +24,7 @@ public class EMCInterfaceMenu extends AEBaseMenu {
     public EMCInterfaceMenu(MenuType<?> menuType, int id, Inventory playerInventory, EMCInterfaceLogicHost host) {
         super(menuType, id, playerInventory, host);
         this.host = host;
+        createPlayerInventorySlots(playerInventory);
 
         registerClientAction(ACTION_OPEN_SET_AMOUNT, Integer.class, this::openSetAmountMenu);
 
