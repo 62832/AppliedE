@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.api.client.AEKeyRenderHandler;
 import appeng.api.client.AEKeyRendering;
@@ -21,8 +22,8 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
 
     private EMCRenderer() {}
 
-    public static void register() {
-        AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, INSTANCE);
+    public static void register(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, INSTANCE));
     }
 
     @Override

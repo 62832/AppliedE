@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "appliede:emc_interface"
+    }
+  ],
+  "result": {
+    "item": "appliede:cable_emc_interface"
+  }
+}

@@ -1,13 +1,17 @@
 package gripe._90.appliede;
 
 import java.math.BigInteger;
+import java.util.function.Function;
 
-import net.minecraft.Util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -16,15 +20,24 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import appeng.api.networking.GridServices;
+import appeng.api.parts.IPart;
+import appeng.api.parts.IPartItem;
 import appeng.api.parts.PartModels;
+import appeng.blockentity.AEBaseBlockEntity;
+import appeng.core.AppEng;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
 
+import gripe._90.appliede.iface.EMCInterfaceBlock;
+import gripe._90.appliede.iface.EMCInterfaceBlockEntity;
+import gripe._90.appliede.iface.EMCInterfaceMenu;
+import gripe._90.appliede.iface.EMCInterfacePart;
+import gripe._90.appliede.iface.EMCInterfaceScreen;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.key.EMCRenderer;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.KnowledgeService;
-import gripe._90.appliede.pattern.TransmutationPatternItem;
+import gripe._90.appliede.module.TransmutationPatternItem;
 
 @Mod(AppliedE.MODID)
 public final class AppliedE {
@@ -37,35 +50,70 @@ public final class AppliedE {
     public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
 
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+    private static final DeferredRegister<BlockEntityType<?>> BE_TYPES =
+            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    private static final DeferredRegister<MenuType<?>> MENU_TYPES =
+            DeferredRegister.create(ForgeRegistries.MENU_TYPES, AppEng.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    public static final RegistryObject<Item> EMC_MODULE = ITEMS.register(
-            "emc_module",
-            () -> Util.make(() -> {
-                PartModels.registerModels(PartModelsHelper.createModels(EMCModulePart.class));
-                return new PartItem<>(new Item.Properties(), EMCModulePart.class, EMCModulePart::new);
-            }));
+    public static final RegistryObject<Item> EMC_MODULE =
+            ITEMS.register("emc_module", () -> part(EMCModulePart.class, EMCModulePart::new));
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN =
             ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
-    @SuppressWarnings("unused")
-    private static final RegistryObject<CreativeModeTab> TAB = TABS.register(MODID, () -> CreativeModeTab.builder()
-            .title(Component.translatable("mod." + MODID))
-            .icon(() -> EMC_MODULE.get().getDefaultInstance())
-            .displayItems((params, output) -> output.accept(EMC_MODULE.get()))
-            .build());
+    public static final RegistryObject<EMCInterfaceBlock> EMC_INTERFACE = BLOCKS.register("emc_interface", () -> {
+        var block = new EMCInterfaceBlock();
+        ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
+        return block;
+    });
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE =
+            ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE =
+            BE_TYPES.register("emc_interface", () -> {
+                var type = BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get())
+                        .build(null);
+                EMC_INTERFACE.get().setBlockEntity(EMCInterfaceBlockEntity.class, type, null, null);
+                AEBaseBlockEntity.registerBlockEntityItem(
+                        type, EMC_INTERFACE.get().asItem());
+                return type;
+            });
+
+    static {
+        MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
+        TABS.register(MODID, () -> CreativeModeTab.builder()
+                .title(Component.translatable("mod." + MODID))
+                .icon(() -> EMC_MODULE.get().getDefaultInstance())
+                .displayItems((params, output) -> {
+                    output.accept(EMC_MODULE.get());
+                    output.accept(EMC_INTERFACE.get());
+                    output.accept(CABLE_EMC_INTERFACE.get());
+                })
+                .build());
+    }
 
     public AppliedE() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(bus);
+        BLOCKS.register(bus);
+        MENU_TYPES.register(bus);
+        BE_TYPES.register(bus);
         TABS.register(bus);
         bus.addListener(EMCKeyType::register);
 
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
 
         if (FMLEnvironment.dist.isClient()) {
-            EMCRenderer.register();
+            bus.addListener(EMCRenderer::register);
+            bus.addListener(EMCInterfaceScreen::register);
         }
+    }
+
+    private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
+        PartModels.registerModels(PartModelsHelper.createModels(partClass));
+        return new PartItem<>(new Item.Properties(), partClass, factory);
     }
 }

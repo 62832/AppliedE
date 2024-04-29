@@ -36,11 +36,12 @@ repositories {
 minecraft {
     mappings("official", "1.20.1")
     copyIdeResources.set(true)
+    accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
 
     runs {
         configureEach {
             workingDirectory(file("run"))
-            property("forge.logging.console.level", "info")
+            property("forge.logging.console.level", "debug")
 
             mods {
                 create(modId) {
