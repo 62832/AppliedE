@@ -27,7 +27,7 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             currentTier++;
         }
 
-        out.add(EMCKey.tier(currentTier), emc.min(AppliedE.TIER_LIMIT).longValue());
+        out.add(EMCKey.tier(currentTier), emc.longValue());
     }
 
     @Override
@@ -37,14 +37,10 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE) {
-            var bigAmount = BigInteger.valueOf(amount);
-            var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
-
-            var toInsert = bigAmount.multiply(multiplier);
-
             var providers = new ArrayList<>(service.getProviders());
             Collections.shuffle(providers);
 
+            var toInsert = BigInteger.valueOf(amount).multiply(AppliedE.TIER_LIMIT.pow(emc.getTier() - 1));
             var divisor = BigInteger.valueOf(service.getProviders().size());
             var quotient = toInsert.divide(divisor);
             var remainder = toInsert.remainder(divisor).longValue();
@@ -80,23 +76,22 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
             var remainder = toExtract.remainder(divisor).longValue();
 
             for (var p = 0; p < providers.size(); p++) {
-                var providerSupplier = providers.get(p);
-                var provider = providerSupplier.get();
+                var provider = providers.get(p);
 
-                var currentEmc = provider.getEmc();
+                var currentEmc = provider.get().getEmc();
                 var toExtractFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
 
                 if (currentEmc.compareTo(toExtractFrom) <= 0) {
                     if (mode == Actionable.MODULATE) {
-                        provider.setEmc(BigInteger.ZERO);
+                        provider.get().setEmc(BigInteger.ZERO);
                     }
 
                     extracted += currentEmc.divide(multiplier).longValue();
                     // provider exhausted, remove from providers and re-extract deficit from remaining providers
-                    providers.remove(providerSupplier);
+                    providers.remove(provider);
                 } else {
                     if (mode == Actionable.MODULATE) {
-                        provider.setEmc(currentEmc.subtract(toExtractFrom));
+                        provider.get().setEmc(currentEmc.subtract(toExtractFrom));
                     }
 
                     extracted += toExtractFrom.divide(multiplier).longValue();

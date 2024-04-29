@@ -228,7 +228,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             if (!what.matches(inSlot) || inSlot.amount() < amount) {
                 return true;
             }
-
+            var energy = grid.getEnergyService();
             var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(itemKey.getItem()));
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
             var insertedItems = 0;
@@ -236,14 +236,13 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
                 var toDeposit = clampedLong(totalEmc);
                 var energyToExpend = PowerMultiplier.CONFIG.multiply(toDeposit);
-                var availablePower = grid.getEnergyService()
-                        .extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 
                 if (availablePower < energyToExpend) {
                     break;
                 }
 
-                grid.getEnergyService().extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+                energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
                 knowledge.getStorage().insert(EMCKey.base(), toDeposit, Actionable.MODULATE, requestSource);
 
                 var deposited = BigInteger.valueOf(toDeposit);
@@ -271,6 +270,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         }
 
         var emcStorage = grid.getService(KnowledgeService.class).getStorage();
+        var energy = grid.getEnergyService();
 
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(itemKey.getItem()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
@@ -285,14 +285,13 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             }
 
             var energyToExpend = PowerMultiplier.CONFIG.multiply(toWithdraw);
-            var availablePower =
-                    grid.getEnergyService().extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+            var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 
             if (availablePower < energyToExpend) {
                 break;
             }
 
-            grid.getEnergyService().extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+            energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
             emcStorage.extract(EMCKey.base(), toWithdraw, Actionable.MODULATE, requestSource);
 
             var withdrawn = BigInteger.valueOf(toWithdraw);
