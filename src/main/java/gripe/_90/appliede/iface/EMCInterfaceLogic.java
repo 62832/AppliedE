@@ -215,6 +215,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             return false;
         }
 
+        var knowledge = grid.getService(KnowledgeService.class);
+
+        if (!knowledge.getKnowledge().hasKnowledge(itemKey.toStack())) {
+            return false;
+        }
+
         if (amount < 0) {
             amount = -amount;
             var inSlot = storage.getStack(slot);
@@ -227,7 +233,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
             var insertedItems = 0;
 
-            while (totalEmc.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0) {
+            while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
                 var toDeposit = clampedLong(totalEmc);
                 var energyToExpend = PowerMultiplier.CONFIG.multiply(toDeposit);
                 var availablePower = grid.getEnergyService()
@@ -238,9 +244,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
                 }
 
                 grid.getEnergyService().extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                grid.getService(KnowledgeService.class)
-                        .getStorage()
-                        .insert(EMCKey.base(), toDeposit, Actionable.MODULATE, requestSource);
+                knowledge.getStorage().insert(EMCKey.base(), toDeposit, Actionable.MODULATE, requestSource);
 
                 var deposited = BigInteger.valueOf(toDeposit);
                 insertedItems += (int) deposited.divide(itemEmc).longValue();
@@ -272,7 +276,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var acquiredItems = 0L;
 
-        while (totalEmc.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0) {
+        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
             var toWithdraw = clampedLong(totalEmc);
             var canWithdraw = emcStorage.extract(EMCKey.base(), toWithdraw, Actionable.SIMULATE, requestSource);
 
