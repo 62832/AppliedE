@@ -60,6 +60,9 @@ dependencies {
     implementation(fg.deobf(libs.ae2.get()))
     implementation(fg.deobf(libs.projecte.get()))
 
+    // implementation(fg.deobf(libs.aecapfix.get()))
+    compileOnly(fg.deobf(libs.aecapfix.get()))
+
     runtimeOnly(fg.deobf(libs.projectex.get()))
     runtimeOnly(fg.deobf(libs.teampe.get()))
     runtimeOnly(fg.deobf(libs.jade.get()))

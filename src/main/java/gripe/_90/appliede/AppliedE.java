@@ -12,6 +12,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -33,6 +34,7 @@ import gripe._90.appliede.iface.EMCInterfaceBlock;
 import gripe._90.appliede.iface.EMCInterfaceBlockEntity;
 import gripe._90.appliede.iface.EMCInterfaceMenu;
 import gripe._90.appliede.iface.EMCInterfacePart;
+import gripe._90.appliede.iface.EMCInterfacePartAECF;
 import gripe._90.appliede.iface.EMCInterfaceScreen;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.key.EMCRenderer;
@@ -64,7 +66,9 @@ public final class AppliedE {
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> ModList.get().isLoaded("aecapfix")
+            ? part(EMCInterfacePartAECF.class, EMCInterfacePartAECF::new)
+            : part(EMCInterfacePart.class, EMCInterfacePart::new));
 
     @SuppressWarnings("DataFlowIssue")
     public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
