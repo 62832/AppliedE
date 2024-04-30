@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.StorageCells;
-import appeng.me.cells.BasicCellInventory;
+import appeng.api.upgrades.IUpgradeableItem;
 
 import gripe._90.appliede.AppliedE;
 
@@ -25,7 +25,7 @@ public class StorageCellNBTProcessor implements INBTProcessor {
 
     @Override
     public String getDescription() {
-        return "Calculates EMC value of Applied Energistics 2 storage cells.";
+        return "Calculates EMC value of Applied Energistics 2 storage cells (and terminals).";
     }
 
     @Override
@@ -35,22 +35,27 @@ public class StorageCellNBTProcessor implements INBTProcessor {
 
     @Override
     public long recalculateEMC(@NotNull ItemInfo itemInfo, long currentEmc) throws ArithmeticException {
-        var cell = StorageCells.getCellInventory(itemInfo.createStack(), null);
-        if (cell == null) return currentEmc;
+        if (!(itemInfo.getItem() instanceof IUpgradeableItem upgradeable)) {
+            return currentEmc;
+        }
 
+        var stack = itemInfo.createStack();
         var bigEmc = BigInteger.valueOf(currentEmc);
+
+        for (var upgrade : upgradeable.getUpgrades(stack)) {
+            bigEmc = bigEmc.add(BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(upgrade)));
+        }
+
+        var cell = StorageCells.getCellInventory(stack, null);
+
+        if (cell == null) {
+            return AppliedE.clampedLong(bigEmc);
+        }
 
         for (var key : cell.getAvailableStacks()) {
             if (key.getKey() instanceof AEItemKey item) {
                 var keyEmc = IEMCProxy.INSTANCE.getValue(item.getItem());
                 bigEmc = bigEmc.add(BigInteger.valueOf(keyEmc).multiply(BigInteger.valueOf(key.getLongValue())));
-            }
-        }
-
-        // TODO: See about adding upgrade inventories to the StorageCell interface
-        if (cell instanceof BasicCellInventory basicCell) {
-            for (var upgrade : basicCell.getUpgradesInventory()) {
-                bigEmc = bigEmc.add(BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(upgrade)));
             }
         }
 
