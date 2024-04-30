@@ -30,6 +30,7 @@ import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
+import appeng.api.storage.AEKeyFilter;
 import appeng.api.storage.MEStorage;
 import appeng.capabilities.Capabilities;
 import appeng.helpers.externalstorage.GenericStackItemStorage;
@@ -67,7 +68,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, int slots) {
         this.host = host;
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
-        storage = ConfigInventory.storage(slots, this::onStorageChanged);
+        storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
 
         mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL).addService(IGridTickable.class, this);
         plannedWork = new GenericStack[slots];
@@ -409,6 +410,16 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     private class RequestContext {
         public int getPriority() {
             return priority;
+        }
+    }
+
+    private class StorageFilter implements AEKeyFilter {
+        @Override
+        public boolean matches(AEKey what) {
+            var grid = mainNode.getGrid();
+            return grid != null
+                    && what instanceof AEItemKey item
+                    && grid.getService(KnowledgeService.class).knowsItem(item);
         }
     }
 }
