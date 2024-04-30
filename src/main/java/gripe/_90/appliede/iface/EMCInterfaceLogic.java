@@ -69,9 +69,10 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         this.host = host;
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
         storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
-
-        mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL).addService(IGridTickable.class, this);
         plannedWork = new GenericStack[slots];
+        mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL)
+                .addService(IGridTickable.class, this)
+                .setIdlePowerUsage(10);
 
         config.useRegisteredCapacities();
         storage.useRegisteredCapacities();

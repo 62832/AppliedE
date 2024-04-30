@@ -57,7 +57,7 @@ public final class EMCModulePart extends AEBasePart
                 .addService(IStorageProvider.class, this)
                 .addService(ICraftingProvider.class, this)
                 .addService(IGridTickable.class, this)
-                .setIdlePowerUsage(5.0);
+                .setIdlePowerUsage(25.0);
     }
 
     @Override
