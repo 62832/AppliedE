@@ -1,4 +1,6 @@
 plugins {
+    eclipse
+    idea
     alias(libs.plugins.neogradle)
     alias(libs.plugins.mixin)
     alias(libs.plugins.spotless)
