@@ -2,7 +2,6 @@ package gripe._90.appliede.mappers;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -39,14 +38,21 @@ public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
         return InscriberRecipe.TYPE.equals(recipeType);
     }
 
+    // spotless:off
     @Override
     protected Collection<Ingredient> getIngredients(Recipe<?> recipe) {
         if (!(recipe instanceof InscriberRecipe inscriber)) {
             return Collections.emptyList();
         }
 
-        return inscriber.getProcessType() == InscriberProcessType.INSCRIBE
-                ? Collections.singletonList(inscriber.getMiddleInput())
-                : List.of(inscriber.getMiddleInput(), inscriber.getTopOptional(), inscriber.getBottomOptional());
+        if (inscriber.getProcessType() == InscriberProcessType.INSCRIBE) {
+            var output = inscriber.getResultItem();
+            return inscriber.getTopOptional().test(output) || inscriber.getBottomOptional().test(output)
+                    ? Collections.emptyList()
+                    : Collections.singletonList(inscriber.getMiddleInput());
+        }
+
+        return super.getIngredients(recipe);
     }
+    // spotless:on
 }
