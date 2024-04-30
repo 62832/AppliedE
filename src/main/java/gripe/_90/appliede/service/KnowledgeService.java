@@ -126,12 +126,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         moduleNodes.forEach(ICraftingProvider::requestUpdate);
     }
 
-    @Nullable
-    public IGrid getGrid() {
+    IGrid getGrid() {
         return grid;
     }
 
-    public BigInteger getEmc() {
+    BigInteger getEmc() {
         return getProviders().stream()
                 .map(provider -> provider.get().getEmc())
                 .reduce(BigInteger.ZERO, BigInteger::add);
