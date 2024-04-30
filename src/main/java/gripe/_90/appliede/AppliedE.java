@@ -49,12 +49,12 @@ import moze_intel.projecte.api.imc.CustomEMCRegistration;
 import moze_intel.projecte.api.nss.NSSItem;
 import moze_intel.projecte.emc.mappers.APICustomEMCMapper;
 
+// spotless:off
 @Mod(AppliedE.MODID)
 public final class AppliedE {
     public static final String MODID = "appliede";
     public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
 
-    // spotless:off
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     private static final DeferredRegister<BlockEntityType<?>> BE_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
@@ -97,7 +97,6 @@ public final class AppliedE {
                 })
                 .build());
     }
-    // spotless:on
 
     private static boolean mappedAEItems;
 
@@ -128,8 +127,8 @@ public final class AppliedE {
         if (!mappedAEItems) {
             registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
             registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
-            registerEMC(AEItems.MATTER_BALL, 2048);
-            registerEMC(AEItems.SINGULARITY, 2048000);
+            registerEMC(AEItems.MATTER_BALL, 512);
+            registerEMC(AEItems.SINGULARITY, 512000);
             registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
             mappedAEItems = true;
         }
@@ -146,3 +145,4 @@ public final class AppliedE {
         return new PartItem<>(new Item.Properties(), partClass, factory);
     }
 }
+// spotless:on
