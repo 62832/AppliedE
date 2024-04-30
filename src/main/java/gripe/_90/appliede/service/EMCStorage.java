@@ -19,7 +19,14 @@ import gripe._90.appliede.key.EMCKey;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-public record EMCStorage(KnowledgeService service) implements MEStorage {
+public class EMCStorage implements MEStorage {
+    private final KnowledgeService service;
+    private int highestTier = 1;
+
+    EMCStorage(KnowledgeService service) {
+        this.service = service;
+    }
+
     @Override
     public void getAvailableStacks(KeyCounter out) {
         var emc = service.getEmc();
@@ -32,6 +39,11 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         }
 
         out.add(EMCKey.tier(currentTier), emc.longValue());
+
+        if (highestTier != currentTier) {
+            highestTier = currentTier;
+            service.updatePatterns();
+        }
     }
 
     @Override
@@ -156,6 +168,10 @@ public record EMCStorage(KnowledgeService service) implements MEStorage {
         }
 
         return acquiredItems;
+    }
+
+    public int getHighestTier() {
+        return highestTier;
     }
 
     @Override

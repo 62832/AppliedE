@@ -27,7 +27,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
-import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPattern;
 
@@ -44,11 +43,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private IGrid grid;
 
     public KnowledgeService() {
-        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
-            for (var module : modules) {
-                ICraftingProvider.requestUpdate(module.getMainNode());
-            }
-        });
+        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> updatePatterns());
     }
 
     @Override
@@ -68,6 +63,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             if (uuid != null) {
                 providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
             }
+
+            updatePatterns();
         }
     }
 
@@ -80,6 +77,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             if (uuid != null) {
                 providers.remove(uuid);
             }
+
+            updatePatterns();
         }
     }
 
@@ -97,15 +96,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     public List<IPatternDetails> getPatterns() {
         var patterns = new ArrayList<IPatternDetails>();
-        var emc = getEmc();
-        var highestTier = 1;
 
-        while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
-            emc = emc.divide(AppliedE.TIER_LIMIT);
-            highestTier++;
-        }
-
-        for (var tier = highestTier; tier > 1; tier--) {
+        for (var tier = storage.getHighestTier(); tier > 1; tier--) {
             patterns.add(new TransmutationPattern(null, tier));
         }
 
@@ -119,6 +111,12 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         return patterns;
+    }
+
+    void updatePatterns() {
+        for (var module : modules) {
+            ICraftingProvider.requestUpdate(module.getMainNode());
+        }
     }
 
     @Nullable
