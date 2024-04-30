@@ -118,6 +118,10 @@ public final class AppliedE {
         return new ResourceLocation(MODID, path);
     }
 
+    public static long clampedLong(BigInteger toClamp) {
+        return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
+    }
+
     private static boolean isModLoaded(String modId) {
         return ModList.get() != null
                 ? ModList.get().isLoaded(modId)

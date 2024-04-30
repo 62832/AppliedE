@@ -143,7 +143,7 @@ public class EMCStorage implements MEStorage {
         var acquiredItems = 0L;
 
         while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-            var toWithdraw = totalEmc.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
+            var toWithdraw = AppliedE.clampedLong(totalEmc);
             var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (canWithdraw < toWithdraw) {
