@@ -22,8 +22,10 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
+import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
@@ -35,7 +37,7 @@ import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
-    private final List<EMCModulePart> modules = new ArrayList<>();
+    private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
 
@@ -57,7 +59,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            modules.add(module);
+            moduleNodes.add(module.getMainNode());
             var uuid = gridNode.getOwningPlayerProfileId();
 
             if (uuid != null) {
@@ -71,13 +73,20 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     @Override
     public void removeNode(IGridNode gridNode) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            modules.remove(module);
-            var uuid = gridNode.getOwningPlayerProfileId();
+            moduleNodes.remove(module.getMainNode());
+            providers.clear();
 
-            if (uuid != null) {
-                providers.remove(uuid);
+            for (var mainNode : moduleNodes) {
+                var node = mainNode.getNode();
+                if (node == null) continue;
+
+                var uuid = node.getOwningPlayerProfileId();
+                if (uuid == null) continue;
+
+                providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
             }
 
+            moduleNodes.forEach(IStorageProvider::requestUpdate);
             updatePatterns();
         }
     }
@@ -90,8 +99,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return storage;
     }
 
-    public MEStorage getStorage(EMCModulePart module) {
-        return !modules.isEmpty() && module.equals(modules.get(0)) ? storage : NullInventory.of();
+    public MEStorage getStorage(IManagedGridNode node) {
+        return !moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) ? storage : NullInventory.of();
     }
 
     public List<IPatternDetails> getPatterns() {
@@ -114,9 +123,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     void updatePatterns() {
-        for (var module : modules) {
-            ICraftingProvider.requestUpdate(module.getMainNode());
-        }
+        moduleNodes.forEach(ICraftingProvider::requestUpdate);
     }
 
     @Nullable

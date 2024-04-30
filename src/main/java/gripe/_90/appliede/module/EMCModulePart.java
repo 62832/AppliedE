@@ -89,7 +89,7 @@ public final class EMCModulePart extends AEBasePart
         var grid = getMainNode().getGrid();
 
         if (grid != null) {
-            mounts.mount(grid.getService(KnowledgeService.class).getStorage(this));
+            mounts.mount(grid.getService(KnowledgeService.class).getStorage(getMainNode()));
         }
     }
 
