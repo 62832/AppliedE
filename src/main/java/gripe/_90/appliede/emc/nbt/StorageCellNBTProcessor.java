@@ -1,4 +1,4 @@
-package gripe._90.appliede.mappers;
+package gripe._90.appliede.emc.nbt;
 
 import java.math.BigInteger;
 
@@ -25,12 +25,7 @@ public class StorageCellNBTProcessor implements INBTProcessor {
 
     @Override
     public String getDescription() {
-        return "Calculates EMC value of Applied Energistics 2 storage cells (and terminals).";
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return AppliedE.useCustomMapper();
+        return "Calculates EMC value of Applied Energistics 2 storage cells (and anything else that's upgradeable)";
     }
 
     @Override
