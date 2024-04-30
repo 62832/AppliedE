@@ -150,10 +150,10 @@ public class EMCStorage implements MEStorage {
                 break;
             }
 
-            var energyToExpend = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(toWithdraw);
-            var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-
             if (mode == Actionable.MODULATE) {
+                var energyToExpend = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(toWithdraw);
+                var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+
                 if (availablePower < energyToExpend) {
                     break;
                 }
