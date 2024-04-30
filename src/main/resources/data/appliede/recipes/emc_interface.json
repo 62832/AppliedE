@@ -6,7 +6,7 @@
       "tag": "forge:ingots/iron"
     },
     "b": {
-      "tag": "projecte:transmutation_tablet"
+      "item": "projecte:transmutation_tablet"
     },
     "c": {
       "item": "ae2:annihilation_core"
