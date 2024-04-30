@@ -245,7 +245,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
                 }
 
                 energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                knowledge.getStorage().insert(EMCKey.base(), toDeposit, Actionable.MODULATE, requestSource);
+                knowledge.getStorage().insert(EMCKey.BASE, toDeposit, Actionable.MODULATE, requestSource);
 
                 var deposited = BigInteger.valueOf(toDeposit);
                 insertedItems += (int) deposited.divide(itemEmc).longValue();

@@ -10,8 +10,8 @@ import appeng.api.stacks.AEKeyType;
 import gripe._90.appliede.AppliedE;
 
 public final class EMCKeyType extends AEKeyType {
-    static final Component EMC = Component.translatable("key." + AppliedE.MODID + ".emc");
     public static final EMCKeyType TYPE = new EMCKeyType();
+    private static final Component EMC = Component.translatable("key." + AppliedE.MODID + ".emc");
 
     private EMCKeyType() {
         super(AppliedE.id("emc"), EMCKey.class, EMC);

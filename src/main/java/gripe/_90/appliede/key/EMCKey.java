@@ -17,22 +17,20 @@ import appeng.api.stacks.AEKeyType;
 import gripe._90.appliede.AppliedE;
 
 public final class EMCKey extends AEKey {
+    public static final EMCKey BASE = new EMCKey(1);
+
     private final int tier;
 
     private EMCKey(int tier) {
         if (tier <= 0) {
-            throw new IllegalArgumentException("Tier must be positive");
+            throw new IllegalArgumentException("Tier must be non-negative");
         }
 
         this.tier = tier;
     }
 
     public static EMCKey tier(int tier) {
-        return new EMCKey(tier);
-    }
-
-    public static EMCKey base() {
-        return tier(1);
+        return tier == 1 ? BASE : new EMCKey(tier);
     }
 
     public int getTier() {

@@ -144,7 +144,7 @@ public class EMCStorage implements MEStorage {
 
         while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
             var toWithdraw = AppliedE.clampedLong(totalEmc);
-            var canWithdraw = extract(EMCKey.base(), toWithdraw, Actionable.SIMULATE, source);
+            var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (canWithdraw < toWithdraw) {
                 break;
@@ -159,7 +159,7 @@ public class EMCStorage implements MEStorage {
                 }
 
                 energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                extract(EMCKey.base(), toWithdraw, Actionable.MODULATE, source);
+                extract(EMCKey.BASE, toWithdraw, Actionable.MODULATE, source);
             }
 
             var withdrawn = BigInteger.valueOf(toWithdraw);
