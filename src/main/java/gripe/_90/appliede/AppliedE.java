@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.ModList;
@@ -27,6 +28,8 @@ import appeng.api.parts.PartModels;
 import appeng.api.stacks.AEKeyTypes;
 import appeng.blockentity.AEBaseBlockEntity;
 import appeng.core.AppEng;
+import appeng.core.definitions.AEBlocks;
+import appeng.core.definitions.AEItems;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
 
@@ -41,6 +44,10 @@ import gripe._90.appliede.key.EMCRenderer;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPatternItem;
 import gripe._90.appliede.service.KnowledgeService;
+
+import moze_intel.projecte.api.imc.CustomEMCRegistration;
+import moze_intel.projecte.api.nss.NSSItem;
+import moze_intel.projecte.emc.mappers.APICustomEMCMapper;
 
 @Mod(AppliedE.MODID)
 public final class AppliedE {
@@ -92,6 +99,8 @@ public final class AppliedE {
     }
     // spotless:on
 
+    private static boolean mappedAEItems;
+
     public AppliedE() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(bus);
@@ -110,8 +119,26 @@ public final class AppliedE {
         return new ResourceLocation(MODID, path);
     }
 
-    public static long clampedLong(BigInteger toClamp) {
-        return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
+    public static boolean useCustomMapper() {
+        // prioritise existing AE2 EMC mapping add-on over this one
+        if (ModList.get().isLoaded("projecteintegration")) {
+            return false;
+        }
+
+        if (!mappedAEItems) {
+            registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
+            registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
+            registerEMC(AEItems.MATTER_BALL, 2048);
+            registerEMC(AEItems.SINGULARITY, 2048000);
+            registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
+            mappedAEItems = true;
+        }
+
+        return true;
+    }
+
+    private static void registerEMC(ItemLike item, int emc) {
+        APICustomEMCMapper.INSTANCE.registerCustomEMC("ae2", new CustomEMCRegistration(NSSItem.createItem(item), emc));
     }
 
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {

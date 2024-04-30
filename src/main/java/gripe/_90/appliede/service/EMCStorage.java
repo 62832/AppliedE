@@ -111,7 +111,7 @@ public class EMCStorage implements MEStorage {
                     }
 
                     extracted += currentEmc.divide(multiplier).longValue();
-                    // provider exhausted, remove from providers and re-extract deficit from remaining providers
+                    // provider exhausted, remove from current list to re-extract deficit from remaining providers
                     providers.remove(provider);
                 } else {
                     if (mode == Actionable.MODULATE) {
@@ -143,7 +143,7 @@ public class EMCStorage implements MEStorage {
         var acquiredItems = 0L;
 
         while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-            var toWithdraw = AppliedE.clampedLong(totalEmc);
+            var toWithdraw = totalEmc.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
             var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (canWithdraw < toWithdraw) {
