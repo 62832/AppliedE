@@ -145,7 +145,7 @@ public final class AppliedE {
     }
 
     private static void registerEMC(ItemLike item, int emc) {
-        APICustomEMCMapper.INSTANCE.registerCustomEMC("ae2", new CustomEMCRegistration(NSSItem.createItem(item), emc));
+        APICustomEMCMapper.INSTANCE.registerCustomEMC(MODID, new CustomEMCRegistration(NSSItem.createItem(item), emc));
     }
 
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
