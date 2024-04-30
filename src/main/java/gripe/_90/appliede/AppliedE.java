@@ -28,7 +28,6 @@ import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.PartModels;
 import appeng.api.stacks.AEKeyTypes;
-import appeng.blockentity.AEBaseBlockEntity;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
@@ -83,7 +82,6 @@ public final class AppliedE {
     public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
         var type = BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get()).build(null);
         EMC_INTERFACE.get().setBlockEntity(EMCInterfaceBlockEntity.class, type, null, null);
-        AEBaseBlockEntity.registerBlockEntityItem(type, EMC_INTERFACE.get().asItem());
         return type;
     });
 
