@@ -54,7 +54,7 @@ import moze_intel.projecte.emc.mappers.APICustomEMCMapper;
 @Mod(AppliedE.MODID)
 public final class AppliedE {
     public static final String MODID = "appliede";
-    public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(2, 42));
+    public static final BigInteger TIER_LIMIT = BigInteger.valueOf((long) Math.pow(10, 12));
 
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
