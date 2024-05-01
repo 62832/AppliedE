@@ -1,4 +1,4 @@
-package gripe._90.appliede.emc.nbt;
+package gripe._90.appliede.emc.processors;
 
 import java.math.BigInteger;
 
@@ -16,7 +16,7 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 
 @SuppressWarnings("unused")
 @NBTProcessor
-public class NetworkToolNBTProcessor implements INBTProcessor {
+public class NetworkToolProcessor implements INBTProcessor {
     @Override
     public String getName() {
         return "AE2NetworkToolProcessor";

@@ -57,6 +57,11 @@ minecraft {
     }
 }
 
+mixin {
+    add(sourceSets.main.get(), "$modId.refmap.json")
+    config("$modId.mixins.json")
+}
+
 dependencies {
     minecraft(libs.forge)
     implementation(fg.deobf(libs.ae2.get()))

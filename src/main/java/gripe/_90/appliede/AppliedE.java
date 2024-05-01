@@ -31,6 +31,7 @@ import appeng.api.stacks.AEKeyTypes;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
+import appeng.core.definitions.AEParts;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
 
@@ -140,6 +141,7 @@ public final class AppliedE {
             registerEMC(AEItems.MATTER_BALL, 512);
             registerEMC(AEItems.SINGULARITY, 512000);
             registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
+            registerEMC(AEParts.CABLE_ANCHOR, 32);
             mappedAEItems = true;
         }
 
