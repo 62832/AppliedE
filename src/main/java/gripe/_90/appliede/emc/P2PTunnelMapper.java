@@ -28,7 +28,7 @@ public class P2PTunnelMapper implements IEMCMapper<NormalizedSimpleStack, Long> 
 
     @Override
     public String getDescription() {
-        return "Maps Applied Energistics 2 P2P tunnels.";
+        return "(AppliedE) Maps Applied Energistics 2 P2P tunnels.";
     }
 
     @Override

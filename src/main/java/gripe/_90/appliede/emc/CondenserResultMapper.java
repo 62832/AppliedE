@@ -26,7 +26,7 @@ public class CondenserResultMapper implements IEMCMapper<NormalizedSimpleStack, 
 
     @Override
     public String getDescription() {
-        return "Maps Applied Energistics 2 matter condenser results.";
+        return "(AppliedE) Maps Applied Energistics 2 matter condenser results.";
     }
 
     @Override

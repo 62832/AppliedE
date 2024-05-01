@@ -25,7 +25,7 @@ public class FacadeProcessor implements INBTProcessor {
 
     @Override
     public String getDescription() {
-        return "Calculates EMC value of Applied Energistics 2 cable facades.";
+        return "(AppliedE) Calculates EMC value of Applied Energistics 2 cable facades.";
     }
 
     @Override

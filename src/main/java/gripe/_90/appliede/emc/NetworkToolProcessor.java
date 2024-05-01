@@ -24,7 +24,7 @@ public class NetworkToolProcessor implements INBTProcessor {
 
     @Override
     public String getDescription() {
-        return "Calculates EMC value of the Applied Energistics 2 network tool.";
+        return "(AppliedE) Calculates EMC value of the Applied Energistics 2 network tool.";
     }
 
     @Override

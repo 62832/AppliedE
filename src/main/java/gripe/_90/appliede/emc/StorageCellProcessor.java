@@ -25,7 +25,7 @@ public class StorageCellProcessor implements INBTProcessor {
 
     @Override
     public String getDescription() {
-        return "Calculates EMC value of Applied Energistics 2 storage cells (and anything else that's upgradeable).";
+        return "(AppliedE) Calculates EMC value of Applied Energistics 2 storage cells (and anything else that's upgradeable).";
     }
 
     @Override

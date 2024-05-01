@@ -24,7 +24,7 @@ public class TransformRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public String getDescription() {
-        return "Maps Applied Energistics 2 in-world transformation recipes.";
+        return "(AppliedE) Maps Applied Energistics 2 in-world transformation recipes.";
     }
 
     @Override

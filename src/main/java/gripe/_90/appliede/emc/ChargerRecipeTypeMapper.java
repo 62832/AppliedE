@@ -17,7 +17,7 @@ public class ChargerRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public String getDescription() {
-        return "Maps Applied Energistics 2 charger recipes.";
+        return "(AppliedE) Maps Applied Energistics 2 charger recipes.";
     }
 
     @Override

@@ -23,7 +23,7 @@ public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public String getDescription() {
-        return "Maps Applied Energistics 2 inscriber recipes.";
+        return "(AppliedE) Maps Applied Energistics 2 inscriber recipes.";
     }
 
     @Override
