@@ -40,6 +40,7 @@ public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
 
         if (inscriber.getProcessType() == InscriberProcessType.INSCRIBE) {
             var output = inscriber.getResultItem();
+            // prevent recursive recipes (i.e. those for extra presses) from yielding an EMC value for their result
             return inscriber.getTopOptional().test(output) || inscriber.getBottomOptional().test(output)
                     ? Collections.emptyList()
                     : Collections.singletonList(inscriber.getMiddleInput());

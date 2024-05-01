@@ -109,8 +109,6 @@ public final class AppliedE {
         bus.addListener((FMLCommonSetupEvent event) -> {
             registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
             registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
-            registerEMC(AEItems.MATTER_BALL, 512);
-            registerEMC(AEItems.SINGULARITY, 512000);
             registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
             registerEMC(AEParts.CABLE_ANCHOR, 32);
             registerEMC(AEItems.FACADE, 1); // will be replaced by FacadeProcessor
