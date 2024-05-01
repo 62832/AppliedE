@@ -31,4 +31,9 @@ public final class EMCKeyType extends AEKeyType {
     public int getAmountPerByte() {
         return Integer.MAX_VALUE;
     }
+
+    @Override
+    public Component getDescription() {
+        return EMC;
+    }
 }
