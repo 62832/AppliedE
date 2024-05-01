@@ -37,10 +37,8 @@ public class CondenserResultMapper implements IEMCMapper<NormalizedSimpleStack, 
             RegistryAccess access,
             ResourceManager resourceManager) {
         // very much hard-coded for now, as with the matter condenser itself
-        var component1K = NSSItem.createItem(AEItems.CELL_COMPONENT_1K);
-        var matterBall = NSSItem.createItem(AEItems.MATTER_BALL);
-        collector.addConversion(1, component1K, Collections.singletonList(matterBall));
-        collector.addConversion(1, matterBall, Collections.singletonList(component1K));
+        // also, don't give matter balls too high of a default value since they're much easier to get
+        collector.setValueBefore(NSSItem.createItem(AEItems.MATTER_BALL), 512L);
 
         var component64K = NSSItem.createItem(AEItems.CELL_COMPONENT_64K);
         var singularity = NSSItem.createItem(AEItems.SINGULARITY);
