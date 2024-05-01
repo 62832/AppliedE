@@ -417,10 +417,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     private class StorageFilter implements AEKeyFilter {
         @Override
         public boolean matches(AEKey what) {
+            if (!(what instanceof AEItemKey item)) {
+                return false;
+            }
+
             var grid = mainNode.getGrid();
-            return grid != null
-                    && what instanceof AEItemKey item
-                    && grid.getService(KnowledgeService.class).knowsItem(item);
+            return grid == null || grid.getService(KnowledgeService.class).knowsItem(item);
         }
     }
 }
