@@ -112,7 +112,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
         var knownItems = getProviders().stream()
                 .flatMap(provider -> provider.get().getKnowledge().stream())
-                .map(item -> AEItemKey.of(item.getItem()))
+                .map(item -> AEItemKey.of(item.getItem(), item.getNBT()))
                 .collect(Collectors.toSet());
 
         for (var item : knownItems) {
