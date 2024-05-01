@@ -22,6 +22,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import appeng.api.behaviors.ContainerItemStrategy;
 import appeng.api.networking.GridServices;
 import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
@@ -40,6 +41,8 @@ import gripe._90.appliede.iface.EMCInterfaceMenu;
 import gripe._90.appliede.iface.EMCInterfacePart;
 import gripe._90.appliede.iface.EMCInterfacePartAECF;
 import gripe._90.appliede.iface.EMCInterfaceScreen;
+import gripe._90.appliede.strategy.EMCContainerItemStrategy;
+import gripe._90.appliede.key.EMCKey;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPatternItem;
@@ -61,9 +64,11 @@ public final class AppliedE {
     private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, AppEng.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
+    @SuppressWarnings("UnstableApiUsage")
     public static final RegistryObject<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
+        ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, new EMCContainerItemStrategy());
         return part(EMCModulePart.class, EMCModulePart::new);
     });
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN = ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
