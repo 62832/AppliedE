@@ -41,7 +41,6 @@ import gripe._90.appliede.iface.EMCInterfacePart;
 import gripe._90.appliede.iface.EMCInterfacePartAECF;
 import gripe._90.appliede.iface.EMCInterfaceScreen;
 import gripe._90.appliede.key.EMCKeyType;
-import gripe._90.appliede.key.EMCRenderer;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPatternItem;
 import gripe._90.appliede.service.KnowledgeService;
@@ -115,7 +114,6 @@ public final class AppliedE {
         });
 
         if (FMLEnvironment.dist.isClient()) {
-            bus.addListener(EMCRenderer::register);
             bus.addListener(EMCInterfaceScreen::register);
         }
     }
