@@ -11,11 +11,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -29,7 +28,9 @@ import gripe._90.appliede.AppliedE;
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(modid = AppliedE.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
-    private static final Supplier<Texture> TEXTURE = () -> Texture.INSTANCE;
+    private final Supplier<TextureAtlasSprite> sprite = () -> Minecraft.getInstance()
+            .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+            .apply(AppliedE.id("item/dummy_emc_item"));
 
     private EMCRenderer() {}
 
@@ -38,14 +39,9 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
         event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, new EMCRenderer()));
     }
 
-    @SubscribeEvent
-    public static void loadTexture(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener(TEXTURE.get());
-    }
-
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics guiGraphics, int x, int y, EMCKey stack) {
-        Blitter.sprite(TEXTURE.get().get())
+        Blitter.sprite(sprite.get())
                 .blending(false)
                 .dest(x, y, 16, 16)
                 .colorRgb(hueShift(stack.getTier()))
@@ -62,12 +58,12 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     @Override
     public void drawOnBlockFace(
             PoseStack poseStack, MultiBufferSource buffers, EMCKey what, float scale, int combinedLight, Level level) {
-        var sprite = TEXTURE.get().get();
+        var s = sprite.get();
         poseStack.pushPose();
         // Push it out of the block face a bit to avoid z-fighting
         poseStack.translate(0, 0, 0.01f);
 
-        var buffer = buffers.getBuffer(RenderType.solid());
+        var buffer = buffers.getBuffer(RenderType.cutoutMipped());
 
         // y is flipped here
         var x0 = -scale / 2;
@@ -78,28 +74,28 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
         var transform = poseStack.last().pose();
         buffer.vertex(transform, x0, y1, 0)
                 .color(-1)
-                .uv(sprite.getU0(), sprite.getV1())
+                .uv(s.getU0(), s.getV1())
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(combinedLight)
                 .normal(0, 0, 1)
                 .endVertex();
         buffer.vertex(transform, x1, y1, 0)
                 .color(-1)
-                .uv(sprite.getU1(), sprite.getV1())
+                .uv(s.getU1(), s.getV1())
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(combinedLight)
                 .normal(0, 0, 1)
                 .endVertex();
         buffer.vertex(transform, x1, y0, 0)
                 .color(-1)
-                .uv(sprite.getU1(), sprite.getV0())
+                .uv(s.getU1(), s.getV0())
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(combinedLight)
                 .normal(0, 0, 1)
                 .endVertex();
         buffer.vertex(transform, x0, y0, 0)
                 .color(-1)
-                .uv(sprite.getU0(), sprite.getV0())
+                .uv(s.getU0(), s.getV0())
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(combinedLight)
                 .normal(0, 0, 1)
@@ -111,20 +107,5 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     @Override
     public Component getDisplayName(EMCKey stack) {
         return stack.getDisplayName();
-    }
-
-    private static class Texture extends TextureAtlasHolder {
-        private static final Texture INSTANCE = new Texture();
-
-        private Texture() {
-            super(
-                    Minecraft.getInstance().getTextureManager(),
-                    AppliedE.id("textures/atlas/emc.png"),
-                    AppliedE.id("emc"));
-        }
-
-        private TextureAtlasSprite get() {
-            return getSprite(AppliedE.id("me/emc"));
-        }
     }
 }

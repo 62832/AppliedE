@@ -99,6 +99,7 @@ public final class AppliedE {
     });
 
     static {
+        ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
