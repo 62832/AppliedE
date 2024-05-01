@@ -131,6 +131,10 @@ public class EMCStorage implements MEStorage {
     }
 
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+        if (!service.knowsItem(what)) {
+            return 0;
+        }
+
         var grid = service.getGrid();
 
         if (grid == null || grid.getStorageService().getCachedInventory().get(what) > 0) {
