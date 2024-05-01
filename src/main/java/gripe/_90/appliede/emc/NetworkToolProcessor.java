@@ -1,4 +1,4 @@
-package gripe._90.appliede.emc.processors;
+package gripe._90.appliede.emc;
 
 import java.math.BigInteger;
 

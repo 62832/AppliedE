@@ -1,4 +1,4 @@
-package gripe._90.appliede.emc.mappers;
+package gripe._90.appliede.emc;
 
 import net.minecraft.world.item.crafting.RecipeType;
 
