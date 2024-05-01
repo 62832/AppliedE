@@ -23,6 +23,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import appeng.api.behaviors.ContainerItemStrategy;
+import appeng.api.behaviors.StackExportStrategy;
+import appeng.api.behaviors.StackImportStrategy;
 import appeng.api.networking.GridServices;
 import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
@@ -41,12 +43,14 @@ import gripe._90.appliede.iface.EMCInterfaceMenu;
 import gripe._90.appliede.iface.EMCInterfacePart;
 import gripe._90.appliede.iface.EMCInterfacePartAECF;
 import gripe._90.appliede.iface.EMCInterfaceScreen;
-import gripe._90.appliede.strategy.EMCContainerItemStrategy;
 import gripe._90.appliede.key.EMCKey;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPatternItem;
 import gripe._90.appliede.service.KnowledgeService;
+import gripe._90.appliede.strategy.EMCContainerItemStrategy;
+import gripe._90.appliede.strategy.EMCExportStrategy;
+import gripe._90.appliede.strategy.EMCImportStrategy;
 
 import moze_intel.projecte.api.imc.CustomEMCRegistration;
 import moze_intel.projecte.api.nss.NSSItem;
@@ -68,7 +72,12 @@ public final class AppliedE {
     public static final RegistryObject<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
+
+        // external storage strategy not provided so as not to clash with mounted EMC service storage
+        StackImportStrategy.register(EMCKeyType.TYPE, EMCImportStrategy::new);
+        StackExportStrategy.register(EMCKeyType.TYPE, EMCExportStrategy::new);
         ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, new EMCContainerItemStrategy());
+
         return part(EMCModulePart.class, EMCModulePart::new);
     });
     public static final RegistryObject<Item> TRANSMUTATION_PATTERN = ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);

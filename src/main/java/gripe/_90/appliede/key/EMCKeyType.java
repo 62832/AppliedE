@@ -33,6 +33,11 @@ public final class EMCKeyType extends AEKeyType {
     }
 
     @Override
+    public int getAmountPerOperation() {
+        return 2000;
+    }
+
+    @Override
     public Component getDescription() {
         return EMC;
     }

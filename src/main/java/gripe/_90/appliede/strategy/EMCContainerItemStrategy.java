@@ -1,6 +1,5 @@
 package gripe._90.appliede.strategy;
 
-import gripe._90.appliede.key.EMCKey;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.sounds.SoundSource;
@@ -11,6 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import appeng.api.behaviors.ContainerItemStrategy;
 import appeng.api.config.Actionable;
 import appeng.api.stacks.GenericStack;
+
+import gripe._90.appliede.key.EMCKey;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
