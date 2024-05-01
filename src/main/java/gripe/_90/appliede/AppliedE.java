@@ -113,6 +113,7 @@ public final class AppliedE {
             registerEMC(AEItems.SINGULARITY, 512000);
             registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
             registerEMC(AEParts.CABLE_ANCHOR, 32);
+            registerEMC(AEItems.FACADE, 1); // will be replaced by FacadeProcessor
         });
 
         if (FMLEnvironment.dist.isClient()) {
