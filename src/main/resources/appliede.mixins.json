@@ -2,6 +2,5 @@
   "minVersion": "0.8.5",
   "required": true,
   "package": "gripe._90.appliede.mixin",
-  "refmap": "appliede.refmap.json",
   "mixins": ["P2PTunnelAttunementAccessor"]
 }
