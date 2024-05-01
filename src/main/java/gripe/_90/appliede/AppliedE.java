@@ -15,10 +15,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -75,7 +74,7 @@ public final class AppliedE {
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> isModLoaded("aecapfix")
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> ModList.get().isLoaded("aecapfix")
             ? part(EMCInterfacePartAECF.class, EMCInterfacePartAECF::new)
             : part(EMCInterfacePart.class, EMCInterfacePart::new));
 
@@ -99,8 +98,6 @@ public final class AppliedE {
                 .build());
     }
 
-    private static boolean mappedAEItems;
-
     public AppliedE() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(bus);
@@ -108,6 +105,15 @@ public final class AppliedE {
         MENU_TYPES.register(bus);
         BE_TYPES.register(bus);
         TABS.register(bus);
+
+        bus.addListener((FMLCommonSetupEvent event) -> {
+            registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
+            registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
+            registerEMC(AEItems.MATTER_BALL, 512);
+            registerEMC(AEItems.SINGULARITY, 512000);
+            registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
+            registerEMC(AEParts.CABLE_ANCHOR, 32);
+        });
 
         if (FMLEnvironment.dist.isClient()) {
             bus.addListener(EMCRenderer::register);
@@ -121,31 +127,6 @@ public final class AppliedE {
 
     public static long clampedLong(BigInteger toClamp) {
         return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
-    }
-
-    private static boolean isModLoaded(String modId) {
-        return ModList.get() != null
-                ? ModList.get().isLoaded(modId)
-                : LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(modId::equals);
-    }
-
-    public static boolean useCustomMapper() {
-        // prioritise existing AE2 EMC mapping add-on over this one
-        if (isModLoaded("projecteintegration")) {
-            return false;
-        }
-
-        if (!mappedAEItems) {
-            registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
-            registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
-            registerEMC(AEItems.MATTER_BALL, 512);
-            registerEMC(AEItems.SINGULARITY, 512000);
-            registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
-            registerEMC(AEParts.CABLE_ANCHOR, 32);
-            mappedAEItems = true;
-        }
-
-        return true;
     }
 
     private static void registerEMC(ItemLike item, int emc) {

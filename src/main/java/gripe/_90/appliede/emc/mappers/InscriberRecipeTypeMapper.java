@@ -10,8 +10,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
 
-import gripe._90.appliede.AppliedE;
-
 import moze_intel.projecte.api.mapper.recipe.RecipeTypeMapper;
 import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
 
@@ -26,11 +24,6 @@ public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
     public String getDescription() {
         return "Maps Applied Energistics 2 inscriber recipes.";
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return AppliedE.useCustomMapper();
     }
 
     @Override

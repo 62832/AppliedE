@@ -11,8 +11,6 @@ import appeng.core.definitions.AEBlocks;
 import appeng.recipes.transform.TransformCircumstance;
 import appeng.recipes.transform.TransformRecipe;
 
-import gripe._90.appliede.AppliedE;
-
 import moze_intel.projecte.api.mapper.recipe.RecipeTypeMapper;
 import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
 
@@ -27,11 +25,6 @@ public class TransformRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
     public String getDescription() {
         return "Maps Applied Energistics 2 in-world transformation recipes.";
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return AppliedE.useCustomMapper();
     }
 
     @Override
