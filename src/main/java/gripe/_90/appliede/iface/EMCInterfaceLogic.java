@@ -232,8 +232,9 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             if (!what.matches(inSlot) || inSlot.amount() < amount) {
                 return true;
             }
+
             var energy = grid.getEnergyService();
-            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(itemKey.toStack()));
+            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(itemKey.toStack()));
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
             var insertedItems = 0;
 
