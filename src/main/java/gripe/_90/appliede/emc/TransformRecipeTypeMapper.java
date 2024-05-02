@@ -8,6 +8,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 
 import appeng.core.definitions.AEBlocks;
+import appeng.core.definitions.AEItems;
 import appeng.recipes.transform.TransformCircumstance;
 import appeng.recipes.transform.TransformRecipe;
 
@@ -35,6 +36,10 @@ public class TransformRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
     protected Collection<Ingredient> getIngredients(Recipe<?> recipe) {
         if (!(recipe instanceof TransformRecipe transform)) {
+            return Collections.emptyList();
+        }
+
+        if (transform.getResultItem().is(AEItems.QUANTUM_ENTANGLED_SINGULARITY.asItem())) {
             return Collections.emptyList();
         }
 

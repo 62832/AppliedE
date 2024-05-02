@@ -126,7 +126,6 @@ public final class AppliedE {
             registerEMC(AEItems.CALCULATION_PROCESSOR_PRESS, 2048);
             registerEMC(AEItems.ENGINEERING_PROCESSOR_PRESS, 2048);
             registerEMC(AEItems.LOGIC_PROCESSOR_PRESS, 2048);
-            registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
             registerEMC(AEParts.CABLE_ANCHOR, 32);
         });
     }
