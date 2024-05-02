@@ -6,5 +6,6 @@
   "item.appliede.transmutation_pattern": "Transmutation Pattern",
   "key.appliede.emc": "EMC",
   "key.appliede.emc_tiered": "EMC^%s",
+  "tooltip.appliede.transmutable": "Transmutable from EMC (Shift+Click/Scroll)",
   "tooltip.appliede.owner": "Owner: %s"
 }

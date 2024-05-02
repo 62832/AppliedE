@@ -105,6 +105,13 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return !moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) ? storage : NullInventory.of();
     }
 
+    public Set<AEItemKey> getKnownItems() {
+        return getProviders().stream()
+                .flatMap(provider -> provider.getKnowledge().stream())
+                .map(item -> AEItemKey.of(item.getItem(), item.getNBT()))
+                .collect(Collectors.toSet());
+    }
+
     public List<IPatternDetails> getPatterns() {
         var patterns = new ArrayList<IPatternDetails>();
 
@@ -112,12 +119,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             patterns.add(new TransmutationPattern(null, tier));
         }
 
-        var knownItems = getProviders().stream()
-                .flatMap(provider -> provider.getKnowledge().stream())
-                .map(item -> AEItemKey.of(item.getItem(), item.getNBT()))
-                .collect(Collectors.toSet());
-
-        for (var item : knownItems) {
+        for (var item : getKnownItems()) {
             patterns.add(new TransmutationPattern(item, 1));
         }
 

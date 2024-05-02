@@ -13,6 +13,7 @@ dependencyResolutionManagement {
             plugin("spotless", "com.diffplug.spotless").version("6.23.3")
 
             library("forge", "net.neoforged", "forge").version("1.20.1-47.1.54")
+            library("mixin", "org.spongepowered", "mixin").version("0.8.5")
 
             version("ae2", "15.1.0")
             library("ae2", "appeng", "appliedenergistics2-forge").versionRef("ae2")

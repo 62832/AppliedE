@@ -1,0 +1,17 @@
+{
+  "minVersion": "0.8.5",
+  "required": true,
+  "package": "gripe._90.appliede.mixin.retardedfuckingtooltip",
+  "refmap": "appliede.refmap.json",
+  "mixins": [
+    "BasePacketAccessor",
+    "GridInventoryEntryMixin",
+    "MEInventoryUpdatePacketAccessor",
+    "MEInventoryUpdatePacketMixin",
+    "MEStorageMenuMixin"
+  ],
+  "client": ["MEStorageScreenMixin", "RepoMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

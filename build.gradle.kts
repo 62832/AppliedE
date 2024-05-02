@@ -60,10 +60,13 @@ minecraft {
 mixin {
     add(sourceSets.main.get(), "$modId.refmap.json")
     config("$modId.mixins.json")
+    config("deargodwhy.mixins.json")
 }
 
 dependencies {
     minecraft(libs.forge)
+    annotationProcessor(variantOf(libs.mixin) { classifier("processor") })
+
     implementation(fg.deobf(libs.ae2.get()))
     implementation(fg.deobf(libs.projecte.get()))
 
