@@ -1,9 +1,7 @@
 package gripe._90.appliede.service;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -15,14 +13,15 @@ import gripe._90.appliede.AppliedE;
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 class TeamProjectEHandler {
-    private final Map<UUID, TPTeam> teamsSharingEmc = new HashMap<>();
-    private final Set<IKnowledgeProvider> providersToKeep = new HashSet<>();
+    private final Map<UUID, TPTeam> playersInSharingTeams = new HashMap<>();
+    private final Map<TPTeam, IKnowledgeProvider> providersToKeep = new HashMap<>();
 
     TeamProjectEHandler() {
         MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> {
-            teamsSharingEmc.clear();
+            playersInSharingTeams.clear();
             providersToKeep.clear();
         });
     }
@@ -35,24 +34,29 @@ class TeamProjectEHandler {
         var uuid = provider.getKey();
         var team = TPTeam.getOrCreateTeam(uuid);
 
-        if (team.isSharingEMC() && !teamsSharingEmc.containsValue(team)) {
-            teamsSharingEmc.put(uuid, team);
-            providersToKeep.add(teamProvider);
+        if (team.isSharingEMC() && (!playersInSharingTeams.containsValue(team) || !providersToKeep.containsKey(team))) {
+            playersInSharingTeams.put(uuid, team);
+            providersToKeep.put(team, teamProvider);
             return true;
         }
 
         if (!team.isSharingEMC()) {
-            teamsSharingEmc.entrySet().stream()
+            playersInSharingTeams.entrySet().stream()
                     .filter(entry -> entry.getValue() == team)
-                    .forEach(entry -> teamsSharingEmc.remove(entry.getKey()));
-            providersToKeep.remove(teamProvider);
+                    .forEach(entry -> playersInSharingTeams.remove(entry.getKey()));
+            providersToKeep.remove(team);
         }
 
-        return !teamsSharingEmc.containsValue(team) || providersToKeep.contains(teamProvider);
+        return !playersInSharingTeams.containsValue(team) || providersToKeep.containsValue(teamProvider);
     }
 
     void removeTeamReference(UUID member) {
-        teamsSharingEmc.remove(member);
+        var team = playersInSharingTeams.remove(member);
+        var provider = ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(member);
+
+        if (team != null && providersToKeep.containsValue(provider)) {
+            providersToKeep.remove(team);
+        }
     }
 
     static class Proxy {
@@ -65,11 +69,7 @@ class TeamProjectEHandler {
         }
 
         boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
-            if (handler != null) {
-                return ((TeamProjectEHandler) handler).notSharingEmc(provider);
-            }
-
-            return true;
+            return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);
         }
 
         void removeTeamReference(UUID member) {
