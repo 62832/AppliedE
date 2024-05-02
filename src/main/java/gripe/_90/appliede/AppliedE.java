@@ -18,6 +18,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -87,7 +89,7 @@ public final class AppliedE {
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> ModList.get().isLoaded("aecapfix")
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> isModLoaded("aecapfix")
             ? part(EMCInterfacePartAECF.class, EMCInterfacePartAECF::new)
             : part(EMCInterfacePart.class, EMCInterfacePart::new));
 
@@ -135,6 +137,12 @@ public final class AppliedE {
 
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MODID, path);
+    }
+
+    public static boolean isModLoaded(String modId) {
+        return ModList.get() != null
+                ? ModList.get().isLoaded(modId)
+                : LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(modId::equals);
     }
 
     public static long clampedLong(BigInteger toClamp) {

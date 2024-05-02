@@ -70,8 +70,8 @@ dependencies {
     // implementation(fg.deobf(libs.aecapfix.get()))
     compileOnly(fg.deobf(libs.aecapfix.get()))
 
+    implementation(fg.deobf(libs.teampe.get()))
     runtimeOnly(fg.deobf(libs.projectex.get()))
-    runtimeOnly(fg.deobf(libs.teampe.get()))
     runtimeOnly(fg.deobf(libs.jade.get()))
 }
 

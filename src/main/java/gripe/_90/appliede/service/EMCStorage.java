@@ -62,7 +62,7 @@ public class EMCStorage implements MEStorage {
             var remainder = toInsert.remainder(divisor).longValue();
 
             for (var p = 0; p < providers.size(); p++) {
-                var provider = providers.get(p).get();
+                var provider = providers.get(p);
                 provider.setEmc(provider.getEmc().add(quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO)));
             }
 
@@ -102,12 +102,12 @@ public class EMCStorage implements MEStorage {
             for (var p = 0; p < providers.size(); p++) {
                 var provider = providers.get(p);
 
-                var currentEmc = provider.get().getEmc();
+                var currentEmc = provider.getEmc();
                 var toExtractFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
 
                 if (currentEmc.compareTo(toExtractFrom) <= 0) {
                     if (mode == Actionable.MODULATE) {
-                        provider.get().setEmc(BigInteger.ZERO);
+                        provider.setEmc(BigInteger.ZERO);
                     }
 
                     extracted += currentEmc.divide(multiplier).longValue();
@@ -115,7 +115,7 @@ public class EMCStorage implements MEStorage {
                     providers.remove(provider);
                 } else {
                     if (mode == Actionable.MODULATE) {
-                        provider.get().setEmc(currentEmc.subtract(toExtractFrom));
+                        provider.setEmc(currentEmc.subtract(toExtractFrom));
                     }
 
                     extracted += toExtractFrom.divide(multiplier).longValue();

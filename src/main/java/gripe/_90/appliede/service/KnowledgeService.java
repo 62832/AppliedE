@@ -29,6 +29,7 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPattern;
 
@@ -91,8 +92,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
     }
 
-    Set<Supplier<IKnowledgeProvider>> getProviders() {
-        return providers.values().stream().collect(Collectors.toUnmodifiableSet());
+    Set<IKnowledgeProvider> getProviders() {
+        return providers.values().stream().map(Supplier::get).collect(Collectors.toUnmodifiableSet());
     }
 
     public EMCStorage getStorage() {
@@ -111,7 +112,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         var knownItems = getProviders().stream()
-                .flatMap(provider -> provider.get().getKnowledge().stream())
+                .flatMap(provider -> provider.getKnowledge().stream())
                 .map(item -> AEItemKey.of(item.getItem(), item.getNBT()))
                 .collect(Collectors.toSet());
 
@@ -131,13 +132,21 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     BigInteger getEmc() {
-        return getProviders().stream()
-                .map(provider -> provider.get().getEmc())
+        var providerStream = providers.entrySet().stream();
+
+        if (AppliedE.isModLoaded("teamprojecte")) {
+            providerStream = providerStream.filter(TeamProjectEIntegration::notSharingEmc);
+        }
+
+        return providerStream
+                .map(provider -> provider.getValue().get())
+                .distinct()
+                .map(IKnowledgeProvider::getEmc)
                 .reduce(BigInteger.ZERO, BigInteger::add);
     }
 
     public boolean knowsItem(AEItemKey item) {
-        return getProviders().stream().anyMatch(provider -> provider.get().hasKnowledge(item.toStack()));
+        return getProviders().stream().anyMatch(provider -> provider.hasKnowledge(item.toStack()));
     }
 
     void syncEmc() {
