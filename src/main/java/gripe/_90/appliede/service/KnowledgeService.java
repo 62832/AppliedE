@@ -29,7 +29,6 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
-import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.module.EMCModulePart;
 import gripe._90.appliede.module.TransmutationPattern;
 
@@ -41,6 +40,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
+    private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     private MinecraftServer server;
     private IGrid grid;
@@ -76,6 +76,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
             moduleNodes.remove(module.getMainNode());
             providers.clear();
+            tpeHandler.removeTeamReference(gridNode.getOwningPlayerProfileId());
 
             for (var mainNode : moduleNodes) {
                 var node = mainNode.getNode();
@@ -132,13 +133,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     BigInteger getEmc() {
-        var providerStream = providers.entrySet().stream();
-
-        if (AppliedE.isModLoaded("teamprojecte")) {
-            providerStream = providerStream.filter(TeamProjectEIntegration::notSharingEmc);
-        }
-
-        return providerStream
+        return providers.entrySet().stream()
+                .filter(tpeHandler::notSharingEmc)
                 .map(provider -> provider.getValue().get())
                 .distinct()
                 .map(IKnowledgeProvider::getEmc)
