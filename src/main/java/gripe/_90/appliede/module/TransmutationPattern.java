@@ -65,7 +65,7 @@ public final class TransmutationPattern implements IPatternDetails {
 
     @Override
     public IInput[] getInputs() {
-        return new IInput[] {new Input(item != null ? IEMCProxy.INSTANCE.getValue(item.getItem()) : 1, tier)};
+        return new IInput[] {new Input(item != null ? IEMCProxy.INSTANCE.getValue(item.toStack()) : 1, tier)};
     }
 
     @Override

@@ -39,7 +39,7 @@ public class StorageCellProcessor implements INBTProcessor {
 
         for (var key : cell.getAvailableStacks()) {
             if (key.getKey() instanceof AEItemKey item) {
-                var keyEmc = IEMCProxy.INSTANCE.getValue(item.getItem());
+                var keyEmc = IEMCProxy.INSTANCE.getValue(item.toStack());
                 bigEmc = bigEmc.add(BigInteger.valueOf(keyEmc).multiply(BigInteger.valueOf(key.getLongValue())));
             }
         }

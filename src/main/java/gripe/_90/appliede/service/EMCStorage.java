@@ -142,7 +142,7 @@ public class EMCStorage implements MEStorage {
         }
 
         var energy = grid.getEnergyService();
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.getItem()));
+        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var acquiredItems = 0L;
 
