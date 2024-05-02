@@ -17,7 +17,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.DeferredRegister;
@@ -44,7 +43,6 @@ import gripe._90.appliede.iface.EMCInterfaceBlockEntity;
 import gripe._90.appliede.iface.EMCInterfaceMenu;
 import gripe._90.appliede.iface.EMCInterfacePart;
 import gripe._90.appliede.iface.EMCInterfacePartAECF;
-import gripe._90.appliede.iface.EMCInterfaceScreen;
 import gripe._90.appliede.key.EMCKey;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.module.EMCModulePart;
@@ -129,10 +127,6 @@ public final class AppliedE {
             registerEMC(AEParts.CABLE_ANCHOR, 32);
             registerEMC(AEItems.FACADE, 1); // will be replaced by FacadeProcessor
         });
-
-        if (FMLEnvironment.dist.isClient()) {
-            bus.addListener(EMCInterfaceScreen::register);
-        }
     }
 
     public static ResourceLocation id(String path) {

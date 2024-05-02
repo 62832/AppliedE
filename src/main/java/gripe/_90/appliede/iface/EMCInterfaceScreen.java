@@ -6,6 +6,9 @@ import java.util.List;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.client.gui.AEBaseScreen;
@@ -16,6 +19,10 @@ import appeng.core.localization.ButtonToolTips;
 import appeng.init.client.InitScreens;
 import appeng.menu.SlotSemantics;
 
+import gripe._90.appliede.AppliedE;
+
+@SuppressWarnings("unused")
+@Mod.EventBusSubscriber(modid = AppliedE.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EMCInterfaceScreen extends AEBaseScreen<EMCInterfaceMenu> {
     private final List<Button> amountButtons = new ArrayList<>();
 
@@ -39,6 +46,7 @@ public class EMCInterfaceScreen extends AEBaseScreen<EMCInterfaceMenu> {
         }
     }
 
+    @SubscribeEvent
     public static void register(FMLClientSetupEvent event) {
         event.enqueueWork(() -> InitScreens.register(
                 EMCInterfaceMenu.TYPE, EMCInterfaceScreen::new, "/screens/appliede/emc_interface.json"));
