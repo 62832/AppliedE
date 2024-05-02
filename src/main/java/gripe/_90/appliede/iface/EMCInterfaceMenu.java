@@ -4,11 +4,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.InterfaceMenu;
 import appeng.menu.implementations.MenuTypeBuilder;
-import appeng.menu.implementations.SetStockAmountMenu;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.FakeSlot;
 
@@ -47,9 +47,9 @@ public class EMCInterfaceMenu extends AEBaseMenu {
         } else {
             var stack = host.getConfig().getStack(configSlot);
 
-            if (stack != null) {
-                SetStockAmountMenu.open(
-                        (ServerPlayer) getPlayer(), getLocator(), configSlot, stack.what(), (int) stack.amount());
+            if (stack != null && stack.what() instanceof AEItemKey item) {
+                EMCSetStockAmountMenu.open(
+                        (ServerPlayer) getPlayer(), getLocator(), configSlot, item, (int) stack.amount());
             }
         }
     }

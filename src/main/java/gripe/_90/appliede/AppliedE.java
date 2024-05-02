@@ -43,6 +43,7 @@ import gripe._90.appliede.iface.EMCInterfaceBlockEntity;
 import gripe._90.appliede.iface.EMCInterfaceMenu;
 import gripe._90.appliede.iface.EMCInterfacePart;
 import gripe._90.appliede.iface.EMCInterfacePartAECF;
+import gripe._90.appliede.iface.EMCSetStockAmountMenu;
 import gripe._90.appliede.key.EMCKey;
 import gripe._90.appliede.key.EMCKeyType;
 import gripe._90.appliede.module.EMCModulePart;
@@ -100,7 +101,10 @@ public final class AppliedE {
 
     static {
         ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
+
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
+        MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
+
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
                 .icon(() -> EMC_MODULE.get().getDefaultInstance())
