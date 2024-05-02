@@ -4,15 +4,19 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.google.common.primitives.Ints;
+
 import net.minecraft.network.chat.Component;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
+import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
+import appeng.core.stats.AeStats;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.key.EMCKey;
@@ -141,31 +145,32 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var energy = grid.getEnergyService();
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var insertedItems = 0L;
+        var totalInserted = 0L;
 
         while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
             var toDeposit = AppliedE.clampedLong(totalEmc);
             var canDeposit = toDeposit;
 
             if (mode == Actionable.MODULATE) {
-                var requiredPower = PowerMultiplier.CONFIG.multiply(toDeposit);
-                var availablePower = energy.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-                var powerToExpend = Math.min(requiredPower, availablePower);
-                energy.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-
-                canDeposit = (long) PowerMultiplier.CONFIG.divide(powerToExpend);
+                canDeposit = getAmountAfterPowerExpenditure(canDeposit, grid.getEnergyService());
                 insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
             }
 
-            insertedItems += BigInteger.valueOf(canDeposit).divide(itemEmc).longValue();
+            var inserted = BigInteger.valueOf(canDeposit).divide(itemEmc).longValue();
+            totalInserted += inserted;
+            source.player().ifPresent(player -> {
+                if (mode == Actionable.MODULATE) {
+                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+                }
+            });
+
             var wouldHaveDeposited = BigInteger.valueOf(toDeposit);
             totalEmc = totalEmc.subtract(wouldHaveDeposited).add(wouldHaveDeposited.remainder(itemEmc));
         }
 
-        return insertedItems;
+        return totalInserted;
     }
 
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
@@ -179,31 +184,40 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var energy = grid.getEnergyService();
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var acquiredItems = 0L;
+        var totalExtracted = 0L;
 
         while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
             var toWithdraw = AppliedE.clampedLong(totalEmc);
             var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (mode == Actionable.MODULATE) {
-                var requiredPower = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(canWithdraw);
-                var availablePower = energy.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-                var powerToExpend = Math.min(requiredPower, availablePower);
-                energy.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-
-                canWithdraw = requiredPower > 0 ? (long) PowerMultiplier.CONFIG.divide(powerToExpend) : canWithdraw;
+                canWithdraw = getAmountAfterPowerExpenditure(canWithdraw, grid.getEnergyService());
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
-            acquiredItems += BigInteger.valueOf(canWithdraw).divide(itemEmc).longValue();
+            var extracted = BigInteger.valueOf(canWithdraw).divide(itemEmc).longValue();
+            totalExtracted += extracted;
+            source.player().ifPresent(player -> {
+                if (mode == Actionable.MODULATE) {
+                    AeStats.ItemsExtracted.addToPlayer(player, Ints.saturatedCast(extracted));
+                }
+            });
+
             var wouldHaveWithdrawn = BigInteger.valueOf(toWithdraw);
             totalEmc = totalEmc.subtract(wouldHaveWithdrawn).add(wouldHaveWithdrawn.remainder(itemEmc));
         }
 
-        return acquiredItems;
+        return totalExtracted;
+    }
+
+    private long getAmountAfterPowerExpenditure(long maxAmount, IEnergySource source) {
+        var requiredPower = PowerMultiplier.CONFIG.multiply(maxAmount);
+        var availablePower = source.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+        var powerToExpend = Math.min(requiredPower, availablePower);
+        source.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+        return (long) PowerMultiplier.CONFIG.divide(powerToExpend);
     }
 
     public int getHighestTier() {
