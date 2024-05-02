@@ -83,7 +83,7 @@ public class EMCStorage implements MEStorage {
         }
 
         if (what instanceof AEItemKey item && source.player().isPresent()) {
-            return extractItem(item, amount, mode, source);
+            return extractItem(item, amount, mode, source, false);
         }
 
         if (!(what instanceof EMCKey emc)) {
@@ -173,14 +173,18 @@ public class EMCStorage implements MEStorage {
         return totalInserted;
     }
 
-    public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+    public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean skipStored) {
         if (!service.knowsItem(what)) {
             return 0;
         }
 
         var grid = service.getGrid();
 
-        if (grid == null || grid.getStorageService().getCachedInventory().get(what) > 0) {
+        if (grid == null) {
+            return 0;
+        }
+
+        if (!skipStored && grid.getStorageService().getCachedInventory().get(what) > 0) {
             return 0;
         }
 
