@@ -1,7 +1,7 @@
 {
   "mod.appliede": "AppliedE",
-  "block.appliede.emc_interface": "ME EMC Interface",
-  "item.appliede.cable_emc_interface": "ME EMC Interface",
+  "block.appliede.emc_interface": "ME Transmutation Interface",
+  "item.appliede.cable_emc_interface": "ME Transmutation Interface",
   "item.appliede.emc_module": "ME Transmutation Module",
   "item.appliede.transmutation_pattern": "Transmutation Pattern",
   "key.appliede.emc": "EMC",
