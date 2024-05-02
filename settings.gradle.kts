@@ -26,6 +26,7 @@ dependencyResolutionManagement {
             library("projectex", "curse.maven", "project-expansion-579177").version("5232445")
             library("teampe", "curse.maven", "team-projecte-689273").version("4882959")
             library("jade", "curse.maven", "jade-324717").version("5072729")
+            library("jei", "mezz.jei", "jei-1.20.1-forge").version("15.3.0.4")
         }
     }
 }

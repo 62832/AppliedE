@@ -23,6 +23,7 @@ repositories {
         url = uri("https://modmaven.dev/")
         content {
             includeGroup("appeng")
+            includeGroup("mezz.jei")
         }
     }
 
@@ -70,11 +71,11 @@ dependencies {
     implementation(fg.deobf(libs.ae2.get()))
     implementation(fg.deobf(libs.projecte.get()))
 
-    // implementation(fg.deobf(libs.aecapfix.get()))
-    compileOnly(fg.deobf(libs.aecapfix.get()))
-
+    implementation(fg.deobf(libs.aecapfix.get()))
     implementation(fg.deobf(libs.teampe.get()))
+
     runtimeOnly(fg.deobf(libs.projectex.get()))
+    runtimeOnly(fg.deobf(libs.jei.get()))
     runtimeOnly(fg.deobf(libs.jade.get()))
 }
 
