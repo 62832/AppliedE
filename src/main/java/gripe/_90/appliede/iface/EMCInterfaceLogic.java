@@ -1,6 +1,5 @@
 package gripe._90.appliede.iface;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -17,7 +16,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 import appeng.api.config.Actionable;
-import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
@@ -38,10 +36,7 @@ import appeng.me.storage.DelegatingMEInventory;
 import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
-import gripe._90.appliede.key.EMCKey;
 import gripe._90.appliede.service.KnowledgeService;
-
-import moze_intel.projecte.api.proxy.IEMCProxy;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCInterfaceLogic implements IActionHost, IGridTickable {
@@ -209,7 +204,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     }
 
     private boolean tryUsePlan(int slot, AEKey what, int amount) {
-        if (!(what instanceof AEItemKey itemKey)) {
+        if (!(what instanceof AEItemKey item)) {
             return false;
         }
 
@@ -221,7 +216,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
         var knowledge = grid.getService(KnowledgeService.class);
 
-        if (!knowledge.knowsItem(itemKey)) {
+        if (!knowledge.knowsItem(item)) {
             return false;
         }
 
@@ -233,30 +228,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
                 return true;
             }
 
-            var energy = grid.getEnergyService();
-            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(itemKey.toStack()));
-            var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-            var insertedItems = 0;
+            var depositedItems = grid.getService(KnowledgeService.class)
+                    .getStorage()
+                    .insertItem(item, amount, Actionable.MODULATE, requestSource);
 
-            while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-                var toDeposit = clampedLong(totalEmc);
-                var energyToExpend = PowerMultiplier.CONFIG.multiply(toDeposit);
-                var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-
-                if (availablePower < energyToExpend) {
-                    break;
-                }
-
-                energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                knowledge.getStorage().insert(EMCKey.BASE, toDeposit, Actionable.MODULATE, requestSource);
-
-                var deposited = BigInteger.valueOf(toDeposit);
-                insertedItems += (int) deposited.divide(itemEmc).longValue();
-                totalEmc = totalEmc.subtract(deposited).add(deposited.remainder(itemEmc));
-            }
-
-            if (insertedItems > 0) {
-                storage.extract(slot, what, insertedItems, Actionable.MODULATE);
+            if (depositedItems > 0) {
+                storage.extract(slot, what, depositedItems, Actionable.MODULATE);
                 return true;
             }
         }
@@ -289,10 +266,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         } else {
             return false;
         }
-    }
-
-    private long clampedLong(BigInteger toClamp) {
-        return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
     }
 
     private void onConfigRowChanged() {

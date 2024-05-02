@@ -130,6 +130,44 @@ public class EMCStorage implements MEStorage {
         return extracted;
     }
 
+    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+        if (!service.knowsItem(what)) {
+            return 0;
+        }
+
+        var grid = service.getGrid();
+
+        if (grid == null) {
+            return 0;
+        }
+
+        var energy = grid.getEnergyService();
+        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
+        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
+        var insertedItems = 0L;
+
+        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
+            var toDeposit = AppliedE.clampedLong(totalEmc);
+            var canDeposit = toDeposit;
+
+            if (mode == Actionable.MODULATE) {
+                var requiredPower = PowerMultiplier.CONFIG.multiply(toDeposit);
+                var availablePower = energy.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                var powerToExpend = Math.min(requiredPower, availablePower);
+                energy.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+
+                canDeposit = (long) PowerMultiplier.CONFIG.divide(powerToExpend);
+                insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
+            }
+
+            insertedItems += BigInteger.valueOf(canDeposit).divide(itemEmc).longValue();
+            var wouldHaveDeposited = BigInteger.valueOf(toDeposit);
+            totalEmc = totalEmc.subtract(wouldHaveDeposited).add(wouldHaveDeposited.remainder(itemEmc));
+        }
+
+        return insertedItems;
+    }
+
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
         if (!service.knowsItem(what)) {
             return 0;
@@ -154,8 +192,9 @@ public class EMCStorage implements MEStorage {
                 var requiredPower = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(canWithdraw);
                 var availablePower = energy.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
                 var powerToExpend = Math.min(requiredPower, availablePower);
-
                 energy.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+
+                canWithdraw = requiredPower > 0 ? (long) PowerMultiplier.CONFIG.divide(powerToExpend) : canWithdraw;
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
