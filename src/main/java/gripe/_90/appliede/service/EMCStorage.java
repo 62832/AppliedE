@@ -151,20 +151,17 @@ public class EMCStorage implements MEStorage {
             var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (mode == Actionable.MODULATE) {
-                var energyToExpend = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(canWithdraw);
-                var availablePower = energy.extractAEPower(energyToExpend, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                var requiredPower = source.player().isPresent() ? 0 : PowerMultiplier.CONFIG.multiply(canWithdraw);
+                var availablePower = energy.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                var powerToExpend = Math.min(requiredPower, availablePower);
 
-                if (availablePower < energyToExpend) {
-                    break;
-                }
-
-                energy.extractAEPower(energyToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
+                energy.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
-            var withdrawn = BigInteger.valueOf(canWithdraw);
-            acquiredItems += withdrawn.divide(itemEmc).longValue();
-            totalEmc = totalEmc.subtract(BigInteger.valueOf(toWithdraw)).add(withdrawn.remainder(itemEmc));
+            acquiredItems += BigInteger.valueOf(canWithdraw).divide(itemEmc).longValue();
+            var wouldHaveWithdrawn = BigInteger.valueOf(toWithdraw);
+            totalEmc = totalEmc.subtract(wouldHaveWithdrawn).add(wouldHaveWithdrawn.remainder(itemEmc));
         }
 
         return acquiredItems;
