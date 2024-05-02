@@ -2,7 +2,8 @@
   "credit": "Made with Blockbench by Sea_Kerman",
   "textures": {
     "front": "appliede:part/emc_module",
-    "side": "appliede:part/emc_module_side"
+    "side": "appliede:part/emc_module_side",
+    "particle": "appliede:part/emc_module"
   },
   "elements": [
     {
