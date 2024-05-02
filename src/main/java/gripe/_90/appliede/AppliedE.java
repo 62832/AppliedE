@@ -128,7 +128,6 @@ public final class AppliedE {
             registerEMC(AEItems.LOGIC_PROCESSOR_PRESS, 2048);
             registerEMC(AEItems.QUANTUM_ENTANGLED_SINGULARITY, 0);
             registerEMC(AEParts.CABLE_ANCHOR, 32);
-            registerEMC(AEItems.FACADE, 1); // will be replaced by FacadeProcessor
         });
     }
 
