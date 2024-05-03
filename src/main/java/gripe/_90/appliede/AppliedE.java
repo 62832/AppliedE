@@ -17,6 +17,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.DeferredRegister;
@@ -31,15 +32,20 @@ import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.PartModels;
 import appeng.api.stacks.AEKeyTypes;
+import appeng.api.upgrades.Upgrades;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
 import appeng.core.definitions.AEParts;
+import appeng.core.localization.GuiText;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
 
 import gripe._90.appliede.block.EMCInterfaceBlock;
 import gripe._90.appliede.block.EMCInterfaceBlockEntity;
+import gripe._90.appliede.client.EMCRenderer;
+import gripe._90.appliede.client.screen.EMCInterfaceScreen;
+import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.service.KnowledgeService;
@@ -49,6 +55,8 @@ import gripe._90.appliede.me.strategy.EMCExportStrategy;
 import gripe._90.appliede.me.strategy.EMCImportStrategy;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
+import gripe._90.appliede.part.EMCExportBusPart;
+import gripe._90.appliede.part.EMCImportBusPart;
 import gripe._90.appliede.part.EMCInterfacePart;
 import gripe._90.appliede.part.EMCInterfacePartAECF;
 import gripe._90.appliede.part.EMCModulePart;
@@ -74,7 +82,7 @@ public final class AppliedE {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
 
-        // external storage strategy not provided so as not to clash with mounted EMC service storage
+        // external storage strategy not provided so as not to clash with service's mounted EMC storage
         StackImportStrategy.register(EMCKeyType.TYPE, EMCImportStrategy::new);
         StackExportStrategy.register(EMCKeyType.TYPE, EMCExportStrategy::new);
         ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, new EMCContainerItemStrategy());
@@ -99,11 +107,16 @@ public final class AppliedE {
         return type;
     });
 
+    public static final RegistryObject<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
+    public static final RegistryObject<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
+
     static {
         ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
 
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
         MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
+        MENU_TYPES.register("emc_export_bus", () -> EMCExportBusPart.MENU);
+        MENU_TYPES.register("emc_import_bus", () -> EMCImportBusPart.MENU);
 
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
@@ -112,6 +125,8 @@ public final class AppliedE {
                     output.accept(EMC_MODULE.get());
                     output.accept(EMC_INTERFACE.get());
                     output.accept(CABLE_EMC_INTERFACE.get());
+                    output.accept(EMC_EXPORT_BUS.get());
+                    output.accept(EMC_IMPORT_BUS.get());
                 })
                 .build());
     }
@@ -125,6 +140,15 @@ public final class AppliedE {
         TABS.register(bus);
 
         bus.addListener((FMLCommonSetupEvent event) -> {
+            var busesGroup = GuiText.IOBuses.getTranslationKey();
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_EXPORT_BUS.get(), 1, busesGroup);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_EXPORT_BUS.get(), 5, busesGroup);
+            Upgrades.add(AEItems.SPEED_CARD, EMC_EXPORT_BUS.get(), 4, busesGroup);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_IMPORT_BUS.get(), 1, busesGroup);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS.get(), 5, busesGroup);
+            Upgrades.add(AEItems.SPEED_CARD, EMC_IMPORT_BUS.get(), 4, busesGroup);
+            Upgrades.add(AEItems.INVERTER_CARD, EMC_IMPORT_BUS.get(), 1, busesGroup);
+
             registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
             registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
             registerEMC(AEItems.CALCULATION_PROCESSOR_PRESS, 2048);
@@ -132,6 +156,14 @@ public final class AppliedE {
             registerEMC(AEItems.LOGIC_PROCESSOR_PRESS, 2048);
             registerEMC(AEParts.CABLE_ANCHOR, 32);
         });
+
+        if (FMLEnvironment.dist.isClient()) {
+            bus.addListener(EMCRenderer::register);
+            bus.addListener(EMCInterfaceScreen::register);
+            bus.addListener(EMCSetStockAmountScreen::register);
+            bus.addListener(EMCExportBusPart::registerScreen);
+            bus.addListener(EMCImportBusPart::registerScreen);
+        }
     }
 
     public static ResourceLocation id(String path) {

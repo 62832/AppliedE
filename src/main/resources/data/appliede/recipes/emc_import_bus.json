@@ -2,22 +2,25 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
+    "A": {
+      "item": "ae2:annihilation_core"
+    },
     "I": {
       "tag": "forge:ingots/iron"
     },
     "T": {
       "item": "projecte:transmutation_tablet"
     },
-    "A": {
-      "item": "ae2:annihilation_core"
+    "D": {
+      "item": "projecte:dark_matter"
     },
-    "F": {
-      "item": "ae2:formation_core"
+    "S": {
+      "item": "minecraft:sticky_piston"
     }
   },
-  "pattern": ["ITI", "A F", "ITI"],
+  "pattern": [" A ", "ITI", "DSD"],
   "result": {
-    "item": "appliede:emc_interface"
+    "item": "appliede:emc_import_bus"
   },
   "show_notification": true
 }

@@ -18,11 +18,11 @@ import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCImportStrategy implements StackImportStrategy {
-    private final BlockApiCache<IEmcStorage> blockApiCache;
+    private final BlockApiCache<IEmcStorage> apiCache;
     private final Direction fromSide;
 
     public EMCImportStrategy(ServerLevel level, BlockPos fromPos, Direction fromSide) {
-        blockApiCache = BlockApiCache.create(PECapabilities.EMC_STORAGE_CAPABILITY, level, fromPos);
+        apiCache = BlockApiCache.create(PECapabilities.EMC_STORAGE_CAPABILITY, level, fromPos);
         this.fromSide = fromSide;
     }
 
@@ -32,7 +32,7 @@ public class EMCImportStrategy implements StackImportStrategy {
             return false;
         }
 
-        var emcStorage = blockApiCache.find(fromSide);
+        var emcStorage = apiCache.find(fromSide);
 
         if (emcStorage == null) {
             return false;

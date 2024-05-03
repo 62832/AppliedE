@@ -3,6 +3,8 @@
   "block.appliede.emc_interface": "ME Transmutation Interface",
   "item.appliede.cable_emc_interface": "ME Transmutation Interface",
   "item.appliede.emc_module": "ME Transmutation Module",
+  "item.appliede.emc_export_bus": "ME Transmutation Export Bus",
+  "item.appliede.emc_import_bus": "ME Transmutation Import Bus",
   "item.appliede.transmutation_pattern": "Transmutation Pattern",
   "key.appliede.emc": "EMC",
   "key.appliede.emc_tiered": "EMC^%s",

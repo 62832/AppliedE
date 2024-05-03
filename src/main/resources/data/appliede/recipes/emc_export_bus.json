@@ -5,19 +5,22 @@
     "I": {
       "tag": "forge:ingots/iron"
     },
+    "F": {
+      "item": "ae2:formation_core"
+    },
+    "D": {
+      "item": "projecte:dark_matter"
+    },
     "T": {
       "item": "projecte:transmutation_tablet"
     },
-    "A": {
-      "item": "ae2:annihilation_core"
-    },
-    "F": {
-      "item": "ae2:formation_core"
+    "P": {
+      "item": "minecraft:piston"
     }
   },
-  "pattern": ["ITI", "A F", "ITI"],
+  "pattern": ["IFI", "DTD", " P "],
   "result": {
-    "item": "appliede:emc_interface"
+    "item": "appliede:emc_export_bus"
   },
   "show_notification": true
 }

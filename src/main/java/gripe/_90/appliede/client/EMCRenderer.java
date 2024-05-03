@@ -14,9 +14,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.api.client.AEKeyRenderHandler;
@@ -28,7 +25,6 @@ import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 
 @SuppressWarnings("unused")
-@Mod.EventBusSubscriber(modid = AppliedE.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     private final Supplier<TextureAtlasSprite> sprite = () -> Minecraft.getInstance()
             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
@@ -36,7 +32,6 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
 
     private EMCRenderer() {}
 
-    @SubscribeEvent
     public static void register(FMLClientSetupEvent event) {
         event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, new EMCRenderer()));
     }
