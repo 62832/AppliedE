@@ -13,11 +13,10 @@ import gripe._90.appliede.AppliedE;
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
-import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 class TeamProjectEHandler {
     private final Map<UUID, TPTeam> playersInSharingTeams = new HashMap<>();
-    private final Map<TPTeam, IKnowledgeProvider> providersToKeep = new HashMap<>();
+    private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersToKeep = new HashMap<>();
 
     TeamProjectEHandler() {
         MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> {
@@ -27,7 +26,7 @@ class TeamProjectEHandler {
     }
 
     boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
-        if (!(provider.getValue().get() instanceof TeamKnowledgeProvider teamProvider)) {
+        if (!(provider.getValue().get() instanceof TeamKnowledgeProvider)) {
             return true;
         }
 
@@ -36,7 +35,7 @@ class TeamProjectEHandler {
 
         if (team.isSharingEMC() && (!playersInSharingTeams.containsValue(team) || !providersToKeep.containsKey(team))) {
             playersInSharingTeams.put(uuid, team);
-            providersToKeep.put(team, teamProvider);
+            providersToKeep.put(team, provider.getValue());
             return true;
         }
 
@@ -47,14 +46,13 @@ class TeamProjectEHandler {
             providersToKeep.remove(team);
         }
 
-        return !playersInSharingTeams.containsValue(team) || providersToKeep.containsValue(teamProvider);
+        return !playersInSharingTeams.containsValue(team) || providersToKeep.containsValue(provider.getValue());
     }
 
     void removeTeamReference(UUID member) {
         var team = playersInSharingTeams.remove(member);
-        var provider = ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(member);
 
-        if (team != null && providersToKeep.containsValue(provider)) {
+        if (team != null && !playersInSharingTeams.containsValue(team)) {
             providersToKeep.remove(team);
         }
     }
