@@ -91,14 +91,9 @@ tasks {
     }
 
     processResources {
-        val props = mapOf(
-            "version" to version,
-            "ae2Version" to libs.versions.ae2.get(),
-            "ae2VersionEnd" to libs.versions.ae2.get().substringBefore('.').toInt() + 1,
-            "projectEVersion" to libs.versions.projecte.get(),
-        )
-
+        val props = mapOf("version" to version)
         inputs.properties(props)
+
         filesMatching("META-INF/mods.toml") {
             expand(props)
         }

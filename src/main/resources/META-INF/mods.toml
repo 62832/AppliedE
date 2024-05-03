@@ -17,13 +17,18 @@ description = "Direct EMC integration with Applied Energistics 2."
 [[dependencies]]
 modId = "ae2"
 type = "required"
-versionRange = "[$ae2Version,$ae2VersionEnd)"
+versionRange = "[15.1.0,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies]]
 modId = "projecte"
 type = "required"
-versionRange = "[$projectEVersion,)"
+versionRange = "[1.0.1,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies]]
+modId = "teamprojecte"
+type = "optional"
+versionRange = "[1.1.3,)"

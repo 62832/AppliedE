@@ -11,6 +11,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import gripe._90.appliede.AppliedE;
 
 import cn.leomc.teamprojecte.TPTeam;
+import cn.leomc.teamprojecte.TeamChangeEvent;
 import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 
@@ -18,14 +19,12 @@ class TeamProjectEHandler {
     private final Map<UUID, TPTeam> playersInSharingTeams = new HashMap<>();
     private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersToKeep = new HashMap<>();
 
-    TeamProjectEHandler() {
-        MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> {
-            playersInSharingTeams.clear();
-            providersToKeep.clear();
-        });
+    private TeamProjectEHandler() {
+        MinecraftForge.EVENT_BUS.addListener(this::onTeamChange);
+        MinecraftForge.EVENT_BUS.addListener(this::onServerStop);
     }
 
-    boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
+    private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
         if (!(provider.getValue().get() instanceof TeamKnowledgeProvider)) {
             return true;
         }
@@ -39,22 +38,32 @@ class TeamProjectEHandler {
             return true;
         }
 
-        if (!team.isSharingEMC()) {
-            playersInSharingTeams.entrySet().stream()
-                    .filter(entry -> entry.getValue() == team)
-                    .forEach(entry -> playersInSharingTeams.remove(entry.getKey()));
-            providersToKeep.remove(team);
-        }
-
         return !playersInSharingTeams.containsValue(team) || providersToKeep.containsValue(provider.getValue());
     }
 
-    void removeTeamReference(UUID member) {
+    private void removeTeamReference(UUID member) {
         var team = playersInSharingTeams.remove(member);
 
         if (team != null && !playersInSharingTeams.containsValue(team)) {
             providersToKeep.remove(team);
         }
+    }
+
+    private void onTeamChange(TeamChangeEvent event) {
+        providersToKeep.remove(playersInSharingTeams.remove(event.getPlayerUUID()));
+        var team = event.getTeam();
+
+        if (team != null && !team.isSharingEMC()) {
+            playersInSharingTeams.entrySet().stream()
+                    .filter(entry -> entry.getValue() == team)
+                    .forEach(entry -> playersInSharingTeams.remove(entry.getKey()));
+            providersToKeep.remove(team);
+        }
+    }
+
+    private void onServerStop(ServerStoppedEvent event) {
+        playersInSharingTeams.clear();
+        providersToKeep.clear();
     }
 
     static class Proxy {
