@@ -2,7 +2,6 @@ package gripe._90.appliede.block;
 
 import java.util.List;
 
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -22,8 +22,8 @@ import appeng.api.networking.IManagedGridNode;
 import appeng.blockentity.grid.AENetworkBlockEntity;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.helpers.EMCInterfaceLogic;
-import gripe._90.appliede.me.helpers.EMCInterfaceLogicHost;
+import gripe._90.appliede.me.misc.EMCInterfaceLogic;
+import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCInterfaceBlockEntity extends AENetworkBlockEntity implements EMCInterfaceLogicHost {
     private final EMCInterfaceLogic logic = createLogic();

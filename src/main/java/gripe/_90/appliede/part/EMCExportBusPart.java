@@ -26,7 +26,7 @@ import appeng.parts.automation.IOBusPart;
 import appeng.util.prioritylist.DefaultPriorityList;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.helpers.EMCTransferContext;
+import gripe._90.appliede.me.misc.EMCTransferContext;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.strategy.EMCItemExportStrategy;
 

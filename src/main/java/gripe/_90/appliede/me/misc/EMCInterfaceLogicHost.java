@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.helpers;
+package gripe._90.appliede.me.misc;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;

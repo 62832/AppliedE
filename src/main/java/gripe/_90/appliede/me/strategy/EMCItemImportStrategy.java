@@ -13,7 +13,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.me.storage.ExternalStorageFacade;
 import appeng.util.BlockApiCache;
 
-import gripe._90.appliede.me.helpers.EMCTransferContext;
+import gripe._90.appliede.me.misc.EMCTransferContext;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCItemImportStrategy implements StackImportStrategy {

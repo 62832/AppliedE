@@ -24,7 +24,7 @@ import appeng.menu.locator.MenuLocator;
 import appeng.menu.slot.InaccessibleSlot;
 import appeng.util.inv.AppEngInternalInventory;
 
-import gripe._90.appliede.me.helpers.EMCInterfaceLogicHost;
+import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
     public static final MenuType<EMCSetStockAmountMenu> TYPE = MenuTypeBuilder.create(

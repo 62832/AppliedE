@@ -25,8 +25,8 @@ import appeng.parts.AEBasePart;
 import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.helpers.EMCInterfaceLogic;
-import gripe._90.appliede.me.helpers.EMCInterfaceLogicHost;
+import gripe._90.appliede.me.misc.EMCInterfaceLogic;
+import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHost {
     private static final ResourceLocation MODEL_BASE = AppliedE.id("part/emc_interface");

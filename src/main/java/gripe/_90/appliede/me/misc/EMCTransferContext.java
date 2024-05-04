@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.helpers;
+package gripe._90.appliede.me.misc;
 
 import com.google.common.primitives.Ints;
 

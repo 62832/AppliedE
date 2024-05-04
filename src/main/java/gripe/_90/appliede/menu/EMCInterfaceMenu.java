@@ -12,7 +12,7 @@ import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.FakeSlot;
 
-import gripe._90.appliede.me.helpers.EMCInterfaceLogicHost;
+import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCInterfaceMenu extends AEBaseMenu {
     private static final String ACTION_OPEN_SET_AMOUNT = InterfaceMenu.ACTION_OPEN_SET_AMOUNT;
