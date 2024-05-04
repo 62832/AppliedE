@@ -14,6 +14,7 @@ import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
 import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 class TeamProjectEHandler {
     private final Map<UUID, TPTeam> playersInSharingTeams = new HashMap<>();
@@ -32,9 +33,9 @@ class TeamProjectEHandler {
         var uuid = provider.getKey();
         var team = TPTeam.getOrCreateTeam(uuid);
 
-        if (team.isSharingEMC() && (!playersInSharingTeams.containsValue(team) || !providersToKeep.containsKey(team))) {
+        if (team.isSharingEMC() && (!playersInSharingTeams.containsValue(team))) {
             playersInSharingTeams.put(uuid, team);
-            providersToKeep.put(team, provider.getValue());
+            providersToKeep.putIfAbsent(team, provider.getValue());
             return true;
         }
 
@@ -50,7 +51,9 @@ class TeamProjectEHandler {
     }
 
     private void onTeamChange(TeamChangeEvent event) {
-        providersToKeep.remove(playersInSharingTeams.remove(event.getPlayerUUID()));
+        var uuid = event.getPlayerUUID();
+        providersToKeep.remove(playersInSharingTeams.remove(uuid));
+
         var team = event.getTeam();
 
         if (team != null && !team.isSharingEMC()) {
@@ -58,6 +61,16 @@ class TeamProjectEHandler {
                     .filter(entry -> entry.getValue() == team)
                     .forEach(entry -> playersInSharingTeams.remove(entry.getKey()));
             providersToKeep.remove(team);
+        }
+
+        var newTeam = event.getNewTeam();
+
+        if (newTeam != null && uuid != null) {
+            playersInSharingTeams.put(uuid, newTeam);
+
+            if (newTeam.isSharingEMC()) {
+                providersToKeep.putIfAbsent(newTeam, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
+            }
         }
     }
 
