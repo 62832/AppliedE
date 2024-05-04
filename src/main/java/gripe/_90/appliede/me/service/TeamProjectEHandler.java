@@ -12,11 +12,10 @@ import gripe._90.appliede.AppliedE;
 
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
-import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 
 class TeamProjectEHandler {
-    private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersToKeep = new HashMap<>();
+    private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersPerTeam = new HashMap<>();
 
     private TeamProjectEHandler() {
         MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> clear());
@@ -24,16 +23,15 @@ class TeamProjectEHandler {
     }
 
     private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> entry) {
-        if (!(entry.getValue().get() instanceof TeamKnowledgeProvider)) {
-            return true;
-        }
-
         var team = TPTeam.getOrCreateTeam(entry.getKey());
-        return !team.isSharingEMC() || providersToKeep.putIfAbsent(team, entry.getValue()) != null;
+        var provider = entry.getValue();
+        return !team.isSharingEMC()
+                || providersPerTeam.containsValue(provider)
+                || providersPerTeam.putIfAbsent(team, provider) == null;
     }
 
     private void clear() {
-        providersToKeep.clear();
+        providersPerTeam.clear();
     }
 
     static class Proxy {
