@@ -75,7 +75,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
             moduleNodes.remove(module.getMainNode());
             providers.clear();
-            tpeHandler.clear();
+            tpeHandler.removeTeamReference(gridNode.getOwningPlayerProfileId());
 
             for (var mainNode : moduleNodes) {
                 var node = mainNode.getNode();
