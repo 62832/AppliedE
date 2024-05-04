@@ -16,7 +16,6 @@ import cn.leomc.teamprojecte.TeamKnowledgeProvider;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 
 class TeamProjectEHandler {
-    private final Map<UUID, TPTeam> playersInSharingTeams = new HashMap<>();
     private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersToKeep = new HashMap<>();
 
     private TeamProjectEHandler() {
@@ -24,25 +23,16 @@ class TeamProjectEHandler {
         MinecraftForge.EVENT_BUS.addListener((TeamChangeEvent event) -> clear());
     }
 
-    private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
-        if (!(provider.getValue().get() instanceof TeamKnowledgeProvider)) {
+    private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> entry) {
+        if (!(entry.getValue().get() instanceof TeamKnowledgeProvider)) {
             return true;
         }
 
-        var uuid = provider.getKey();
-        var team = TPTeam.getOrCreateTeam(uuid);
-
-        if (team.isSharingEMC()) {
-            playersInSharingTeams.put(uuid, team);
-            providersToKeep.putIfAbsent(team, provider.getValue());
-            return true;
-        }
-
-        return !playersInSharingTeams.containsValue(team) || providersToKeep.containsValue(provider.getValue());
+        var team = TPTeam.getOrCreateTeam(entry.getKey());
+        return !team.isSharingEMC() || providersToKeep.putIfAbsent(team, entry.getValue()) != null;
     }
 
     private void clear() {
-        playersInSharingTeams.clear();
         providersToKeep.clear();
     }
 
