@@ -2,6 +2,7 @@ package gripe._90.appliede.block;
 
 import java.util.List;
 
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,8 +28,12 @@ import gripe._90.appliede.me.helpers.EMCInterfaceLogicHost;
 public class EMCInterfaceBlockEntity extends AENetworkBlockEntity implements EMCInterfaceLogicHost {
     private final EMCInterfaceLogic logic = createLogic();
 
-    public EMCInterfaceBlockEntity(BlockPos pos, BlockState blockState) {
-        super(AppliedE.EMC_INTERFACE_BE.get(), pos, blockState);
+    public EMCInterfaceBlockEntity(BlockPos pos, BlockState state) {
+        this(AppliedE.EMC_INTERFACE_BE.get(), pos, state);
+    }
+
+    public EMCInterfaceBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     protected EMCInterfaceLogic createLogic() {
