@@ -183,16 +183,21 @@ public final class AppliedE {
 
         if (FMLEnvironment.dist.isClient()) {
             bus.addListener(EMCRenderer::register);
-            bus.addListener(EMCInterfaceScreen::register);
             bus.addListener(EMCSetStockAmountScreen::register);
             bus.addListener(EMCExportBusPart::registerScreen);
             bus.addListener(EMCImportBusPart::registerScreen);
 
-            // Java generics fucking suck
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> InitScreens.register(
-                    TransmutationTerminalMenu.TYPE,
-                    TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
-                    "/screens/appliede/transmutation_terminal.json")));
+            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
+                InitScreens.register(
+                        EMCInterfaceMenu.TYPE,
+                        EMCInterfaceScreen<EMCInterfaceMenu>::new,
+                        "/screens/appliede/emc_interface.json");
+                InitScreens.register(
+                        TransmutationTerminalMenu.TYPE,
+                        TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
+                        "/screens/appliede/transmutation_terminal.json");
+            }));
+
             bus.addListener(TransmutationTerminalPart::registerColour);
         }
     }
