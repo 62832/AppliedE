@@ -230,7 +230,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
             var depositedItems = grid.getService(KnowledgeService.class)
                     .getStorage()
-                    .insertItem(item, amount, Actionable.MODULATE, requestSource);
+                    .insertItem(item, amount, Actionable.MODULATE, requestSource, false);
 
             if (depositedItems > 0) {
                 storage.extract(slot, what, depositedItems, Actionable.MODULATE);

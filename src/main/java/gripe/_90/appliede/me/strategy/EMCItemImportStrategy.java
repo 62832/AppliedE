@@ -55,7 +55,8 @@ public class EMCItemImportStrategy implements StackImportStrategy {
             var amount = adjacentStorage.extract(item, remaining, Actionable.MODULATE, context.getActionSource());
 
             if (amount > 0) {
-                var inserted = emcStorage.insertItem(item, amount, Actionable.MODULATE, context.getActionSource());
+                var inserted =
+                        emcStorage.insertItem(item, amount, Actionable.MODULATE, context.getActionSource(), false);
                 context.reduceOperationsRemaining(inserted);
                 remaining -= (int) inserted;
             }

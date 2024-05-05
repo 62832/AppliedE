@@ -70,7 +70,7 @@ public class EMCStorage implements MEStorage {
                 provider.setEmc(provider.getEmc().add(quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO)));
             }
 
-            service.syncEmc();
+            service.sync();
         }
 
         return amount;
@@ -128,14 +128,22 @@ public class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE) {
-            service.syncEmc();
+            service.sync();
         }
 
         return extracted;
     }
 
-    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
-        if (!service.knowsItem(what)) {
+    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
+        if (!mayLearn && !service.knowsItem(what)) {
+            return 0;
+        }
+
+        var playerSource = source.player();
+
+        if (mayLearn
+                && playerSource.isPresent()
+                && !service.isTrackingPlayer(playerSource.get().getUUID())) {
             return 0;
         }
 
@@ -168,6 +176,10 @@ public class EMCStorage implements MEStorage {
 
             var wouldHaveDeposited = BigInteger.valueOf(toDeposit);
             totalEmc = totalEmc.subtract(wouldHaveDeposited).add(wouldHaveDeposited.remainder(itemEmc));
+        }
+
+        if (mode == Actionable.MODULATE && mayLearn) {
+            service.getProviders().forEach(provider -> provider.addKnowledge(what.toStack()));
         }
 
         return totalInserted;

@@ -60,7 +60,7 @@ public class EMCItemExportStrategy implements StackExportStrategy {
 
                 if (wasInserted < extracted) {
                     var leftover = extracted - wasInserted;
-                    emcStorage.insertItem(item, leftover, Actionable.MODULATE, context.getActionSource());
+                    emcStorage.insertItem(item, leftover, Actionable.MODULATE, context.getActionSource(), false);
 
                     if (leftover > 0) {
                         LOGGER.error(

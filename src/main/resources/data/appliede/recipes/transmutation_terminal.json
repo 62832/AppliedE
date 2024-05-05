@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ae2:terminal"
+    },
+    {
+      "item": "projecte:transmutation_tablet"
+    },
+    {
+      "item": "ae2:singularity"
+    },
+    {
+      "item": "projecte:red_matter_block"
+    }
+  ],
+  "result": {
+    "item": "appliede:transmutation_terminal"
+  }
+}

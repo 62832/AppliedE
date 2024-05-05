@@ -30,6 +30,11 @@ class TeamProjectEHandler {
                 || providersPerTeam.putIfAbsent(team, provider) == null;
     }
 
+    private boolean isPlayerInTrackedTeam(UUID uuid) {
+        return providersPerTeam.keySet().stream()
+                .anyMatch(team -> team.getMembers().contains(uuid));
+    }
+
     private void clear() {
         providersPerTeam.clear();
     }
@@ -45,6 +50,10 @@ class TeamProjectEHandler {
 
         boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
             return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);
+        }
+
+        boolean isPlayerInTrackedTeam(UUID uuid) {
+            return handler == null || ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
         }
 
         void clear() {

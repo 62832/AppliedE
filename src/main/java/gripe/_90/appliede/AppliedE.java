@@ -15,11 +15,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -38,6 +41,7 @@ import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
 import appeng.core.definitions.AEParts;
 import appeng.core.localization.GuiText;
+import appeng.init.client.InitScreens;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
 
@@ -46,8 +50,10 @@ import gripe._90.appliede.block.EMCInterfaceBlockEntity;
 import gripe._90.appliede.client.EMCRenderer;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
+import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
+import gripe._90.appliede.me.misc.LearnAllItemsPacket;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.service.TransmutationPatternItem;
 import gripe._90.appliede.me.strategy.EMCContainerItemStrategy;
@@ -55,11 +61,13 @@ import gripe._90.appliede.me.strategy.EMCExportStrategy;
 import gripe._90.appliede.me.strategy.EMCImportStrategy;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
+import gripe._90.appliede.menu.TransmutationTerminalMenu;
 import gripe._90.appliede.part.EMCExportBusPart;
 import gripe._90.appliede.part.EMCImportBusPart;
 import gripe._90.appliede.part.EMCInterfacePart;
 import gripe._90.appliede.part.EMCInterfacePartAECF;
 import gripe._90.appliede.part.EMCModulePart;
+import gripe._90.appliede.part.TransmutationTerminalPart;
 
 import moze_intel.projecte.api.imc.CustomEMCRegistration;
 import moze_intel.projecte.api.nss.NSSItem;
@@ -110,6 +118,8 @@ public final class AppliedE {
     public static final RegistryObject<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
     public static final RegistryObject<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
 
+    public static final RegistryObject<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
+
     static {
         ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
 
@@ -117,6 +127,7 @@ public final class AppliedE {
         MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
         MENU_TYPES.register("emc_export_bus", () -> EMCExportBusPart.MENU);
         MENU_TYPES.register("emc_import_bus", () -> EMCImportBusPart.MENU);
+        MENU_TYPES.register("transmutation_terminal", () -> TransmutationTerminalMenu.TYPE);
 
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
@@ -127,8 +138,21 @@ public final class AppliedE {
                     output.accept(CABLE_EMC_INTERFACE.get());
                     output.accept(EMC_EXPORT_BUS.get());
                     output.accept(EMC_IMPORT_BUS.get());
+                    output.accept(TRANSMUTATION_TERMINAL.get());
                 })
                 .build());
+    }
+
+    private static final String PROTOCOL_VERSION = Integer.toString(1);
+    public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(
+            id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+
+    static {
+        PACKET_HANDLER.messageBuilder(LearnAllItemsPacket.class, 0)
+                .encoder(LearnAllItemsPacket::encode)
+                .decoder(LearnAllItemsPacket::decode)
+                .consumerMainThread(LearnAllItemsPacket::handle)
+                .add();
     }
 
     public AppliedE() {
@@ -163,6 +187,13 @@ public final class AppliedE {
             bus.addListener(EMCSetStockAmountScreen::register);
             bus.addListener(EMCExportBusPart::registerScreen);
             bus.addListener(EMCImportBusPart::registerScreen);
+
+            // Java generics fucking suck
+            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> InitScreens.register(
+                    TransmutationTerminalMenu.TYPE,
+                    TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
+                    "/screens/appliede/transmutation_terminal.json")));
+            bus.addListener(TransmutationTerminalPart::registerColour);
         }
     }
 

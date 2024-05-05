@@ -146,13 +146,18 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return getProviders().stream().anyMatch(provider -> provider.hasKnowledge(item.toStack()));
     }
 
-    void syncEmc() {
+    public boolean isTrackingPlayer(UUID uuid) {
+        return providers.containsKey(uuid) || tpeHandler.isPlayerInTrackedTeam(uuid);
+    }
+
+    void sync() {
         if (server != null) {
             providers.forEach((uuid, provider) -> {
                 var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
                 var player = IPlayerRegistry.getConnected(server, id);
 
                 if (player != null) {
+                    provider.get().sync(player);
                     provider.get().syncEmc(player);
                 }
             });
