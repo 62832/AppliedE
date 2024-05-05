@@ -1,14 +1,10 @@
 package gripe._90.appliede.me.misc;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -38,20 +34,15 @@ import appeng.util.Platform;
 
 import gripe._90.appliede.me.service.KnowledgeService;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     protected final EMCInterfaceLogicHost host;
     protected final IManagedGridNode mainNode;
 
-    @Nullable
-    private MEStorage localInvHandler;
-
     private final ConfigInventory config;
     private final ConfigInventory storage;
-
-    protected final IActionSource requestSource = new RequestSource();
+    private final MEStorage localInvHandler;
     private final GenericStack[] plannedWork;
-    private int priority = 0;
+    private final IActionSource source = IActionSource.ofMachine(this);
 
     private final LazyOptional<IItemHandler> storageHolder;
     private final LazyOptional<MEStorage> localInvHolder;
@@ -60,20 +51,23 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         this(node, host, 9);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, int slots) {
         this.host = host;
-        config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
-        storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
-        plannedWork = new GenericStack[slots];
         mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL)
                 .addService(IGridTickable.class, this)
                 .setIdlePowerUsage(10);
+
+        config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
+        storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
+        localInvHandler = new DelegatingMEInventory(storage);
+        plannedWork = new GenericStack[slots];
 
         config.useRegisteredCapacities();
         storage.useRegisteredCapacities();
 
         storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
-        localInvHolder = LazyOptional.of(this::getInventory);
+        localInvHolder = LazyOptional.of(() -> localInvHandler);
     }
 
     public ConfigInventory getConfig() {
@@ -84,19 +78,9 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         return storage;
     }
 
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-        host.saveChanges();
-    }
-
     public void readFromNBT(CompoundTag tag) {
         config.readFromChildTag(tag, "config");
         storage.readFromChildTag(tag, "storage");
-        priority = tag.getInt("priority");
 
         updatePlan();
         notifyNeighbours();
@@ -105,15 +89,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     public void writeToNBT(CompoundTag tag) {
         config.writeToChildTag(tag, "config");
         storage.writeToChildTag(tag, "storage");
-        tag.putInt("priority", priority);
-    }
-
-    private MEStorage getInventory() {
-        if (localInvHandler == null) {
-            localInvHandler = new Inventory();
-        }
-
-        return localInvHandler;
     }
 
     @Nullable
@@ -230,7 +205,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
             var depositedItems = grid.getService(KnowledgeService.class)
                     .getStorage()
-                    .insertItem(item, amount, Actionable.MODULATE, requestSource, false);
+                    .insertItem(item, amount, Actionable.MODULATE, source, false);
 
             if (depositedItems > 0) {
                 storage.extract(slot, what, depositedItems, Actionable.MODULATE);
@@ -253,7 +228,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
         var acquiredItems = grid.getService(KnowledgeService.class)
                 .getStorage()
-                .extractItem(item, amount, Actionable.MODULATE, requestSource, true);
+                .extractItem(item, amount, Actionable.MODULATE, source, true);
 
         if (acquiredItems > 0) {
             var inserted = storage.insert(slot, what, acquiredItems, Actionable.MODULATE);
@@ -321,71 +296,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     public void invalidateCaps() {
         storageHolder.invalidate();
         localInvHolder.invalidate();
-    }
-
-    private class Inventory extends DelegatingMEInventory {
-        private Inventory() {
-            super(storage);
-        }
-
-        @Override
-        public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-            return getRequestInterfacePriority(source).isPresent() && isSameGrid(source)
-                    ? 0
-                    : super.insert(what, amount, mode, source);
-        }
-
-        @Override
-        public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-            var requestPriority = getRequestInterfacePriority(source);
-            return requestPriority.isPresent() && requestPriority.getAsInt() <= getPriority() && isSameGrid(source)
-                    ? 0
-                    : super.extract(what, amount, mode, source);
-        }
-
-        private OptionalInt getRequestInterfacePriority(IActionSource source) {
-            return source.context(RequestContext.class)
-                    .map(ctx -> OptionalInt.of(ctx.getPriority()))
-                    .orElseGet(OptionalInt::empty);
-        }
-
-        private boolean isSameGrid(IActionSource source) {
-            return source.machine()
-                            .map(IActionHost::getActionableNode)
-                            .map(IGridNode::getGrid)
-                            .orElse(null)
-                    == mainNode.getGrid();
-        }
-
-        @Override
-        public Component getDescription() {
-            return host.getMainMenuIcon().getHoverName();
-        }
-    }
-
-    private class RequestSource implements IActionSource {
-        private final RequestContext context = new RequestContext();
-
-        @Override
-        public Optional<Player> player() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<IActionHost> machine() {
-            return Optional.of(EMCInterfaceLogic.this);
-        }
-
-        @Override
-        public <T> Optional<T> context(Class<T> key) {
-            return key == RequestContext.class ? Optional.of(key.cast(context)) : Optional.empty();
-        }
-    }
-
-    private class RequestContext {
-        public int getPriority() {
-            return priority;
-        }
     }
 
     private class StorageFilter implements AEKeyFilter {

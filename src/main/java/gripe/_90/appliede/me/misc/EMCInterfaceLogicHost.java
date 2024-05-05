@@ -5,8 +5,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
+import appeng.api.storage.ISubMenuHost;
 import appeng.helpers.IConfigInvHost;
-import appeng.helpers.IPriorityHost;
 import appeng.helpers.externalstorage.GenericStackInv;
 import appeng.menu.ISubMenu;
 import appeng.menu.MenuOpener;
@@ -14,7 +14,7 @@ import appeng.menu.locator.MenuLocator;
 
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 
-public interface EMCInterfaceLogicHost extends IPriorityHost, IConfigInvHost {
+public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost {
     IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {
         @Override
         public void onSaveChanges(EMCInterfaceLogicHost host, IGridNode node) {
@@ -39,16 +39,6 @@ public interface EMCInterfaceLogicHost extends IPriorityHost, IConfigInvHost {
     void onMainNodeStateChanged(IGridNodeListener.State reason);
 
     EMCInterfaceLogic getInterfaceLogic();
-
-    @Override
-    default int getPriority() {
-        return getInterfaceLogic().getPriority();
-    }
-
-    @Override
-    default void setPriority(int priority) {
-        getInterfaceLogic().setPriority(priority);
-    }
 
     @Override
     default GenericStackInv getConfig() {

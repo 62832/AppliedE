@@ -21,8 +21,6 @@ public class EMCInterfaceScreen<M extends EMCInterfaceMenu> extends AEBaseScreen
 
     public EMCInterfaceScreen(M menu, Inventory playerInventory, Component title, ScreenStyle style) {
         super(menu, playerInventory, title, style);
-
-        widgets.addOpenPriorityButton();
         var configSlots = menu.getSlots(SlotSemantics.CONFIG);
 
         for (int i = 0; i < configSlots.size(); i++) {
