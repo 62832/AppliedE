@@ -30,6 +30,7 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
+import gripe._90.appliede.mixin.TransmutationOfflineAccessor;
 import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
@@ -64,7 +65,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             var uuid = gridNode.getOwningPlayerProfileId();
 
             if (uuid != null) {
-                providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
+                addProvider(uuid);
             }
 
             updatePatterns();
@@ -85,12 +86,22 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
                 var uuid = node.getOwningPlayerProfileId();
                 if (uuid == null) continue;
 
-                providers.put(uuid, () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(uuid));
+                addProvider(uuid);
             }
 
             moduleNodes.forEach(IStorageProvider::requestUpdate);
             updatePatterns();
         }
+    }
+
+    private void addProvider(UUID playerUUID) {
+        providers.put(playerUUID, () -> {
+            try {
+                return ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
+            } catch (NullPointerException e) {
+                return TransmutationOfflineAccessor.invokeForPlayer(playerUUID);
+            }
+        });
     }
 
     Set<IKnowledgeProvider> getProviders() {
