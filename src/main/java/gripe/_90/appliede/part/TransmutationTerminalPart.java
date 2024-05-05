@@ -6,13 +6,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
 import appeng.api.networking.IGrid;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
-import appeng.api.util.AEColor;
-import appeng.client.render.StaticItemColor;
 import appeng.items.parts.PartModels;
 import appeng.parts.PartModel;
 import appeng.parts.reporting.AbstractTerminalPart;
@@ -36,10 +33,6 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements I
 
     public TransmutationTerminalPart(IPartItem<?> partItem) {
         super(partItem);
-    }
-
-    public static void registerColour(RegisterColorHandlersEvent.Item event) {
-        event.register(new StaticItemColor(AEColor.TRANSPARENT), AppliedE.TRANSMUTATION_TERMINAL.get());
     }
 
     @Override

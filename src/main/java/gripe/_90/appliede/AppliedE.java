@@ -13,6 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -36,6 +38,8 @@ import appeng.api.parts.IPartItem;
 import appeng.api.parts.PartModels;
 import appeng.api.stacks.AEKeyTypes;
 import appeng.api.upgrades.Upgrades;
+import appeng.api.util.AEColor;
+import appeng.client.render.StaticItemColor;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
@@ -182,23 +186,7 @@ public final class AppliedE {
         });
 
         if (FMLEnvironment.dist.isClient()) {
-            bus.addListener(EMCRenderer::register);
-            bus.addListener(EMCSetStockAmountScreen::register);
-            bus.addListener(EMCExportBusPart::registerScreen);
-            bus.addListener(EMCImportBusPart::registerScreen);
-
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
-                InitScreens.register(
-                        EMCInterfaceMenu.TYPE,
-                        EMCInterfaceScreen<EMCInterfaceMenu>::new,
-                        "/screens/appliede/emc_interface.json");
-                InitScreens.register(
-                        TransmutationTerminalMenu.TYPE,
-                        TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
-                        "/screens/appliede/transmutation_terminal.json");
-            }));
-
-            bus.addListener(TransmutationTerminalPart::registerColour);
+            Client.setup(bus);
         }
     }
 
@@ -223,6 +211,29 @@ public final class AppliedE {
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
         PartModels.registerModels(PartModelsHelper.createModels(partClass));
         return new PartItem<>(new Item.Properties(), partClass, factory);
+    }
+
+    private static class Client {
+        private static void setup(IEventBus bus) {
+            bus.addListener(EMCRenderer::register);
+            bus.addListener(EMCSetStockAmountScreen::register);
+            bus.addListener(EMCExportBusPart::registerScreen);
+            bus.addListener(EMCImportBusPart::registerScreen);
+
+            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
+                InitScreens.register(
+                        EMCInterfaceMenu.TYPE,
+                        EMCInterfaceScreen<EMCInterfaceMenu>::new,
+                        "/screens/appliede/emc_interface.json");
+                InitScreens.register(
+                        TransmutationTerminalMenu.TYPE,
+                        TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
+                        "/screens/appliede/transmutation_terminal.json");
+            }));
+
+            bus.addListener((RegisterColorHandlersEvent.Item event) ->
+                    event.register(new StaticItemColor(AEColor.TRANSPARENT), AppliedE.TRANSMUTATION_TERMINAL.get()));
+        }
     }
 }
 // spotless:on
