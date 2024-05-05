@@ -3,5 +3,9 @@
   "required": true,
   "compatibilityLevel": "JAVA_17",
   "package": "gripe._90.appliede.mixin",
-  "mixins": ["P2PTunnelAttunementAccessor"]
+  "mixins": [
+    "P2PTunnelAttunementAccessor",
+    "TransmutationOfflineAccessor",
+    "TransmutationProxyImplMixin"
+  ]
 }
