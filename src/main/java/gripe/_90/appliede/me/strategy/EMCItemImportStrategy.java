@@ -39,7 +39,7 @@ public class EMCItemImportStrategy implements StackImportStrategy {
 
         var adjacentStorage = ExternalStorageFacade.of(itemHandler);
         var remaining = emcContext.getOperationsRemaining();
-        var emcStorage = emcContext.getEmcStorage();
+        var emc = emcContext.getEmcStorage();
 
         for (var i = 0; i < adjacentStorage.getSlots() && remaining > 0; i++) {
             var resource = adjacentStorage.getStackInSlot(i);
@@ -52,11 +52,11 @@ public class EMCItemImportStrategy implements StackImportStrategy {
                 continue;
             }
 
-            var amount = adjacentStorage.extract(item, remaining, Actionable.MODULATE, context.getActionSource());
+            var amount = adjacentStorage.extract(item, remaining, Actionable.SIMULATE, context.getActionSource());
 
             if (amount > 0) {
-                var inserted =
-                        emcStorage.insertItem(item, amount, Actionable.MODULATE, context.getActionSource(), false);
+                var inserted = emc.insertItem(item, amount, Actionable.MODULATE, context.getActionSource(), false);
+                adjacentStorage.extract(item, inserted, Actionable.MODULATE, context.getActionSource());
                 context.reduceOperationsRemaining(inserted);
                 remaining -= (int) inserted;
             }

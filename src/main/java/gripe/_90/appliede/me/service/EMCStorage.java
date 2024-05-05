@@ -135,6 +135,10 @@ public class EMCStorage implements MEStorage {
     }
 
     public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
+        if (service.getProviders().isEmpty()) {
+            return 0;
+        }
+
         if (!mayLearn && !service.knowsItem(what)) {
             return 0;
         }
