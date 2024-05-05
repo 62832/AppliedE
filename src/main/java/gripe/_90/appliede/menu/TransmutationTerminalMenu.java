@@ -73,7 +73,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                 var key = AEItemKey.of(stack);
 
                 if (!knowledge.knowsItem(key)) {
-                    learnedLabelTicks = 300;
+                    showLearned();
                 }
 
                 var emcStorage = knowledge.getStorage();
@@ -96,6 +96,11 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         }
 
         shiftToTransmute = transmute;
+    }
+
+    public void showLearned() {
+        learnedLabelTicks = 300;
+        sendAllDataToRemote();
     }
 
     @Override

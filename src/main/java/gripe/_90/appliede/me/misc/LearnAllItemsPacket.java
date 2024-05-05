@@ -42,10 +42,16 @@ public class LearnAllItemsPacket {
                                 return;
                             }
 
-                            storage.getInventory().extract(item, 1, Actionable.MODULATE, IActionSource.ofMachine(host));
-                            emcStorage.insertItem(item, 1, Actionable.MODULATE, IActionSource.ofPlayer(sender), true);
+                            var learned = emcStorage.learnNewItem(item, sender);
+                            var meStorage = storage.getInventory();
+                            meStorage.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));
+
+                            if (learned > 0) {
+                                menu.showLearned();
+                            }
                         });
             }
         });
+        context.get().setPacketHandled(true);
     }
 }

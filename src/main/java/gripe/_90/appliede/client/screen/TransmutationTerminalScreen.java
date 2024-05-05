@@ -63,7 +63,6 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
 
         if (!learned) {
             AppliedE.PACKET_HANDLER.sendToServer(new LearnAllItemsPacket());
-            menu.learnedLabelTicks = 300;
         }
     }
 }

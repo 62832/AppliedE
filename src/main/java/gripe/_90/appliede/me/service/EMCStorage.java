@@ -7,6 +7,7 @@ import java.util.Collections;
 import com.google.common.primitives.Ints;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
@@ -21,6 +22,7 @@ import appeng.core.stats.AeStats;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.key.EMCKey;
 
+import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public class EMCStorage implements MEStorage {
@@ -70,7 +72,7 @@ public class EMCStorage implements MEStorage {
                 provider.setEmc(provider.getEmc().add(quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO)));
             }
 
-            service.sync();
+            service.syncEmc();
         }
 
         return amount;
@@ -128,7 +130,7 @@ public class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE) {
-            service.sync();
+            service.syncEmc();
         }
 
         return extracted;
@@ -183,7 +185,15 @@ public class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE && mayLearn) {
-            service.getProviders().forEach(provider -> provider.addKnowledge(what.toStack()));
+            service.getProviders().forEach(provider -> {
+                var stack = what.toStack();
+                provider.addKnowledge(stack);
+                playerSource.ifPresent(player -> {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        provider.syncKnowledgeChange(serverPlayer, ItemInfo.fromStack(stack), true);
+                    }
+                });
+            });
         }
 
         return totalInserted;
@@ -230,6 +240,12 @@ public class EMCStorage implements MEStorage {
         }
 
         return totalExtracted;
+    }
+
+    public long learnNewItem(AEItemKey what, ServerPlayer player) {
+        return !service.knowsItem(what)
+                ? insertItem(what, 1, Actionable.MODULATE, IActionSource.ofPlayer(player), true)
+                : 0;
     }
 
     private long getAmountAfterPowerExpenditure(long maxAmount, IEnergySource source) {
