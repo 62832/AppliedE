@@ -1,5 +1,7 @@
 package gripe._90.appliede.menu;
 
+import java.util.Objects;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -20,6 +22,7 @@ import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
+import gripe._90.appliede.me.service.KnowledgeService;
 
 public class TransmutationTerminalMenu extends MEStorageMenu {
     public static final MenuType<TransmutationTerminalMenu> TYPE = MenuTypeBuilder.create(
@@ -57,7 +60,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         super.doAction(player, action, slot, id);
         var s = getSlot(slot);
 
-        if (s.equals(transmuteSlot)) {
+        if (s.equals(transmuteSlot) && !getCarried().isEmpty()) {
             var transmuted = transmuteItem(getCarried(), action == InventoryAction.SPLIT_OR_PLACE_SINGLE, player);
             var reduced = getCarried().copy();
             reduced.setCount(reduced.getCount() - (int) transmuted);
@@ -67,25 +70,33 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
     protected long transmuteItem(ItemStack stack, boolean singleItem, ServerPlayer player) {
         if (!stack.isEmpty()) {
-            var knowledge = host.getKnowledgeService();
+            var grid = host.getGrid();
+
+            if (grid == null) {
+                return 0;
+            }
+
+            var knowledge = grid.getService(KnowledgeService.class);
 
             if (knowledge != null) {
-                var key = AEItemKey.of(stack);
-                var newItem = (!knowledge.knowsItem(key));
+                if (!knowledge.isTrackingPlayer(player)) {
+                    return 0;
+                }
 
+                var key = AEItemKey.of(stack);
                 var emcStorage = knowledge.getStorage();
-                var inserted = emcStorage.insertItem(
+                var learned = emcStorage.learnNewItem(Objects.requireNonNull(key), player);
+
+                if (learned > 0) {
+                    showLearned();
+                }
+
+                return emcStorage.insertItem(
                         key,
                         singleItem ? 1 : stack.getCount(),
                         Actionable.MODULATE,
                         IActionSource.ofPlayer(player),
                         true);
-
-                if (inserted > 0 && newItem) {
-                    showLearned();
-                }
-
-                return inserted;
             }
         }
 

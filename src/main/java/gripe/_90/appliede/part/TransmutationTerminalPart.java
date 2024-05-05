@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
-import appeng.api.networking.storage.IStorageService;
+import appeng.api.networking.IGrid;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.util.AEColor;
@@ -19,7 +19,6 @@ import appeng.parts.reporting.AbstractTerminalPart;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
-import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class TransmutationTerminalPart extends AbstractTerminalPart implements ITransmutationTerminalHost {
@@ -56,16 +55,8 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements I
 
     @Nullable
     @Override
-    public KnowledgeService getKnowledgeService() {
-        var grid = getMainNode().getGrid();
-        return grid != null ? grid.getService(KnowledgeService.class) : null;
-    }
-
-    @Nullable
-    @Override
-    public IStorageService getStorageService() {
-        var grid = getMainNode().getGrid();
-        return grid != null ? grid.getStorageService() : null;
+    public IGrid getGrid() {
+        return getMainNode().getGrid();
     }
 
     @Override

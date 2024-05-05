@@ -9,6 +9,7 @@ import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 
+import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class LearnAllItemsPacket {
@@ -27,18 +28,26 @@ public class LearnAllItemsPacket {
             }
 
             var host = menu.getHost();
-            var storage = host.getStorageService();
-            var knowledge = host.getKnowledgeService();
+            var grid = host.getGrid();
 
-            if (storage != null && knowledge != null && knowledge.isTrackingPlayer(sender.getUUID())) {
-                var emcStorage = knowledge.getStorage();
+            if (grid == null) {
+                return;
+            }
+
+            var storage = grid.getStorageService();
+            var knowledge = grid.getService(KnowledgeService.class);
+
+            if (storage != null && knowledge != null && knowledge.isTrackingPlayer(sender)) {
+                var emc = knowledge.getStorage();
                 storage.getCachedInventory().keySet().stream()
-                        .filter(key -> key instanceof AEItemKey item && !knowledge.knowsItem(item))
+                        .filter(key -> key instanceof AEItemKey)
                         .map(AEItemKey.class::cast)
                         .forEach(item -> {
-                            var learned = emcStorage.learnNewItem(item, sender);
-                            var meStorage = storage.getInventory();
-                            meStorage.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));
+                            var learned = emc.learnNewItem(item, sender);
+                            emc.insertItem(item, learned, Actionable.MODULATE, IActionSource.ofPlayer(sender), true);
+
+                            var me = storage.getInventory();
+                            me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));
 
                             if (learned > 0) {
                                 menu.showLearned();

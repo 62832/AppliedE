@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
 import appeng.api.crafting.IPatternDetails;
@@ -96,6 +97,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return providers.values().stream().map(Supplier::get).collect(Collectors.toUnmodifiableSet());
     }
 
+    Supplier<IKnowledgeProvider> getProviderFor(Player player) {
+        return providers.get(player.getUUID());
+    }
+
     public EMCStorage getStorage() {
         return storage;
     }
@@ -146,7 +151,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return getProviders().stream().anyMatch(provider -> provider.hasKnowledge(item.toStack()));
     }
 
-    public boolean isTrackingPlayer(UUID uuid) {
+    public boolean isTrackingPlayer(Player player) {
+        var uuid = player.getUUID();
         return providers.containsKey(uuid) || tpeHandler.isPlayerInTrackedTeam(uuid);
     }
 

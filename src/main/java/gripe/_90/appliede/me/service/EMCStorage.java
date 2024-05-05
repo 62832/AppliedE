@@ -145,11 +145,9 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var playerSource = source.player();
+        var playerProvider = source.player().map(service::getProviderFor).orElse(null);
 
-        if (mayLearn
-                && playerSource.isPresent()
-                && !service.isTrackingPlayer(playerSource.get().getUUID())) {
+        if (mayLearn && source.player().isPresent() && playerProvider == null) {
             return 0;
         }
 
@@ -185,14 +183,15 @@ public class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE && mayLearn) {
-            service.getProviders().forEach(provider -> {
-                var stack = what.toStack();
-                provider.addKnowledge(stack);
-                playerSource.ifPresent(player -> {
+            source.player().ifPresent(player -> {
+                if (playerProvider != null) {
+                    var stack = what.toStack();
+                    playerProvider.get().addKnowledge(stack);
+
                     if (player instanceof ServerPlayer serverPlayer) {
-                        provider.syncKnowledgeChange(serverPlayer, ItemInfo.fromStack(stack), true);
+                        playerProvider.get().syncKnowledgeChange(serverPlayer, ItemInfo.fromStack(stack), true);
                     }
-                });
+                }
             });
         }
 
@@ -243,8 +242,8 @@ public class EMCStorage implements MEStorage {
     }
 
     public long learnNewItem(AEItemKey what, ServerPlayer player) {
-        return !service.knowsItem(what)
-                ? insertItem(what, 1, Actionable.MODULATE, IActionSource.ofPlayer(player), true)
+        return !service.getProviderFor(player).get().hasKnowledge(what.toStack())
+                ? insertItem(what, 1, Actionable.SIMULATE, IActionSource.ofPlayer(player), true)
                 : 0;
     }
 
