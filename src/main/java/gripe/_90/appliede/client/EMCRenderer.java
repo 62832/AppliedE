@@ -26,6 +26,8 @@ import gripe._90.appliede.me.key.EMCKeyType;
 
 @SuppressWarnings("unused")
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
+    public static final EMCRenderer INSTANCE = new EMCRenderer();
+
     private final Supplier<TextureAtlasSprite> sprite = () -> Minecraft.getInstance()
             .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
             .apply(AppliedE.id("item/dummy_emc_item"));

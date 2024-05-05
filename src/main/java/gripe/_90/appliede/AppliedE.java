@@ -32,6 +32,7 @@ import net.minecraftforge.registries.RegistryObject;
 import appeng.api.behaviors.ContainerItemStrategy;
 import appeng.api.behaviors.StackExportStrategy;
 import appeng.api.behaviors.StackImportStrategy;
+import appeng.api.client.AEKeyRendering;
 import appeng.api.networking.GridServices;
 import appeng.api.parts.IPart;
 import appeng.api.parts.IPartItem;
@@ -39,6 +40,7 @@ import appeng.api.parts.PartModels;
 import appeng.api.stacks.AEKeyTypes;
 import appeng.api.upgrades.Upgrades;
 import appeng.api.util.AEColor;
+import appeng.client.gui.implementations.IOBusScreen;
 import appeng.client.render.StaticItemColor;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
@@ -215,21 +217,23 @@ public final class AppliedE {
 
     private static class Client {
         private static void setup(IEventBus bus) {
-            bus.addListener(EMCRenderer::register);
-            bus.addListener(EMCSetStockAmountScreen::register);
-            bus.addListener(EMCExportBusPart::registerScreen);
-            bus.addListener(EMCImportBusPart::registerScreen);
-
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
-                InitScreens.register(
-                        EMCInterfaceMenu.TYPE,
-                        EMCInterfaceScreen<EMCInterfaceMenu>::new,
-                        "/screens/appliede/emc_interface.json");
-                InitScreens.register(
-                        TransmutationTerminalMenu.TYPE,
-                        TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
-                        "/screens/appliede/transmutation_terminal.json");
-            }));
+            bus.addListener((FMLClientSetupEvent event) -> {
+                event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, EMCRenderer.INSTANCE));
+                event.enqueueWork(() -> {
+                    InitScreens.register(
+                            EMCInterfaceMenu.TYPE,
+                            EMCInterfaceScreen<EMCInterfaceMenu>::new,
+                            "/screens/appliede/emc_interface.json");
+                    InitScreens.register(
+                            EMCSetStockAmountMenu.TYPE, EMCSetStockAmountScreen::new, "/screens/set_stock_amount.json");
+                    InitScreens.register(EMCExportBusPart.MENU, IOBusScreen::new, "/screens/export_bus.json");
+                    InitScreens.register(EMCImportBusPart.MENU, IOBusScreen::new, "/screens/import_bus.json");
+                    InitScreens.register(
+                            TransmutationTerminalMenu.TYPE,
+                            TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
+                            "/screens/appliede/transmutation_terminal.json");
+                });
+            });
 
             bus.addListener((RegisterColorHandlersEvent.Item event) ->
                     event.register(new StaticItemColor(AEColor.TRANSPARENT), AppliedE.TRANSMUTATION_TERMINAL.get()));

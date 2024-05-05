@@ -3,7 +3,6 @@ package gripe._90.appliede.part;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.api.behaviors.StackImportStrategy;
 import appeng.api.networking.IGrid;
@@ -11,11 +10,9 @@ import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEItemKey;
-import appeng.client.gui.implementations.IOBusScreen;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
-import appeng.init.client.InitScreens;
 import appeng.items.parts.PartModels;
 import appeng.menu.implementations.IOBusMenu;
 import appeng.menu.implementations.MenuTypeBuilder;
@@ -48,10 +45,6 @@ public class EMCImportBusPart extends IOBusPart {
 
     public EMCImportBusPart(IPartItem<?> partItem) {
         super(TickRates.ImportBus, AEItemKey.filter(), partItem);
-    }
-
-    public static void registerScreen(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> InitScreens.register(MENU, IOBusScreen::new, "/screens/import_bus.json"));
     }
 
     @Override

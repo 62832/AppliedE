@@ -2,7 +2,6 @@ package gripe._90.appliede.client.screen;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.client.gui.AEBaseScreen;
 import appeng.client.gui.NumberEntryType;
@@ -10,7 +9,6 @@ import appeng.client.gui.implementations.AESubScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.NumberEntryWidget;
 import appeng.core.localization.GuiText;
-import appeng.init.client.InitScreens;
 
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
 
@@ -31,11 +29,6 @@ public class EMCSetStockAmountScreen extends AEBaseScreen<EMCSetStockAmountMenu>
         amount.setMinValue(0);
         amount.setHideValidationIcon(true);
         amount.setOnConfirm(this::confirm);
-    }
-
-    public static void register(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> InitScreens.register(
-                EMCSetStockAmountMenu.TYPE, EMCSetStockAmountScreen::new, "/screens/set_stock_amount.json"));
     }
 
     @Override
