@@ -11,8 +11,6 @@ import appeng.api.stacks.AEItemKey;
 
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
-import moze_intel.projecte.api.proxy.IEMCProxy;
-
 public class LearnAllItemsPacket {
     public void encode(FriendlyByteBuf ignored) {}
 
@@ -38,10 +36,6 @@ public class LearnAllItemsPacket {
                         .filter(key -> key instanceof AEItemKey item && !knowledge.knowsItem(item))
                         .map(AEItemKey.class::cast)
                         .forEach(item -> {
-                            if (!IEMCProxy.INSTANCE.hasValue(item.toStack())) {
-                                return;
-                            }
-
                             var learned = emcStorage.learnNewItem(item, sender);
                             var meStorage = storage.getInventory();
                             meStorage.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));

@@ -141,7 +141,7 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        if (!mayLearn && !service.knowsItem(what)) {
+        if (!mayLearn && !service.knowsItem(what) || !IEMCProxy.INSTANCE.hasValue(what.toStack())) {
             return 0;
         }
 

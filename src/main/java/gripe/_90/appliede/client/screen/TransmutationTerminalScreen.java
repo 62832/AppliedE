@@ -54,7 +54,7 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
         setTextHidden("learned", menu.learnedLabelTicks <= 0);
 
         if (menu.learnedLabelTicks > 0) {
-            menu.learnedLabelTicks--;
+            menu.decrementLearnedTicks();
         }
     }
 

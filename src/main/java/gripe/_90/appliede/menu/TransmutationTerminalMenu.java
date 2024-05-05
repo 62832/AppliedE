@@ -21,8 +21,6 @@ import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
 
-import moze_intel.projecte.api.proxy.IEMCProxy;
-
 public class TransmutationTerminalMenu extends MEStorageMenu {
     public static final MenuType<TransmutationTerminalMenu> TYPE = MenuTypeBuilder.create(
                     TransmutationTerminalMenu::new, ITransmutationTerminalHost.class)
@@ -30,6 +28,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
     protected static final SlotSemantic TRANSMUTE = SlotSemantics.register("APPLIEDE_TRANSMUTE", false);
 
     private static final String ACTION_SET_SHIFT = "setShiftDestination";
+    private static final String ACTION_HIDE_LEARNED = "hideLearnedText";
 
     private final ITransmutationTerminalHost host;
     private final Slot transmuteSlot = new FakeSlot(InternalInventory.empty(), 0);
@@ -49,6 +48,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         super(menuType, id, ip, host, bindInventory);
         this.host = host;
         registerClientAction(ACTION_SET_SHIFT, Boolean.class, host::setShiftToTransmute);
+        registerClientAction(ACTION_HIDE_LEARNED, () -> learnedLabelTicks--);
         addSlot(transmuteSlot, TRANSMUTE);
     }
 
@@ -66,23 +66,26 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
     }
 
     protected long transmuteItem(ItemStack stack, boolean singleItem, ServerPlayer player) {
-        if (!stack.isEmpty() && IEMCProxy.INSTANCE.hasValue(stack)) {
+        if (!stack.isEmpty()) {
             var knowledge = host.getKnowledgeService();
 
             if (knowledge != null) {
                 var key = AEItemKey.of(stack);
-
-                if (!knowledge.knowsItem(key)) {
-                    showLearned();
-                }
+                var newItem = (!knowledge.knowsItem(key));
 
                 var emcStorage = knowledge.getStorage();
-                return emcStorage.insertItem(
+                var inserted = emcStorage.insertItem(
                         key,
                         singleItem ? 1 : stack.getCount(),
                         Actionable.MODULATE,
                         IActionSource.ofPlayer(player),
                         true);
+
+                if (inserted > 0 && newItem) {
+                    showLearned();
+                }
+
+                return inserted;
             }
         }
 
@@ -100,17 +103,19 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
     public void showLearned() {
         learnedLabelTicks = 300;
-        sendAllDataToRemote();
+        broadcastChanges();
+    }
+
+    public void decrementLearnedTicks() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_HIDE_LEARNED);
+        }
     }
 
     @Override
     public ItemStack quickMoveStack(Player player, int idx) {
         if (player instanceof ServerPlayer serverPlayer && shiftToTransmute) {
             var stack = slots.get(idx).getItem();
-
-            if (!IEMCProxy.INSTANCE.hasValue(stack)) {
-                return super.quickMoveStack(player, idx);
-            }
 
             var remaining = stack.copy();
             remaining.setCount(remaining.getCount() - (int) transmuteItem(stack, false, serverPlayer));
