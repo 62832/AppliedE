@@ -329,10 +329,29 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             }
 
             var grid = mainNode.getGrid();
-            return grid == null
-                    || grid.getService(KnowledgeService.class).knowsItem(item)
+
+            if (grid == null) {
+                // client-side, allow everything in order for items to actually display
+                return true;
+            }
+
+            var node = mainNode.getNode();
+
+            if (node == null) {
+                return false;
+            }
+
+            var uuid = node.getOwningPlayerProfileId();
+
+            if (uuid == null) {
+                return false;
+            }
+
+            var knowledge = grid.getService(KnowledgeService.class);
+            return knowledge.knowsItem(item)
                     || (upgrades.isInstalled(AppliedE.LEARNING_CARD.get())
-                            && IEMCProxy.INSTANCE.hasValue(item.toStack()));
+                            && IEMCProxy.INSTANCE.hasValue(item.toStack())
+                            && knowledge.getProviderFor(uuid) != null);
         }
     }
 }

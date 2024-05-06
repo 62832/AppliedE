@@ -108,7 +108,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return providers.values().stream().map(Supplier::get).collect(Collectors.toUnmodifiableSet());
     }
 
-    Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+    public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
         return providers.get(uuid);
     }
 
