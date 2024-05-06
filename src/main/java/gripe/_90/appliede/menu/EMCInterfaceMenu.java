@@ -5,29 +5,24 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 
 import appeng.api.stacks.AEItemKey;
-import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.InterfaceMenu;
 import appeng.menu.implementations.MenuTypeBuilder;
+import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
-public class EMCInterfaceMenu extends AEBaseMenu {
+public class EMCInterfaceMenu extends UpgradeableMenu<EMCInterfaceLogicHost> {
     private static final String ACTION_OPEN_SET_AMOUNT = InterfaceMenu.ACTION_OPEN_SET_AMOUNT;
 
     public static final MenuType<EMCInterfaceMenu> TYPE = MenuTypeBuilder.create(
                     EMCInterfaceMenu::new, EMCInterfaceLogicHost.class)
             .build("emc_interface");
 
-    private final EMCInterfaceLogicHost host;
-
     public EMCInterfaceMenu(MenuType<?> menuType, int id, Inventory playerInventory, EMCInterfaceLogicHost host) {
         super(menuType, id, playerInventory, host);
-        this.host = host;
-        createPlayerInventorySlots(playerInventory);
-
         registerClientAction(ACTION_OPEN_SET_AMOUNT, Integer.class, this::openSetAmountMenu);
 
         var logic = host.getInterfaceLogic();
@@ -47,7 +42,7 @@ public class EMCInterfaceMenu extends AEBaseMenu {
         if (isClientSide()) {
             sendClientAction(ACTION_OPEN_SET_AMOUNT, configSlot);
         } else {
-            var stack = host.getConfig().getStack(configSlot);
+            var stack = getHost().getConfig().getStack(configSlot);
 
             if (stack != null && stack.what() instanceof AEItemKey item) {
                 EMCSetStockAmountMenu.open(

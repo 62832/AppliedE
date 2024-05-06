@@ -125,6 +125,7 @@ public final class AppliedE {
     public static final RegistryObject<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
 
     public static final RegistryObject<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
+    public static final RegistryObject<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
     static {
         ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
@@ -145,6 +146,7 @@ public final class AppliedE {
                     output.accept(EMC_EXPORT_BUS.get());
                     output.accept(EMC_IMPORT_BUS.get());
                     output.accept(TRANSMUTATION_TERMINAL.get());
+                    output.accept(LEARNING_CARD.get());
                 })
                 .build());
     }
@@ -178,6 +180,11 @@ public final class AppliedE {
             Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS.get(), 5, busesGroup);
             Upgrades.add(AEItems.SPEED_CARD, EMC_IMPORT_BUS.get(), 4, busesGroup);
             Upgrades.add(AEItems.INVERTER_CARD, EMC_IMPORT_BUS.get(), 1, busesGroup);
+
+            var emcInterfaceGroup = EMC_INTERFACE.get().getDescriptionId();
+            Upgrades.add(LEARNING_CARD.get(), EMC_INTERFACE.get(), 1, emcInterfaceGroup);
+            Upgrades.add(LEARNING_CARD.get(), CABLE_EMC_INTERFACE.get(), 1, emcInterfaceGroup);
+            Upgrades.add(LEARNING_CARD.get(), EMC_IMPORT_BUS.get(), 1);
 
             registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
             registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);

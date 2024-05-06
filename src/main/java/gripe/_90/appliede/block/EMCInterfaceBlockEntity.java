@@ -37,7 +37,7 @@ public class EMCInterfaceBlockEntity extends AENetworkBlockEntity implements EMC
     }
 
     protected EMCInterfaceLogic createLogic() {
-        return new EMCInterfaceLogic(getMainNode(), this);
+        return new EMCInterfaceLogic(getMainNode(), this, getItemFromBlockEntity());
     }
 
     @Override

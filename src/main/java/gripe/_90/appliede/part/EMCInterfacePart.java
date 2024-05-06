@@ -48,7 +48,7 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     }
 
     protected EMCInterfaceLogic createLogic() {
-        return new EMCInterfaceLogic(getMainNode(), this);
+        return new EMCInterfaceLogic(getMainNode(), this, getPartItem().asItem());
     }
 
     @Override

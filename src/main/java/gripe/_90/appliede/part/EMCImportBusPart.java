@@ -63,7 +63,8 @@ public class EMCImportBusPart extends IOBusPart {
 
         var context = new EMCTransferContext(
                 grid.getService(KnowledgeService.class).getStorage(), source, getFilter(), getOperationsPerTick());
-        context.setInverted(this.isUpgradedWith(AEItems.INVERTER_CARD));
+        context.setInverted(isUpgradedWith(AEItems.INVERTER_CARD));
+        context.setCanLearn(isUpgradedWith(AppliedE.LEARNING_CARD.get()));
         importStrategy.transfer(context);
         return context.hasDoneWork();
     }

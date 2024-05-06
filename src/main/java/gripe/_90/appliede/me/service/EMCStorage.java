@@ -3,14 +3,17 @@ package gripe._90.appliede.me.service;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 import com.google.common.primitives.Ints;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
+import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
@@ -23,6 +26,7 @@ import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.key.EMCKey;
 
 import moze_intel.projecte.api.ItemInfo;
+import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public class EMCStorage implements MEStorage {
@@ -146,9 +150,21 @@ public class EMCStorage implements MEStorage {
         }
 
         var playerProvider = source.player().map(service::getProviderFor).orElse(null);
+        var machineOwnerProvider = source.machine()
+                .map(host -> {
+                    var node = host.getActionableNode();
+                    return node != null ? service.getProviderFor(node.getOwningPlayerProfileId()) : null;
+                })
+                .orElse(null);
 
-        if (mayLearn && source.player().isPresent() && playerProvider == null) {
-            return 0;
+        if (mayLearn) {
+            if (source.player().isPresent() && playerProvider == null) {
+                return 0;
+            }
+
+            if (source.machine().isPresent() && machineOwnerProvider == null) {
+                return 0;
+            }
         }
 
         var grid = service.getGrid();
@@ -185,12 +201,15 @@ public class EMCStorage implements MEStorage {
         if (mode == Actionable.MODULATE && mayLearn) {
             source.player().ifPresent(player -> {
                 if (playerProvider != null) {
-                    var stack = what.toStack();
-                    playerProvider.get().addKnowledge(stack);
-
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        playerProvider.get().syncKnowledgeChange(serverPlayer, ItemInfo.fromStack(stack), true);
-                    }
+                    addKnowledge(what, playerProvider.get(), player);
+                }
+            });
+            source.machine().ifPresent(host -> {
+                if (machineOwnerProvider != null) {
+                    var node = Objects.requireNonNull(host.getActionableNode());
+                    var id = node.getOwningPlayerId();
+                    var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), id);
+                    addKnowledge(what, machineOwnerProvider.get(), player);
                 }
             });
         }
@@ -245,6 +264,15 @@ public class EMCStorage implements MEStorage {
         return !service.getProviderFor(player).get().hasKnowledge(what.toStack())
                 ? insertItem(what, 1, Actionable.SIMULATE, IActionSource.ofPlayer(player), true)
                 : 0;
+    }
+
+    private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
+        var stack = what.toStack();
+        provider.addKnowledge(stack);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            provider.syncKnowledgeChange(serverPlayer, ItemInfo.fromStack(stack), true);
+        }
     }
 
     private long getAmountAfterPowerExpenditure(long maxAmount, IEnergySource source) {

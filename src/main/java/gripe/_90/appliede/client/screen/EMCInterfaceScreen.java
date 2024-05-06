@@ -7,8 +7,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-import appeng.client.gui.AEBaseScreen;
 import appeng.client.gui.Icon;
+import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.IconButton;
 import appeng.core.localization.ButtonToolTips;
@@ -16,7 +16,7 @@ import appeng.menu.SlotSemantics;
 
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 
-public class EMCInterfaceScreen<M extends EMCInterfaceMenu> extends AEBaseScreen<M> {
+public class EMCInterfaceScreen<M extends EMCInterfaceMenu> extends UpgradeableScreen<M> {
     private final List<Button> amountButtons = new ArrayList<>();
 
     public EMCInterfaceScreen(M menu, Inventory playerInventory, Component title, ScreenStyle style) {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -26,20 +27,28 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.storage.AEKeyFilter;
 import appeng.api.storage.MEStorage;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.capabilities.Capabilities;
 import appeng.helpers.externalstorage.GenericStackItemStorage;
 import appeng.me.storage.DelegatingMEInventory;
 import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
 
-public class EMCInterfaceLogic implements IActionHost, IGridTickable {
+import moze_intel.projecte.api.proxy.IEMCProxy;
+
+public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeableObject {
     protected final EMCInterfaceLogicHost host;
     protected final IManagedGridNode mainNode;
 
     private final ConfigInventory config;
     private final ConfigInventory storage;
+    private final IUpgradeInventory upgrades;
+
     private final MEStorage localInvHandler;
     private final GenericStack[] plannedWork;
     private final IActionSource source = IActionSource.ofMachine(this);
@@ -47,12 +56,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     private final LazyOptional<IItemHandler> storageHolder;
     private final LazyOptional<MEStorage> localInvHolder;
 
-    public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host) {
-        this(node, host, 9);
+    public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
+        this(node, host, is, 9);
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, int slots) {
+    public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is, int slots) {
         this.host = host;
         mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL)
                 .addService(IGridTickable.class, this)
@@ -60,6 +69,8 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
         storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
+        upgrades = UpgradeInventories.forMachine(is, 1, this::onStorageChanged);
+
         localInvHandler = new DelegatingMEInventory(storage);
         plannedWork = new GenericStack[slots];
 
@@ -78,9 +89,15 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
         return storage;
     }
 
+    @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
+    }
+
     public void readFromNBT(CompoundTag tag) {
         config.readFromChildTag(tag, "config");
         storage.readFromChildTag(tag, "storage");
+        upgrades.readFromNBT(tag, "upgrades");
 
         updatePlan();
         notifyNeighbours();
@@ -89,6 +106,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
     public void writeToNBT(CompoundTag tag) {
         config.writeToChildTag(tag, "config");
         storage.writeToChildTag(tag, "storage");
+        upgrades.writeToNBT(tag, "upgrades");
     }
 
     @Nullable
@@ -189,12 +207,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             return false;
         }
 
-        var knowledge = grid.getService(KnowledgeService.class);
-
-        if (!knowledge.knowsItem(item)) {
-            return false;
-        }
-
         if (amount < 0) {
             amount = -amount;
             var inSlot = storage.getStack(slot);
@@ -205,7 +217,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
 
             var depositedItems = grid.getService(KnowledgeService.class)
                     .getStorage()
-                    .insertItem(item, amount, Actionable.MODULATE, source, false);
+                    .insertItem(
+                            item,
+                            amount,
+                            Actionable.MODULATE,
+                            source,
+                            upgrades.isInstalled(AppliedE.LEARNING_CARD.get()));
 
             if (depositedItems > 0) {
                 storage.extract(slot, what, depositedItems, Actionable.MODULATE);
@@ -281,6 +298,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
                                 host.getBlockEntity().getBlockPos());
             }
         }
+
+        for (var is : this.upgrades) {
+            if (!is.isEmpty()) {
+                drops.add(is);
+            }
+        }
     }
 
     public <T> LazyOptional<T> getCapability(Capability<T> cap) {
@@ -306,7 +329,10 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable {
             }
 
             var grid = mainNode.getGrid();
-            return grid == null || grid.getService(KnowledgeService.class).knowsItem(item);
+            return grid == null
+                    || grid.getService(KnowledgeService.class).knowsItem(item)
+                    || (upgrades.isInstalled(AppliedE.LEARNING_CARD.get())
+                            && IEMCProxy.INSTANCE.hasValue(item.toStack()));
         }
     }
 }

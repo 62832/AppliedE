@@ -22,6 +22,7 @@ public class EMCTransferContext implements StackTransferContext {
 
     private int operationsRemaining;
     private boolean isInverted;
+    private boolean canLearn;
 
     public EMCTransferContext(
             EMCStorage emcStorage, IActionSource actionSource, IPartitionList filter, int operationsRemaining) {
@@ -95,6 +96,14 @@ public class EMCTransferContext implements StackTransferContext {
     @Override
     public boolean isInverted() {
         return isInverted;
+    }
+
+    public void setCanLearn(boolean learn) {
+        canLearn = learn;
+    }
+
+    public boolean canLearn() {
+        return canLearn;
     }
 
     @Override

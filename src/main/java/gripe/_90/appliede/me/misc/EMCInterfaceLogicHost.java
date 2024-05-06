@@ -6,6 +6,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.storage.ISubMenuHost;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
 import appeng.helpers.IConfigInvHost;
 import appeng.helpers.externalstorage.GenericStackInv;
 import appeng.menu.ISubMenu;
@@ -14,7 +16,7 @@ import appeng.menu.locator.MenuLocator;
 
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 
-public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost {
+public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUpgradeableObject {
     IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {
         @Override
         public void onSaveChanges(EMCInterfaceLogicHost host, IGridNode node) {
@@ -47,6 +49,11 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost {
 
     default GenericStackInv getStorage() {
         return getInterfaceLogic().getStorage();
+    }
+
+    @Override
+    default IUpgradeInventory getUpgrades() {
+        return getInterfaceLogic().getUpgrades();
     }
 
     default void openMenu(Player player, MenuLocator locator) {
