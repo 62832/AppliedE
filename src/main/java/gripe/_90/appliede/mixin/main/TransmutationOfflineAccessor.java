@@ -1,4 +1,4 @@
-package gripe._90.appliede.mixin;
+package gripe._90.appliede.mixin.main;
 
 import java.util.UUID;
 

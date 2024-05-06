@@ -3,5 +3,17 @@
   "required": true,
   "compatibilityLevel": "JAVA_17",
   "package": "gripe._90.appliede.mixin",
-  "mixins": ["P2PTunnelAttunementAccessor", "TransmutationOfflineAccessor"]
+  "refmap": "appliede.refmap.json",
+  "plugin": "gripe._90.appliede.mixin.Plugin",
+  "mixins": [
+    "aecapfix.EMCInterfacePartMixin",
+    "main.P2PTunnelAttunementAccessor",
+    "main.TransmutationOfflineAccessor",
+    "tooltip.BasePacketAccessor",
+    "tooltip.GridInventoryEntryMixin",
+    "tooltip.MEInventoryUpdatePacketAccessor",
+    "tooltip.MEInventoryUpdatePacketMixin",
+    "tooltip.MEStorageMenuMixin"
+  ],
+  "client": ["tooltip.MEStorageScreenMixin", "tooltip.RepoMixin"]
 }

@@ -15,14 +15,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
@@ -71,7 +68,6 @@ import gripe._90.appliede.menu.TransmutationTerminalMenu;
 import gripe._90.appliede.part.EMCExportBusPart;
 import gripe._90.appliede.part.EMCImportBusPart;
 import gripe._90.appliede.part.EMCInterfacePart;
-import gripe._90.appliede.part.EMCInterfacePartAECF;
 import gripe._90.appliede.part.EMCModulePart;
 import gripe._90.appliede.part.TransmutationTerminalPart;
 
@@ -110,9 +106,7 @@ public final class AppliedE {
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> isModLoaded("aecapfix")
-            ? part(EMCInterfacePartAECF.class, EMCInterfacePartAECF::new)
-            : part(EMCInterfacePart.class, EMCInterfacePart::new));
+    public static final RegistryObject<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
 
     @SuppressWarnings("DataFlowIssue")
     public static final RegistryObject<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
@@ -201,12 +195,6 @@ public final class AppliedE {
 
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MODID, path);
-    }
-
-    public static boolean isModLoaded(String modId) {
-        return ModList.get() != null
-                ? ModList.get().isLoaded(modId)
-                : LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(modId::equals);
     }
 
     public static long clampedLong(BigInteger toClamp) {

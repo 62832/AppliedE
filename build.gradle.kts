@@ -61,7 +61,6 @@ minecraft {
 mixin {
     add(sourceSets.main.get(), "$modId.refmap.json")
     config("$modId.mixins.json")
-    config("deargodwhy.mixins.json")
 }
 
 dependencies {
