@@ -69,7 +69,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
         storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
-        upgrades = UpgradeInventories.forMachine(is, 1, this::onStorageChanged);
+        upgrades = UpgradeInventories.forMachine(is, 1, host::saveChanges);
 
         localInvHandler = new DelegatingMEInventory(storage);
         plannedWork = new GenericStack[slots];
