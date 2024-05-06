@@ -7,7 +7,8 @@ import java.util.function.Supplier;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.fml.ModList;
+
+import gripe._90.appliede.integration.Addons;
 
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
@@ -42,7 +43,7 @@ class TeamProjectEHandler {
         private Object handler;
 
         Proxy() {
-            if (ModList.get().isLoaded("teamprojecte")) {
+            if (Addons.TEAMPE.isLoaded()) {
                 handler = new TeamProjectEHandler();
             }
         }

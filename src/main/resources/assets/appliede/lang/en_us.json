@@ -7,6 +7,8 @@
   "item.appliede.emc_import_bus": "ME Transmutation Import Bus",
   "item.appliede.learning_card": "Alchemical Mastery Card",
   "item.appliede.transmutation_terminal": "ME Transmutation Terminal",
+  "item.appliede.wireless_transmutation_terminal": "Wireless Transmutation Terminal",
+  "item.appliede.dummy_emc_item": "Dummy EMC Item",
   "item.appliede.transmutation_pattern": "Transmutation Pattern",
   "gui.appliede.terminal": "Transmutation Terminal",
   "gui.appliede.are_you_sure": "Are you sure?",
@@ -19,5 +21,6 @@
   "key.appliede.emc": "EMC",
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "Transmutable from EMC (Shift+Click/Scroll)",
-  "tooltip.appliede.owner": "Owner: %s"
+  "tooltip.appliede.owner": "Owner: %s",
+  "tooltip.appliede.not_installed.ae2wtlib": "AE2WTLib not installed."
 }

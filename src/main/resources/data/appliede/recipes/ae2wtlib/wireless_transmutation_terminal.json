@@ -1,0 +1,31 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ae2wtlib"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": ["R", "T", "C"],
+        "key": {
+          "R": {
+            "item": "ae2:wireless_receiver"
+          },
+          "T": {
+            "item": "appliede:transmutation_terminal"
+          },
+          "C": {
+            "item": "ae2:dense_energy_cell"
+          }
+        },
+        "result": {
+          "item": "appliede:wireless_transmutation_terminal"
+        }
+      }
+    }
+  ]
+}

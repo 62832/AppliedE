@@ -1,0 +1,24 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ae2wtlib"
+        }
+      ],
+      "recipe": {
+        "type": "ae2wtlib:combine",
+        "terminalA": {
+          "item": "ae2:wireless_crafting_terminal"
+        },
+        "terminalB": {
+          "item": "appliede:wireless_transmutation_terminal"
+        },
+        "terminalAName": "crafting",
+        "terminalBName": "transmutation"
+      }
+    }
+  ]
+}

@@ -54,6 +54,9 @@ import gripe._90.appliede.client.EMCRenderer;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
+import gripe._90.appliede.integration.Addons;
+import gripe._90.appliede.integration.DummyIntegrationItem;
+import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.misc.LearnAllItemsPacket;
@@ -121,6 +124,10 @@ public final class AppliedE {
     public static final RegistryObject<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
     public static final RegistryObject<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
+    public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> Addons.AE2WTLIB.isLoaded()
+            ? AE2WTIntegration.createWirelessTerminalItem()
+            : new DummyIntegrationItem(new Item.Properties().stacksTo(1), Addons.AE2WTLIB));
+
     static {
         ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
 
@@ -129,6 +136,10 @@ public final class AppliedE {
         MENU_TYPES.register("emc_export_bus", () -> EMCExportBusPart.MENU);
         MENU_TYPES.register("emc_import_bus", () -> EMCImportBusPart.MENU);
         MENU_TYPES.register("transmutation_terminal", () -> TransmutationTerminalMenu.TYPE);
+
+        if (Addons.AE2WTLIB.isLoaded()) {
+            MENU_TYPES.register("wireless_transmutation_terminal", AE2WTIntegration::getWirelessTerminalMenu);
+        }
 
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
@@ -141,6 +152,11 @@ public final class AppliedE {
                     output.accept(EMC_IMPORT_BUS.get());
                     output.accept(TRANSMUTATION_TERMINAL.get());
                     output.accept(LEARNING_CARD.get());
+                    output.accept(WIRELESS_TRANSMUTATION_TERMINAL.get());
+
+                    if (Addons.AE2WTLIB.isLoaded()) {
+                        output.accept(AE2WTIntegration.getChargedTerminal());
+                    }
                 })
                 .build());
     }
@@ -188,6 +204,10 @@ public final class AppliedE {
             registerEMC(AEParts.CABLE_ANCHOR, 32);
         });
 
+        if (Addons.AE2WTLIB.isLoaded()) {
+            bus.addListener(AE2WTIntegration::addTerminalToAE2WTLibTab);
+        }
+
         if (FMLEnvironment.dist.isClient()) {
             Client.setup(bus);
         }
@@ -227,6 +247,10 @@ public final class AppliedE {
                             TransmutationTerminalMenu.TYPE,
                             TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
                             "/screens/appliede/transmutation_terminal.json");
+
+                    if (Addons.AE2WTLIB.isLoaded()) {
+                        AE2WTIntegration.Client.initScreen();
+                    }
                 });
             });
 

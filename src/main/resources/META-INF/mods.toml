@@ -29,6 +29,22 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies]]
+modId = "ae2wtlib"
+type = "optional"
+versionRange = "[15,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies]]
 modId = "teamprojecte"
 type = "optional"
 versionRange = "[1.1.3,)"
+ordering = "AFTER"
+side = "SERVER"
+
+[[dependencies]]
+modId = "aecapfix"
+type = "optional"
+versionRange = "[0.8,)"
+ordering = "AFTER"
+side = "SERVER"

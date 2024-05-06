@@ -6,6 +6,7 @@
   "refmap": "appliede.refmap.json",
   "plugin": "gripe._90.appliede.mixin.Plugin",
   "mixins": [
+    "ae2wtlib.AE2wtlibMixin",
     "aecapfix.EMCInterfacePartMixin",
     "main.P2PTunnelAttunementAccessor",
     "main.TransmutationOfflineAccessor",

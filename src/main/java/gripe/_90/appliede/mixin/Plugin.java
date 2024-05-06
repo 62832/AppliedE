@@ -7,16 +7,20 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import gripe._90.appliede.integration.Addons;
 
 public class Plugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return !mixinClassName.contains("aecapfix")
-                || LoadingModList.get().getMods().stream()
-                        .map(ModInfo::getModId)
-                        .anyMatch("aecapfix"::equals);
+        if (mixinClassName.contains(Addons.AE2WTLIB.getModId())) {
+            return Addons.AE2WTLIB.isLoaded();
+        }
+
+        if (mixinClassName.contains(Addons.AECAPFIX.getModId())) {
+            return Addons.AECAPFIX.isLoaded();
+        }
+
+        return true;
     }
 
     @Override

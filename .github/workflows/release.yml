@@ -44,3 +44,6 @@ jobs:
           dependencies: |
             ae2(required){curseforge:223794}{modrinth:XxWD5pD3}
             projecte(required){curseforge:226410}
+            ae2wtlib(optional){curseforge:459929}{modrinth:pNabrMMw}
+            teamprojecte(optional){curseforge:689273}
+            aecapfix(optional){curseforge:914685}{modrinth:LkfFGNnA}

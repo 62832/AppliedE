@@ -329,16 +329,11 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             }
 
             var grid = mainNode.getGrid();
-
-            if (grid == null) {
-                // client-side, allow everything in order for items to actually display
-                return true;
-            }
-
             var node = mainNode.getNode();
 
-            if (node == null) {
-                return false;
+            if (grid == null || node == null) {
+                // client-side, allow everything in order for items to actually display
+                return true;
             }
 
             var uuid = node.getOwningPlayerProfileId();

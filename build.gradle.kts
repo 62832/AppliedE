@@ -34,6 +34,23 @@ repositories {
             includeGroup("curse.maven")
         }
     }
+
+    maven {
+        name = "Shedaniel"
+        url = uri("https://maven.shedaniel.me/")
+        content {
+            includeGroup("me.shedaniel.cloth")
+            includeGroup("dev.architectury")
+        }
+    }
+
+    maven {
+        name = "TheIllusiveC4"
+        url = uri("https://maven.theillusivec4.top/")
+        content {
+            includeGroup("top.theillusivec4.curios")
+        }
+    }
 }
 
 minecraft {
@@ -70,8 +87,13 @@ dependencies {
     implementation(fg.deobf(libs.ae2.get()))
     implementation(fg.deobf(libs.projecte.get()))
 
-    implementation(fg.deobf(libs.aecapfix.get()))
     implementation(fg.deobf(libs.teampe.get()))
+    implementation(fg.deobf(libs.ae2wtlib.get()))
+    implementation(fg.deobf(libs.aecapfix.get()))
+
+    runtimeOnly(fg.deobf(libs.curios.get()))
+    runtimeOnly(fg.deobf(libs.architectury.get()))
+    runtimeOnly(fg.deobf(libs.cloth.get()))
 
     runtimeOnly(fg.deobf(libs.projectex.get()))
     runtimeOnly(fg.deobf(libs.jei.get()))
