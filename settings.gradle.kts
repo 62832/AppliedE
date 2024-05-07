@@ -1,6 +1,7 @@
 pluginManagement {
     repositories {
         maven { url = uri("https://maven.neoforged.net/") }
+        maven { url = uri("https://maven.parchmentmc.org") }
         gradlePluginPortal()
     }
 }
@@ -10,6 +11,7 @@ dependencyResolutionManagement {
         create("libs") {
             plugin("neogradle", "net.neoforged.gradle").version("6.0.21")
             plugin("mixin", "org.spongepowered.mixin").version("0.7.+")
+            plugin("parchment", "org.parchmentmc.librarian.forgegradle").version("1.+")
             plugin("spotless", "com.diffplug.spotless").version("6.23.3")
 
             val minecraftVersion = "1.20.1"

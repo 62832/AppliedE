@@ -3,6 +3,7 @@ plugins {
     idea
     alias(libs.plugins.neogradle)
     alias(libs.plugins.mixin)
+    alias(libs.plugins.parchment)
     alias(libs.plugins.spotless)
 }
 
@@ -54,7 +55,7 @@ repositories {
 }
 
 minecraft {
-    mappings("official", "1.20.1")
+    mappings("parchment", "2023.09.03-1.20.1")
     copyIdeResources.set(true)
     accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
 
