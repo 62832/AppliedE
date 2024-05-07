@@ -24,6 +24,7 @@ import appeng.core.stats.AeStats;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
@@ -218,6 +219,11 @@ public class EMCStorage implements MEStorage {
     }
 
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean skipStored) {
+        if (source.player().isPresent()
+                && !(source.player().get().containerMenu instanceof TransmutationTerminalMenu)) {
+            return 0;
+        }
+
         if (!service.knowsItem(what)) {
             return 0;
         }
