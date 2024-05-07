@@ -56,6 +56,7 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, ITransm
     @Override
     public void setShiftToTransmute(boolean toggle) {
         shiftToTransmute = toggle;
+        saveChanges();
     }
 
     @Nullable
