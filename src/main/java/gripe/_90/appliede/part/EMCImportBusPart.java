@@ -20,9 +20,9 @@ import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.misc.EMCTransferContext;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.strategy.EMCItemImportStrategy;
+import gripe._90.appliede.me.strategy.EMCItemTransferContext;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCImportBusPart extends IOBusPart {
@@ -61,7 +61,7 @@ public class EMCImportBusPart extends IOBusPart {
             importStrategy = new EMCItemImportStrategy((ServerLevel) getLevel(), fromPos, fromSide);
         }
 
-        var context = new EMCTransferContext(
+        var context = new EMCItemTransferContext(
                 grid.getService(KnowledgeService.class).getStorage(), source, getFilter(), getOperationsPerTick());
         context.setInverted(isUpgradedWith(AEItems.INVERTER_CARD));
         context.setCanLearn(isUpgradedWith(AppliedE.LEARNING_CARD.get()));

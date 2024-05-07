@@ -22,13 +22,11 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
     @Nullable
     @Override
     public GenericStack getContainedStack(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return null;
-        }
-
-        return stack.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
-                .map(handler -> new GenericStack(EMCKey.BASE, handler.getStoredEmc(stack)))
-                .orElse(null);
+        return !stack.isEmpty()
+                ? stack.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
+                        .map(handler -> new GenericStack(EMCKey.BASE, handler.getStoredEmc(stack)))
+                        .orElse(null)
+                : null;
     }
 
     @Nullable

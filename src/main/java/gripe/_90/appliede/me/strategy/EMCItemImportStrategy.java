@@ -13,8 +13,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.me.storage.ExternalStorageFacade;
 import appeng.util.BlockApiCache;
 
-import gripe._90.appliede.me.misc.EMCTransferContext;
-
 @SuppressWarnings("UnstableApiUsage")
 public class EMCItemImportStrategy implements StackImportStrategy {
     private final BlockApiCache<IItemHandler> apiCache;
@@ -27,7 +25,7 @@ public class EMCItemImportStrategy implements StackImportStrategy {
 
     @Override
     public boolean transfer(StackTransferContext context) {
-        if (!(context instanceof EMCTransferContext emc)) {
+        if (!(context instanceof EMCItemTransferContext emc)) {
             return false;
         }
 
@@ -62,6 +60,6 @@ public class EMCItemImportStrategy implements StackImportStrategy {
             }
         }
 
-        return false;
+        return true;
     }
 }

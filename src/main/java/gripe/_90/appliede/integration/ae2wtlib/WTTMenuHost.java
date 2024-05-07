@@ -27,7 +27,7 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, ITransm
             ItemStack is,
             BiConsumer<Player, ISubMenu> returnToMainMenu) {
         super(player, inventorySlot, is, returnToMainMenu);
-        this.targetGrid = ((WirelessTerminalItem) is.getItem()).getLinkedGrid(is, player.level(), null);
+        targetGrid = ((WirelessTerminalItem) is.getItem()).getLinkedGrid(is, player.level(), null);
         readFromNbt();
     }
 

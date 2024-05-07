@@ -12,12 +12,10 @@ import gripe._90.appliede.integration.Addons;
 public class Plugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains(Addons.AE2WTLIB.getModId())) {
-            return Addons.AE2WTLIB.isLoaded();
-        }
-
-        if (mixinClassName.contains(Addons.AECAPFIX.getModId())) {
-            return Addons.AECAPFIX.isLoaded();
+        for (var addon : Addons.values()) {
+            if (mixinClassName.contains(addon.getModId())) {
+                return addon.isLoaded();
+            }
         }
 
         return true;

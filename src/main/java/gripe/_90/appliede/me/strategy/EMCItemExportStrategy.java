@@ -19,8 +19,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.util.BlockApiCache;
 
-import gripe._90.appliede.me.misc.EMCTransferContext;
-
 @SuppressWarnings("UnstableApiUsage")
 public class EMCItemExportStrategy implements StackExportStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(EMCItemExportStrategy.class);
@@ -35,7 +33,7 @@ public class EMCItemExportStrategy implements StackExportStrategy {
 
     @Override
     public long transfer(StackTransferContext context, AEKey what, long amount) {
-        if (!(context instanceof EMCTransferContext emcContext)) {
+        if (!(context instanceof EMCItemTransferContext emcContext)) {
             return 0;
         }
 

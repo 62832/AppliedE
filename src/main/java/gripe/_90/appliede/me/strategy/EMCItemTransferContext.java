@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.misc;
+package gripe._90.appliede.me.strategy;
 
 import com.google.common.primitives.Ints;
 
@@ -14,7 +14,7 @@ import appeng.util.prioritylist.IPartitionList;
 import gripe._90.appliede.me.service.EMCStorage;
 
 @SuppressWarnings({"UnstableApiUsage", "NonExtendableApiUsage"})
-public class EMCTransferContext implements StackTransferContext {
+public class EMCItemTransferContext implements StackTransferContext {
     private final EMCStorage emcStorage;
     private final IActionSource actionSource;
     private final IPartitionList filter;
@@ -24,7 +24,7 @@ public class EMCTransferContext implements StackTransferContext {
     private boolean isInverted;
     private boolean canLearn;
 
-    public EMCTransferContext(
+    public EMCItemTransferContext(
             EMCStorage emcStorage, IActionSource actionSource, IPartitionList filter, int operationsRemaining) {
         this.emcStorage = emcStorage;
         this.actionSource = actionSource;

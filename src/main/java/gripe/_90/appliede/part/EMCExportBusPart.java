@@ -23,9 +23,9 @@ import appeng.parts.automation.IOBusPart;
 import appeng.util.prioritylist.DefaultPriorityList;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.misc.EMCTransferContext;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.strategy.EMCItemExportStrategy;
+import gripe._90.appliede.me.strategy.EMCItemTransferContext;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCExportBusPart extends IOBusPart {
@@ -68,7 +68,8 @@ public class EMCExportBusPart extends IOBusPart {
     protected boolean doBusWork(IGrid grid) {
         var emcStorage = grid.getService(KnowledgeService.class).getStorage();
         var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
-        var context = new EMCTransferContext(emcStorage, source, DefaultPriorityList.INSTANCE, getOperationsPerTick());
+        var context =
+                new EMCItemTransferContext(emcStorage, source, DefaultPriorityList.INSTANCE, getOperationsPerTick());
 
         var i = 0;
         for (i = 0; i < availableSlots() && context.hasOperationsLeft(); i++) {

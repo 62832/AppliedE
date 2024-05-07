@@ -1,4 +1,4 @@
-package gripe._90.appliede.tooltip;
+package gripe._90.appliede.integration.tooltip;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -14,7 +14,7 @@ import gripe._90.appliede.part.EMCModulePart;
 
 @SuppressWarnings({"UnstableApiUsage", "NonExtendableApiUsage"})
 public class ModuleDataProvider implements BodyProvider<EMCModulePart>, ServerDataProvider<EMCModulePart> {
-    static ModuleDataProvider INSTANCE = new ModuleDataProvider();
+    static final ModuleDataProvider INSTANCE = new ModuleDataProvider();
 
     private ModuleDataProvider() {}
 

@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.features.IPlayerRegistry;
@@ -43,23 +43,15 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final EMCStorage storage = new EMCStorage(this);
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
-    private MinecraftServer server;
-    private IGrid grid;
+    private final IGrid grid;
 
-    public KnowledgeService() {
+    public KnowledgeService(IGrid grid) {
+        this.grid = grid;
         MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> updatePatterns());
     }
 
     @Override
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
-        if (server == null) {
-            server = gridNode.getLevel().getServer();
-        }
-
-        if (grid == null) {
-            grid = gridNode.getGrid();
-        }
-
         if (gridNode.getOwner() instanceof EMCModulePart module) {
             moduleNodes.add(module.getMainNode());
             var uuid = gridNode.getOwningPlayerProfileId();
@@ -172,6 +164,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     void syncEmc() {
+        var server = ServerLifecycleHooks.getCurrentServer();
+
         if (server != null) {
             providers.forEach((uuid, provider) -> {
                 var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
