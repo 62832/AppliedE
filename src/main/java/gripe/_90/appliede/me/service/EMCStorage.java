@@ -23,6 +23,7 @@ import appeng.api.storage.MEStorage;
 import appeng.core.stats.AeStats;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
@@ -100,7 +101,14 @@ public class EMCStorage implements MEStorage {
         var extracted = 0L;
         var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
 
-        var providers = new ArrayList<>(service.getProviders());
+        var providers = new ArrayList<IKnowledgeProvider>();
+
+        if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
+            providers.add(
+                    service.getProviderFor(source.player().get().getUUID()).get());
+        } else {
+            providers.addAll(service.getProviders());
+        }
 
         while (!providers.isEmpty() && extracted < amount) {
             Collections.shuffle(providers);

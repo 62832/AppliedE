@@ -38,6 +38,7 @@ import appeng.parts.AEBasePart;
 import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.service.TransmutationPattern;
 
@@ -58,7 +59,7 @@ public final class EMCModulePart extends AEBasePart
                 .addService(IStorageProvider.class, this)
                 .addService(ICraftingProvider.class, this)
                 .addService(IGridTickable.class, this)
-                .setIdlePowerUsage(25.0);
+                .setIdlePowerUsage(AppliedEConfig.CONFIG.getModuleEnergyUsage());
     }
 
     @Override
