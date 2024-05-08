@@ -101,7 +101,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
-        return providers.get(uuid);
+        return providers.getOrDefault(uuid, tpeHandler.getProviderFor(uuid));
     }
 
     Supplier<IKnowledgeProvider> getProviderFor(Player player) {

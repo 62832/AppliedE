@@ -35,6 +35,14 @@ class TeamProjectEHandler {
                 .anyMatch(team -> team.getMembers().contains(uuid));
     }
 
+    public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+        return providersPerTeam.keySet().stream()
+                .filter(team -> team.getMembers().contains(uuid))
+                .findFirst()
+                .map(providersPerTeam::get)
+                .orElse(null);
+    }
+
     private void clear() {
         providersPerTeam.clear();
     }
@@ -54,6 +62,10 @@ class TeamProjectEHandler {
 
         boolean isPlayerInTrackedTeam(UUID uuid) {
             return handler == null || ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
+        }
+
+        Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+            return handler != null ? ((TeamProjectEHandler) handler).getProviderFor(uuid) : null;
         }
 
         void clear() {
