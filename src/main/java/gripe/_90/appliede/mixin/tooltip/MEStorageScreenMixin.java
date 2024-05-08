@@ -21,6 +21,7 @@ import appeng.menu.me.common.MEStorageMenu;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.reporting.GridInventoryEMCEntry;
+import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 @Mixin(MEStorageScreen.class)
 public abstract class MEStorageScreenMixin<C extends MEStorageMenu> extends AEBaseScreen<C> {
@@ -45,7 +46,9 @@ public abstract class MEStorageScreenMixin<C extends MEStorageMenu> extends AEBa
             int y,
             CallbackInfo ci,
             List<Component> currentTooltip) {
-        if (((GridInventoryEMCEntry) entry).appliede$isTransmutable() && entry.getStoredAmount() == 0) {
+        if (menu instanceof TransmutationTerminalMenu
+                && ((GridInventoryEMCEntry) entry).appliede$isTransmutable()
+                && entry.getStoredAmount() == 0) {
             currentTooltip.add(Component.translatable("tooltip." + AppliedE.MODID + ".transmutable")
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
