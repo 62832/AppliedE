@@ -98,22 +98,23 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var extracted = 0L;
         var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
+        var rawEmc = BigInteger.valueOf(amount).multiply(multiplier);
+        var extracted = BigInteger.ZERO;
 
         var providers = new ArrayList<IKnowledgeProvider>();
 
         if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
-            providers.add(
-                    service.getProviderFor(source.player().get().getUUID()).get());
+            var provider = service.getProviderFor(source.player().get().getUUID());
+            providers.add(provider.get());
         } else {
             providers.addAll(service.getProviders());
         }
 
-        while (!providers.isEmpty() && extracted < amount) {
+        while (!providers.isEmpty() && extracted.compareTo(rawEmc) < 0) {
             Collections.shuffle(providers);
 
-            var toExtract = BigInteger.valueOf(amount - extracted).multiply(multiplier);
+            var toExtract = rawEmc.subtract(extracted);
             var divisor = BigInteger.valueOf(service.getProviders().size());
             var quotient = toExtract.divide(divisor);
             var remainder = toExtract.remainder(divisor).longValue();
@@ -129,7 +130,7 @@ public class EMCStorage implements MEStorage {
                         provider.setEmc(BigInteger.ZERO);
                     }
 
-                    extracted += currentEmc.divide(multiplier).longValue();
+                    extracted = extracted.add(currentEmc);
                     // provider exhausted, remove from current list to re-extract deficit from remaining providers
                     providers.remove(provider);
                 } else {
@@ -137,7 +138,7 @@ public class EMCStorage implements MEStorage {
                         provider.setEmc(currentEmc.subtract(toExtractFrom));
                     }
 
-                    extracted += toExtractFrom.divide(multiplier).longValue();
+                    extracted = extracted.add(toExtractFrom);
                 }
             }
         }
@@ -146,7 +147,7 @@ public class EMCStorage implements MEStorage {
             service.syncEmc();
         }
 
-        return extracted;
+        return extracted.divide(multiplier).longValue();
     }
 
     public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
