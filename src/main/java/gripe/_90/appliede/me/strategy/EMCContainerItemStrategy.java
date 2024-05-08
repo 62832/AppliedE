@@ -12,6 +12,7 @@ import appeng.api.config.Actionable;
 import appeng.api.stacks.GenericStack;
 
 import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
@@ -32,6 +33,10 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
     @Nullable
     @Override
     public ItemStack findCarriedContext(Player player, AbstractContainerMenu menu) {
+        if (!(menu instanceof TransmutationTerminalMenu)) {
+            return null;
+        }
+
         var carried = menu.getCarried();
         return carried.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY).isPresent() ? carried : null;
     }
@@ -46,6 +51,10 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
 
     @Override
     public long insert(ItemStack context, EMCKey what, long amount, Actionable mode) {
+        if (what != EMCKey.BASE) {
+            return 0;
+        }
+
         var action = mode.isSimulate() ? IEmcStorage.EmcAction.SIMULATE : IEmcStorage.EmcAction.EXECUTE;
         return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
                 .map(handler -> handler.insertEmc(context, amount, action))
