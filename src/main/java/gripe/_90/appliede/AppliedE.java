@@ -145,7 +145,7 @@ public final class AppliedE {
 
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
-                .icon(() -> EMC_MODULE.get().getDefaultInstance())
+                .icon(() -> EMC_INTERFACE.get().asItem().getDefaultInstance())
                 .displayItems((params, output) -> {
                     output.accept(EMC_MODULE.get());
                     output.accept(EMC_INTERFACE.get());
