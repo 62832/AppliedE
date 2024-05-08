@@ -236,6 +236,8 @@ public final class AppliedE {
 
     private static class Client {
         private static void setup(IEventBus bus) {
+            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AppliedEConfig.Client.SPEC);
+
             bus.addListener((FMLClientSetupEvent event) -> {
                 event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, EMCRenderer.INSTANCE));
                 event.enqueueWork(() -> {

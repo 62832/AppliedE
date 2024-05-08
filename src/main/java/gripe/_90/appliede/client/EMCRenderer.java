@@ -21,6 +21,7 @@ import appeng.api.client.AEKeyRendering;
 import appeng.client.gui.style.Blitter;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 
@@ -48,10 +49,9 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     }
 
     private int hueShift(int tier) {
-        var intervals = 10;
+        var intervals = AppliedEConfig.Client.CONFIG.getEmcTierColours().get();
         var hue = ((tier - 1) * 360F / intervals) / 360;
-        var wrap = (tier - 1) % intervals == 0;
-        return Color.HSBtoRGB(hue, wrap ? 0 : 0.6F, 1);
+        return Color.HSBtoRGB(hue, tier == 1 ? 0 : 0.6F, 1);
     }
 
     @Override
