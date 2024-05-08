@@ -10,10 +10,10 @@ network and converted into items upon request via AE2's auto-crafting facilities
 Currently, the mod is in **early beta stages**. Beware of any critical bugs, particularly on multiplayer servers, and please
 report them on the [issue tracker][issues] as they arise.
 
-## Features
-### ME EMC Module
-Retrieves all transmutation/EMC knowledge from the player who placed down the module to provide ME networks with
-information on stored EMC and transmutable items. Can be placed anywhere at all on the network to function.
+## Basic Usage
+
+The module retrieves all transmutation/EMC knowledge from the player who placed down the module to provide ME networks
+with information on stored EMC and transmutable items. It can be placed anywhere at all on the network to function.
 
 ![EMC module in-world](img/module1.png)
 
@@ -32,9 +32,8 @@ the EMC stored on a network based on subsequent powers of an arbitrarily large n
 
 ![Displayed EMC tiers](img/module5.png)
 
-### ME EMC Interface
-
-*Work in progress, coming soon...*
+For further information on how to use the add-on, please consult the in-game AE2 guide's new section added by this
+add-on.
 
 ## License
 All code is licensed under [LGPLv3][lgpl-v3], in adherence to the same license used by Applied Energistics 2 and with
