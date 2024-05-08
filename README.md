@@ -12,8 +12,9 @@ report them on the [issue tracker][issues] as they arise.
 
 ## Basic Usage
 
-The module retrieves all transmutation/EMC knowledge from the player who placed down the module to provide ME networks
-with information on stored EMC and transmutable items. It can be placed anywhere at all on the network to function.
+The first step towards using this add-on is to make an *ME Transmutation Module*. The module retrieves all
+transmutation/EMC knowledge from the player who placed down the module to provide ME networks with information on stored
+EMC and transmutable items. It can be placed anywhere at all on the network to function.
 
 ![EMC module in-world](img/module1.png)
 
