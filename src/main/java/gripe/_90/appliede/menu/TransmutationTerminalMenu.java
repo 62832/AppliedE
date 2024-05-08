@@ -63,12 +63,12 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         if (s.equals(transmuteSlot) && !getCarried().isEmpty()) {
             var transmuted = transmuteItem(getCarried(), action == InventoryAction.SPLIT_OR_PLACE_SINGLE, player);
             var reduced = getCarried().copy();
-            reduced.setCount(reduced.getCount() - (int) transmuted);
+            reduced.setCount(reduced.getCount() - transmuted);
             setCarried(reduced.getCount() <= 0 ? ItemStack.EMPTY : reduced);
         }
     }
 
-    protected long transmuteItem(ItemStack stack, boolean singleItem, ServerPlayer player) {
+    private int transmuteItem(ItemStack stack, boolean singleItem, ServerPlayer player) {
         if (!stack.isEmpty()) {
             var grid = host.getGrid();
 
@@ -91,7 +91,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                     showLearned();
                 }
 
-                return emcStorage.insertItem(
+                return (int) emcStorage.insertItem(
                         key,
                         singleItem ? 1 : stack.getCount(),
                         Actionable.MODULATE,
@@ -129,7 +129,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
             var stack = slots.get(idx).getItem();
 
             var remaining = stack.copy();
-            remaining.setCount(remaining.getCount() - (int) transmuteItem(stack, false, serverPlayer));
+            remaining.setCount(remaining.getCount() - transmuteItem(stack, false, serverPlayer));
             slots.get(idx).set(remaining.getCount() <= 0 ? ItemStack.EMPTY : remaining);
 
             return ItemStack.EMPTY;
