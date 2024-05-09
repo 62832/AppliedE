@@ -291,11 +291,9 @@ public class EMCStorage implements MEStorage {
     }
 
     private long getAmountAfterPowerExpenditure(long maxAmount, IEnergySource source) {
-        var requiredPower = PowerMultiplier.CONFIG.multiply(maxAmount);
-        var availablePower = source.extractAEPower(requiredPower, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-        var powerToExpend = Math.min(requiredPower, availablePower);
-        source.extractAEPower(powerToExpend, Actionable.MODULATE, PowerMultiplier.CONFIG);
-        return (long) PowerMultiplier.CONFIG.divide(powerToExpend);
+        var availablePower = source.extractAEPower(maxAmount, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+        source.extractAEPower(Math.min(maxAmount, availablePower), Actionable.MODULATE, PowerMultiplier.CONFIG);
+        return (double) maxAmount <= availablePower ? maxAmount : (long) availablePower;
     }
 
     public int getHighestTier() {
