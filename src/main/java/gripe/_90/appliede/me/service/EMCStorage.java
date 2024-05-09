@@ -104,7 +104,7 @@ public final class EMCStorage implements MEStorage {
         var providers = new ArrayList<IKnowledgeProvider>();
 
         if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
-            var provider = service.getProviderFor(source.player().get().getUUID());
+            var provider = service.getProviderFor(source.player().get());
             providers.add(provider.get());
         } else {
             providers.addAll(service.getProviders());
@@ -160,19 +160,14 @@ public final class EMCStorage implements MEStorage {
         }
 
         var playerProvider = source.player().map(service::getProviderFor).orElse(null);
-        var machineOwnerProvider = source.machine()
-                .map(host -> {
-                    var node = host.getActionableNode();
-                    return node != null ? service.getProviderFor(node.getOwningPlayerProfileId()) : null;
-                })
-                .orElse(null);
+        var machineProvider = source.machine().map(service::getProviderFor).orElse(null);
 
         if (mayLearn) {
             if (source.player().isPresent() && playerProvider == null) {
                 return 0;
             }
 
-            if (source.machine().isPresent() && machineOwnerProvider == null) {
+            if (source.machine().isPresent() && machineProvider == null) {
                 return 0;
             }
         }
@@ -209,10 +204,10 @@ public final class EMCStorage implements MEStorage {
                 }
             });
             source.machine().ifPresent(host -> {
-                if (machineOwnerProvider != null) {
+                if (machineProvider != null) {
                     var node = Objects.requireNonNull(host.getActionableNode());
                     var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
-                    addKnowledge(what, machineOwnerProvider.get(), player);
+                    addKnowledge(what, machineProvider.get(), player);
                 }
             });
             onLearn.run();

@@ -25,7 +25,6 @@ import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
-import appeng.api.storage.AEKeyFilter;
 import appeng.api.storage.MEStorage;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
@@ -68,7 +67,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
                 .setIdlePowerUsage(10);
 
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
-        storage = ConfigInventory.storage(new StorageFilter(), slots, this::onStorageChanged);
+        storage = ConfigInventory.storage(this::storageFilter, slots, this::onStorageChanged);
         upgrades = UpgradeInventories.forMachine(is, 1, host::saveChanges);
 
         localInvHandler = new DelegatingMEInventory(storage);
@@ -92,6 +91,32 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     @Override
     public IUpgradeInventory getUpgrades() {
         return upgrades;
+    }
+
+    private boolean storageFilter(AEKey what) {
+        if (!(what instanceof AEItemKey item)) {
+            return false;
+        }
+
+        var grid = mainNode.getGrid();
+        var node = mainNode.getNode();
+
+        if (grid == null || node == null) {
+            // client-side, allow everything in order for items to actually display
+            return true;
+        }
+
+        var uuid = node.getOwningPlayerProfileId();
+
+        if (uuid == null) {
+            return false;
+        }
+
+        var knowledge = grid.getService(KnowledgeService.class);
+        return knowledge.knowsItem(item)
+                || (upgrades.isInstalled(AppliedE.LEARNING_CARD.get())
+                        && IEMCProxy.INSTANCE.hasValue(item.toStack())
+                        && knowledge.getProviderFor(uuid) != null);
     }
 
     public void readFromNBT(CompoundTag tag) {
@@ -319,34 +344,5 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     public void invalidateCaps() {
         storageHolder.invalidate();
         localInvHolder.invalidate();
-    }
-
-    private class StorageFilter implements AEKeyFilter {
-        @Override
-        public boolean matches(AEKey what) {
-            if (!(what instanceof AEItemKey item)) {
-                return false;
-            }
-
-            var grid = mainNode.getGrid();
-            var node = mainNode.getNode();
-
-            if (grid == null || node == null) {
-                // client-side, allow everything in order for items to actually display
-                return true;
-            }
-
-            var uuid = node.getOwningPlayerProfileId();
-
-            if (uuid == null) {
-                return false;
-            }
-
-            var knowledge = grid.getService(KnowledgeService.class);
-            return knowledge.knowsItem(item)
-                    || (upgrades.isInstalled(AppliedE.LEARNING_CARD.get())
-                            && IEMCProxy.INSTANCE.hasValue(item.toStack())
-                            && knowledge.getProviderFor(uuid) != null);
-        }
     }
 }

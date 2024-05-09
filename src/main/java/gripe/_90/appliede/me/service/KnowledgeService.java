@@ -25,6 +25,7 @@ import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
 import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.crafting.ICraftingProvider;
+import appeng.api.networking.security.IActionHost;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
@@ -106,6 +107,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     Supplier<IKnowledgeProvider> getProviderFor(Player player) {
         return getProviderFor(player.getUUID());
+    }
+
+    Supplier<IKnowledgeProvider> getProviderFor(IActionHost host) {
+        var node = host.getActionableNode();
+        return node != null ? getProviderFor(node.getOwningPlayerProfileId()) : null;
     }
 
     public EMCStorage getStorage() {
