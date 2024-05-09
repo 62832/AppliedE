@@ -8,6 +8,7 @@
   "mixins": [
     "ae2wtlib.AE2wtlibMixin",
     "aecapfix.EMCInterfacePartMixin",
+    "main.MEStorageMenuMixin",
     "main.P2PTunnelAttunementAccessor",
     "main.TransmutationOfflineAccessor",
     "tooltip.BasePacketAccessor",

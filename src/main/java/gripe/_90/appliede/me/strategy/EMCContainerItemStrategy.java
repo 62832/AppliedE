@@ -55,10 +55,6 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
 
     @Override
     public long insert(ItemStack context, EMCKey what, long amount, Actionable mode) {
-        if (what != EMCKey.BASE) {
-            return 0;
-        }
-
         var action = mode.isSimulate() ? IEmcStorage.EmcAction.SIMULATE : IEmcStorage.EmcAction.EXECUTE;
         return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
                 .map(handler -> handler.insertEmc(context, amount, action))
