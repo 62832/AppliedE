@@ -43,15 +43,16 @@ public class LearnAllItemsPacket {
                         .filter(key -> key instanceof AEItemKey)
                         .map(AEItemKey.class::cast)
                         .forEach(item -> {
-                            var learned = emc.learnNewItem(item, sender);
-                            emc.insertItem(item, learned, Actionable.MODULATE, IActionSource.ofPlayer(sender), true);
+                            var learned = emc.insertItem(
+                                    item,
+                                    1,
+                                    Actionable.MODULATE,
+                                    IActionSource.ofPlayer(sender),
+                                    true,
+                                    menu::showLearned);
 
                             var me = storage.getInventory();
                             me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));
-
-                            if (learned > 0) {
-                                menu.showLearned();
-                            }
                         });
             }
         });

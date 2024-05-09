@@ -1,7 +1,5 @@
 package gripe._90.appliede.menu;
 
-import java.util.Objects;
-
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -83,20 +81,15 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                     return 0;
                 }
 
-                var key = AEItemKey.of(stack);
-                var emcStorage = knowledge.getStorage();
-                var learned = emcStorage.learnNewItem(Objects.requireNonNull(key), player);
-
-                if (learned > 0) {
-                    showLearned();
-                }
-
-                return (int) emcStorage.insertItem(
-                        key,
-                        singleItem ? 1 : stack.getCount(),
-                        Actionable.MODULATE,
-                        IActionSource.ofPlayer(player),
-                        true);
+                return (int) knowledge
+                        .getStorage()
+                        .insertItem(
+                                AEItemKey.of(stack),
+                                singleItem ? 1 : stack.getCount(),
+                                Actionable.MODULATE,
+                                IActionSource.ofPlayer(player),
+                                true,
+                                this::showLearned);
             }
         }
 

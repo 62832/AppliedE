@@ -150,6 +150,11 @@ public final class EMCStorage implements MEStorage {
     }
 
     public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
+        return insertItem(what, amount, mode, source, mayLearn, () -> {});
+    }
+
+    public long insertItem(
+            AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn, Runnable onLearn) {
         if (service.getProviders().isEmpty()) {
             return 0;
         }
@@ -201,7 +206,7 @@ public final class EMCStorage implements MEStorage {
             totalEmc = totalEmc.subtract(wouldHaveDeposited).add(wouldHaveDeposited.remainder(itemEmc));
         }
 
-        if (mode == Actionable.MODULATE && mayLearn) {
+        if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
             source.player().ifPresent(player -> {
                 if (playerProvider != null) {
                     addKnowledge(what, playerProvider.get(), player);
@@ -215,6 +220,7 @@ public final class EMCStorage implements MEStorage {
                     addKnowledge(what, machineOwnerProvider.get(), player);
                 }
             });
+            onLearn.run();
         }
 
         return totalInserted;
@@ -262,12 +268,6 @@ public final class EMCStorage implements MEStorage {
         }
 
         return totalExtracted;
-    }
-
-    public long learnNewItem(AEItemKey what, ServerPlayer player) {
-        return !service.getProviderFor(player).get().hasKnowledge(what.toStack())
-                ? insertItem(what, 1, Actionable.SIMULATE, IActionSource.ofPlayer(player), true)
-                : 0;
     }
 
     private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
