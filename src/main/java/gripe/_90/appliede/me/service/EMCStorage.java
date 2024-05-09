@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.features.IPlayerRegistry;
-import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
@@ -31,7 +30,7 @@ import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-public class EMCStorage implements MEStorage {
+public final class EMCStorage implements MEStorage {
     private final KnowledgeService service;
     private int highestTier = 1;
 
@@ -177,12 +176,6 @@ public class EMCStorage implements MEStorage {
             }
         }
 
-        var grid = service.getGrid();
-
-        if (grid == null) {
-            return 0;
-        }
-
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalInserted = 0L;
@@ -192,7 +185,7 @@ public class EMCStorage implements MEStorage {
             var canDeposit = toDeposit;
 
             if (mode == Actionable.MODULATE) {
-                canDeposit = getAmountAfterPowerExpenditure(canDeposit, grid.getEnergyService());
+                canDeposit = getAmountAfterPowerExpenditure(canDeposit);
                 insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
             }
 
@@ -237,13 +230,9 @@ public class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var grid = service.getGrid();
+        var existingStored = service.getGrid().getStorageService().getCachedInventory();
 
-        if (grid == null) {
-            return 0;
-        }
-
-        if (!skipStored && grid.getStorageService().getCachedInventory().get(what) > 0) {
+        if (!skipStored && existingStored.get(what) > 0) {
             return 0;
         }
 
@@ -256,7 +245,7 @@ public class EMCStorage implements MEStorage {
             var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
 
             if (mode == Actionable.MODULATE) {
-                canWithdraw = getAmountAfterPowerExpenditure(canWithdraw, grid.getEnergyService());
+                canWithdraw = getAmountAfterPowerExpenditure(canWithdraw);
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
@@ -290,9 +279,10 @@ public class EMCStorage implements MEStorage {
         }
     }
 
-    private long getAmountAfterPowerExpenditure(long maxAmount, IEnergySource source) {
-        var availablePower = source.extractAEPower(maxAmount, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-        source.extractAEPower(Math.min(maxAmount, availablePower), Actionable.MODULATE, PowerMultiplier.CONFIG);
+    private long getAmountAfterPowerExpenditure(long maxAmount) {
+        var energyService = service.getGrid().getEnergyService();
+        var availablePower = energyService.extractAEPower(maxAmount, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+        energyService.extractAEPower(Math.min(maxAmount, availablePower), Actionable.MODULATE, PowerMultiplier.CONFIG);
         return (double) maxAmount <= availablePower ? maxAmount : (long) availablePower;
     }
 

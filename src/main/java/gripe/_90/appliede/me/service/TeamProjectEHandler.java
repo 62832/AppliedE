@@ -14,7 +14,7 @@ import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 
-class TeamProjectEHandler {
+final class TeamProjectEHandler {
     private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersPerTeam = new HashMap<>();
 
     private TeamProjectEHandler() {
@@ -35,7 +35,7 @@ class TeamProjectEHandler {
                 .anyMatch(team -> team.getMembers().contains(uuid));
     }
 
-    public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+    private Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
         return providersPerTeam.keySet().stream()
                 .filter(team -> team.getMembers().contains(uuid))
                 .findFirst()
