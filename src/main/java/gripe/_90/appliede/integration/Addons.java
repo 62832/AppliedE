@@ -2,7 +2,7 @@ package gripe._90.appliede.integration;
 
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 public enum Addons {
     TEAMPE("teamprojecte"),
@@ -22,6 +22,8 @@ public enum Addons {
     public boolean isLoaded() {
         return ModList.get() != null
                 ? ModList.get().isLoaded(modId)
-                : LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(modId::equals);
+                : LoadingModList.get().getMods().stream()
+                        .map(IModInfo::getModId)
+                        .anyMatch(modId::equals);
     }
 }

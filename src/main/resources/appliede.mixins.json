@@ -16,5 +16,9 @@
     "tooltip.MEInventoryUpdatePacketMixin",
     "tooltip.MEStorageMenuMixin"
   ],
-  "client": ["tooltip.MEStorageScreenMixin", "tooltip.RepoMixin"]
+  "client": [
+    "main.MEStorageScreenMixin",
+    "tooltip.MEStorageScreenMixin",
+    "tooltip.RepoMixin"
+  ]
 }

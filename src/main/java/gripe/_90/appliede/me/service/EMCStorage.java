@@ -149,10 +149,6 @@ public final class EMCStorage implements MEStorage {
         return extracted.divide(multiplier).longValue();
     }
 
-    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
-        return insertItem(what, amount, mode, source, mayLearn, () -> {});
-    }
-
     public long insertItem(
             AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn, Runnable onLearn) {
         if (service.getProviders().isEmpty()) {
@@ -215,8 +211,7 @@ public final class EMCStorage implements MEStorage {
             source.machine().ifPresent(host -> {
                 if (machineOwnerProvider != null) {
                     var node = Objects.requireNonNull(host.getActionableNode());
-                    var id = node.getOwningPlayerId();
-                    var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), id);
+                    var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
                     addKnowledge(what, machineOwnerProvider.get(), player);
                 }
             });
@@ -224,6 +219,10 @@ public final class EMCStorage implements MEStorage {
         }
 
         return totalInserted;
+    }
+
+    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
+        return insertItem(what, amount, mode, source, mayLearn, () -> {});
     }
 
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean skipStored) {

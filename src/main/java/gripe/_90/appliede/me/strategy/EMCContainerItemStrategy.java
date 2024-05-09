@@ -20,6 +20,10 @@ import moze_intel.projecte.gameObjs.registries.PESoundEvents;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, ItemStack> {
+    public static final EMCContainerItemStrategy INSTANCE = new EMCContainerItemStrategy();
+
+    private EMCContainerItemStrategy() {}
+
     @Nullable
     @Override
     public GenericStack getContainedStack(ItemStack stack) {

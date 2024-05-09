@@ -100,7 +100,7 @@ public final class AppliedE {
         // external storage strategy not provided so as not to clash with service's mounted EMC storage
         StackImportStrategy.register(EMCKeyType.TYPE, EMCImportStrategy::new);
         StackExportStrategy.register(EMCKeyType.TYPE, EMCExportStrategy::new);
-        ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, new EMCContainerItemStrategy());
+        ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, EMCContainerItemStrategy.INSTANCE);
 
         return part(EMCModulePart.class, EMCModulePart::new);
     });
