@@ -127,7 +127,7 @@ public final class AppliedE {
     public static final RegistryObject<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
     public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> Addons.AE2WTLIB.isLoaded()
-            ? AE2WTIntegration.createWirelessTerminalItem()
+            ? AE2WTIntegration.getWirelessTerminalItem()
             : new DummyIntegrationItem(new Item.Properties().stacksTo(1), Addons.AE2WTLIB));
 
     static {

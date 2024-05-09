@@ -14,10 +14,14 @@ import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
-    public static Item createWirelessTerminalItem() {
-        var terminal = new WTTItem();
-        GridLinkables.register(terminal, WirelessTerminalItem.LINKABLE_HANDLER);
-        return terminal;
+    private static final Item TERMINAL = new WTTItem();
+
+    static {
+        GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
+    }
+
+    public static Item getWirelessTerminalItem() {
+        return TERMINAL;
     }
 
     public static MenuType<?> getWirelessTerminalMenu() {
