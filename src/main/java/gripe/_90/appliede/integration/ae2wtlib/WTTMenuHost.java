@@ -14,7 +14,6 @@ import appeng.menu.ISubMenu;
 
 import de.mari_023.ae2wtlib.terminal.WTMenuHost;
 
-import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
 
 public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, ITransmutationTerminalHost {
@@ -33,7 +32,7 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, ITransm
 
     @Override
     public ItemStack getMainMenuIcon() {
-        return AppliedE.WIRELESS_TRANSMUTATION_TERMINAL.get().getDefaultInstance();
+        return AE2WTIntegration.getWirelessTerminalItem().getDefaultInstance();
     }
 
     @Override
