@@ -49,6 +49,6 @@ the player who placed down the interface or import bus.
 ## Recipes
 
 <Recipe id="appliede:emc_interface" />
-<Recipe id="appliede:emc_export_bus" />
-<Recipe id="appliede:emc_import_bus" />
-<Recipe id="appliede:learning_card" />
+<RecipeFor id="appliede:emc_export_bus" />
+<RecipeFor id="appliede:emc_import_bus" />
+<RecipeFor id="appliede:learning_card" />
