@@ -199,18 +199,19 @@ public final class EMCStorage implements MEStorage {
 
         if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
             source.player().ifPresent(player -> {
-                if (playerProvider != null) {
+                if (playerProvider != null && !playerProvider.get().hasKnowledge(what.toStack())) {
                     addKnowledge(what, playerProvider.get(), player);
+                    onLearn.run();
                 }
             });
             source.machine().ifPresent(host -> {
-                if (machineProvider != null) {
+                if (machineProvider != null && !machineProvider.get().hasKnowledge(what.toStack())) {
                     var node = Objects.requireNonNull(host.getActionableNode());
                     var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
                     addKnowledge(what, machineProvider.get(), player);
+                    onLearn.run();
                 }
             });
-            onLearn.run();
         }
 
         return totalInserted;
