@@ -1,10 +1,12 @@
 package gripe._90.appliede.me.misc;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -36,6 +38,7 @@ import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.me.service.EMCStorage;
 import gripe._90.appliede.me.service.KnowledgeService;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
@@ -55,6 +58,11 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final LazyOptional<IItemHandler> storageHolder;
     private final LazyOptional<MEStorage> localInvHolder;
 
+    @Nullable
+    private WrappedEMCStorage emcStorage;
+
+    private boolean hasConfig = false;
+
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
         this(node, host, is, 9);
     }
@@ -68,7 +76,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
         storage = ConfigInventory.storage(this::storageFilter, slots, this::onStorageChanged);
-        upgrades = UpgradeInventories.forMachine(is, 1, host::saveChanges);
+        upgrades = UpgradeInventories.forMachine(is, 1, this::onUpgradesChanged);
 
         localInvHandler = new DelegatingMEInventory(storage);
         plannedWork = new GenericStack[slots];
@@ -77,7 +85,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         storage.useRegisteredCapacities();
 
         storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
-        localInvHolder = LazyOptional.of(() -> localInvHandler);
+        localInvHolder = LazyOptional.of(this::getInventory);
     }
 
     public ConfigInventory getConfig() {
@@ -86,6 +94,10 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
     public ConfigInventory getStorage() {
         return storage;
+    }
+
+    public MEStorage getInventory() {
+        return hasConfig ? localInvHandler : emcStorage;
     }
 
     @Override
@@ -124,6 +136,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         storage.readFromChildTag(tag, "storage");
         upgrades.readFromNBT(tag, "upgrades");
 
+        hasConfig = !config.isEmpty();
         updatePlan();
         notifyNeighbours();
     }
@@ -286,6 +299,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     private void onConfigRowChanged() {
+        hasConfig = !config.isEmpty();
         host.saveChanges();
         updatePlan();
         notifyNeighbours();
@@ -294,6 +308,14 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private void onStorageChanged() {
         host.saveChanges();
         updatePlan();
+    }
+
+    private void onUpgradesChanged() {
+        if (emcStorage != null) {
+            emcStorage.setMayLearn(upgrades.isInstalled(AppliedE.LEARNING_CARD.get()));
+        }
+
+        host.saveChanges();
     }
 
     public void notifyNeighbours() {
@@ -308,6 +330,13 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         if (be != null && be.getLevel() != null) {
             Platform.notifyBlocksOfNeighbors(be.getLevel(), be.getBlockPos());
         }
+    }
+
+    public void gridChanged() {
+        emcStorage = new WrappedEMCStorage(Objects.requireNonNull(mainNode.getGrid())
+                .getService(KnowledgeService.class)
+                .getStorage());
+        notifyNeighbours();
     }
 
     public void addDrops(List<ItemStack> drops) {
@@ -344,5 +373,30 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     public void invalidateCaps() {
         storageHolder.invalidate();
         localInvHolder.invalidate();
+    }
+
+    private static class WrappedEMCStorage implements MEStorage {
+        private final EMCStorage storage;
+        private boolean mayLearn;
+
+        private WrappedEMCStorage(EMCStorage storage) {
+            this.storage = storage;
+        }
+
+        private void setMayLearn(boolean mayLearn) {
+            this.mayLearn = mayLearn;
+        }
+
+        @Override
+        public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
+            return what instanceof AEItemKey item
+                    ? storage.insertItem(item, amount, mode, source, mayLearn)
+                    : storage.insert(what, amount, mode, source);
+        }
+
+        @Override
+        public Component getDescription() {
+            return storage.getDescription();
+        }
     }
 }

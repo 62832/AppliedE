@@ -30,7 +30,7 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUp
 
         @Override
         public void onGridChanged(EMCInterfaceLogicHost host, IGridNode node) {
-            host.getInterfaceLogic().notifyNeighbours();
+            host.getInterfaceLogic().gridChanged();
         }
     };
 

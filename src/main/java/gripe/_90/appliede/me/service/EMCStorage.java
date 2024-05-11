@@ -59,7 +59,7 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount == 0 || !(what instanceof EMCKey emc)) {
+        if (amount <= 0 || !(what instanceof EMCKey emc)) {
             return 0;
         }
 
@@ -85,7 +85,7 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount == 0) {
+        if (amount <= 0) {
             return 0;
         }
 
@@ -151,7 +151,7 @@ public final class EMCStorage implements MEStorage {
 
     public long insertItem(
             AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn, Runnable onLearn) {
-        if (service.getProviders().isEmpty()) {
+        if (amount <= 0 || service.getProviders().isEmpty()) {
             return 0;
         }
 
@@ -227,7 +227,7 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        if (!service.knowsItem(what)) {
+        if (amount <= 0 || !service.knowsItem(what)) {
             return 0;
         }
 
@@ -281,7 +281,7 @@ public final class EMCStorage implements MEStorage {
         return (double) maxAmount <= availablePower ? maxAmount : (long) availablePower;
     }
 
-    public int getHighestTier() {
+    int getHighestTier() {
         return highestTier;
     }
 
