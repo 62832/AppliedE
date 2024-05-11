@@ -43,8 +43,8 @@ automatically pulled into an ME system to be turned into EMC. For this reason, t
 <ItemLink id="appliede:emc_import_bus" /> for these to automatically learn the items coming in, provided that they have
 an EMC value in general.
 
-Note, however, that these items will only be learned by the owner of the device itself, i.e.
-the player who placed down the interface or import bus.
+Note, however, that these items will only be learned by the owner of the device itself, i.e. the player who placed down
+the import bus, the interface or the network device sending items into the interface.
 
 ## Recipes
 
