@@ -1,6 +1,7 @@
 package gripe._90.appliede.integration.ae2wtlib;
 
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 
@@ -12,13 +13,14 @@ import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
-    private static final WTTItem TERMINAL = new WTTItem();
+    private static Item TERMINAL;
 
-    static {
-        GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
-    }
+    public static Item getWirelessTerminalItem() {
+        if (TERMINAL == null) {
+            TERMINAL = new WTTItem();
+            GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
+        }
 
-    public static WTTItem getWirelessTerminalItem() {
         return TERMINAL;
     }
 
@@ -28,7 +30,8 @@ public class AE2WTIntegration {
 
     public static ItemStack getChargedTerminal() {
         var stack = TERMINAL.getDefaultInstance();
-        TERMINAL.injectAEPower(stack, TERMINAL.getAEMaxPower(stack), Actionable.MODULATE);
+        var terminal = (WTTItem) TERMINAL;
+        terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
         return stack;
     }
 
