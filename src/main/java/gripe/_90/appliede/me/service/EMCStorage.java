@@ -172,30 +172,22 @@ public final class EMCStorage implements MEStorage {
             }
         }
 
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
-        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
+        var itemEmc = IEMCProxy.INSTANCE.getSellValue(what.toStack());
+        var totalEmc = AppliedE.clampedLong(BigInteger.valueOf(itemEmc).multiply(BigInteger.valueOf(amount)));
         var totalInserted = 0L;
 
-        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-            var toDeposit = AppliedE.clampedLong(totalEmc);
-            var canDeposit = toDeposit;
-
-            if (mode == Actionable.MODULATE) {
-                canDeposit = getAmountAfterPowerExpenditure(canDeposit);
-                insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
-            }
-
-            var inserted = BigInteger.valueOf(canDeposit).divide(itemEmc).longValue();
-            totalInserted += inserted;
-            source.player().ifPresent(player -> {
-                if (mode == Actionable.MODULATE) {
-                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
-                }
-            });
-
-            var wouldHaveDeposited = BigInteger.valueOf(toDeposit);
-            totalEmc = totalEmc.subtract(wouldHaveDeposited).add(wouldHaveDeposited.remainder(itemEmc));
+        if (mode == Actionable.MODULATE) {
+            totalEmc = getAmountAfterPowerExpenditure(totalEmc) / itemEmc * itemEmc;
+            insert(EMCKey.BASE, totalEmc, Actionable.MODULATE, source);
         }
+
+        var inserted = totalEmc / itemEmc;
+        totalInserted += inserted;
+        source.player().ifPresent(player -> {
+            if (mode == Actionable.MODULATE) {
+                AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+            }
+        });
 
         if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
             source.player().ifPresent(player -> {
