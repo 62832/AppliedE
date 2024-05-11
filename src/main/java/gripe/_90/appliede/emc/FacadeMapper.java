@@ -1,12 +1,16 @@
 package gripe._90.appliede.emc;
 
+import java.util.HashMap;
+
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import appeng.core.definitions.AEItems;
+import appeng.core.definitions.AEParts;
 
 import moze_intel.projecte.api.mapper.EMCMapper;
 import moze_intel.projecte.api.mapper.IEMCMapper;
@@ -24,9 +28,7 @@ public class FacadeMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
 
     @Override
     public String getDescription() {
-        return """
-               (AppliedE) Maps the AE2 cable facade to an initial value of 1 for use with the facade NBT processor.
-               Disabling this mapper will prevent AE2FacadeProcessor (under processing.toml) from running.""";
+        return "(AppliedE) Maps Applied Energistics 2 cable facades.";
     }
 
     @Override
@@ -36,6 +38,19 @@ public class FacadeMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
             ReloadableServerResources resources,
             RegistryAccess access,
             ResourceManager resourceManager) {
-        collector.setValueBefore(NSSItem.createItem(AEItems.FACADE.asItem()), 1L);
+        var anchor = NSSItem.createItem(AEParts.CABLE_ANCHOR);
+        var baseFacade = AEItems.FACADE.asItem();
+
+        for (var block : ForgeRegistries.BLOCKS.getValues()) {
+            var blockStack = block.asItem().getDefaultInstance();
+            var facade = baseFacade.createFacadeForItem(blockStack, false);
+
+            if (!facade.isEmpty()) {
+                var ingredients = new HashMap<NormalizedSimpleStack, Integer>();
+                ingredients.put(anchor, 4);
+                ingredients.put(NSSItem.createItem(blockStack), 1);
+                collector.addConversion(4, NSSItem.createItem(facade), ingredients);
+            }
+        }
     }
 }
