@@ -10,7 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import appeng.api.features.P2PTunnelAttunement;
 
-import gripe._90.appliede.mixin.main.P2PTunnelAttunementAccessor;
+import gripe._90.appliede.mixin.misc.P2PTunnelAttunementAccessor;
 
 import moze_intel.projecte.api.mapper.EMCMapper;
 import moze_intel.projecte.api.mapper.IEMCMapper;

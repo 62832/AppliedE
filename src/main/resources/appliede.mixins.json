@@ -11,9 +11,9 @@
     "crafting.CraftConfirmMenuMixin",
     "crafting.CraftingCPULogicMixin",
     "crafting.CraftingTreeNodeMixin",
-    "main.MEStorageMenuMixin",
-    "main.P2PTunnelAttunementAccessor",
-    "main.TransmutationOfflineAccessor",
+    "misc.MEStorageMenuMixin",
+    "misc.P2PTunnelAttunementAccessor",
+    "misc.TransmutationOfflineAccessor",
     "tooltip.BasePacketAccessor",
     "tooltip.GridInventoryEntryMixin",
     "tooltip.MEInventoryUpdatePacketAccessor",
@@ -21,7 +21,7 @@
     "tooltip.MEStorageMenuMixin"
   ],
   "client": [
-    "main.MEStorageScreenMixin",
+    "misc.MEStorageScreenMixin",
     "tooltip.MEStorageScreenMixin",
     "tooltip.RepoMixin"
   ]
