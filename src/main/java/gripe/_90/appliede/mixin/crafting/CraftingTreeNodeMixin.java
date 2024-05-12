@@ -58,11 +58,14 @@ public abstract class CraftingTreeNodeMixin {
             ICraftingService craftingService,
             Iterator<IPatternDetails> iterator,
             IPatternDetails details) {
-        if (details instanceof TransmutationPattern && details.getOutputs()[0].what() instanceof AEItemKey item) {
-            ci.cancel();
-            var newPattern = new TransmutationPattern(item, appliede$requestedAmount);
-            gridNode.getGrid().getService(KnowledgeService.class).addTemporaryPattern(newPattern);
-            nodes.add(new CraftingTreeProcess(craftingService, job, newPattern, (CraftingTreeNode) (Object) this));
+        if (details instanceof TransmutationPattern) {
+            if (details.getOutputs()[0].what() instanceof AEItemKey item) {
+                ci.cancel();
+                details = new TransmutationPattern(item, appliede$requestedAmount);
+                nodes.add(new CraftingTreeProcess(craftingService, job, details, (CraftingTreeNode) (Object) this));
+            }
+
+            gridNode.getGrid().getService(KnowledgeService.class).addTemporaryPattern(details);
         }
     }
 }

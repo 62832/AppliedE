@@ -11,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.crafting.ICraftingPlan;
-import appeng.api.stacks.AEItemKey;
 import appeng.menu.me.crafting.CraftConfirmMenu;
 
 import gripe._90.appliede.me.service.KnowledgeService;
@@ -43,7 +42,7 @@ public abstract class CraftConfirmMenuMixin {
     private void clearTemporaryPatterns(Player player, CallbackInfo ci) {
         if (getGrid() != null && result != null && !appliede$submitted) {
             for (var pattern : result.patternTimes().keySet()) {
-                if (pattern instanceof TransmutationPattern && pattern.getOutputs()[0].what() instanceof AEItemKey) {
+                if (pattern instanceof TransmutationPattern) {
                     getGrid().getService(KnowledgeService.class).removeTemporaryPattern(pattern);
                 }
             }

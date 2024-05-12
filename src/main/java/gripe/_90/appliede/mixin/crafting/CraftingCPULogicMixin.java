@@ -17,7 +17,6 @@ import net.minecraft.world.level.Level;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.energy.IEnergyService;
-import appeng.api.stacks.AEItemKey;
 import appeng.crafting.execution.CraftingCpuLogic;
 import appeng.crafting.execution.ExecutingCraftingJob;
 import appeng.me.cluster.implementations.CraftingCPUCluster;
@@ -60,7 +59,7 @@ public abstract class CraftingCPULogicMixin {
 
     @Unique
     private void appliede$removeTemporaryPattern(IPatternDetails pattern) {
-        if (pattern instanceof TransmutationPattern && pattern.getOutputs()[0].what() instanceof AEItemKey) {
+        if (pattern instanceof TransmutationPattern) {
             var grid = cluster.getGrid();
 
             if (grid != null) {
