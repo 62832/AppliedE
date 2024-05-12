@@ -9,6 +9,7 @@ import com.google.common.primitives.Ints;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 
 import appeng.api.config.Actionable;
@@ -172,22 +173,28 @@ public final class EMCStorage implements MEStorage {
             }
         }
 
-        var itemEmc = IEMCProxy.INSTANCE.getSellValue(what.toStack());
-        var totalEmc = AppliedE.clampedLong(BigInteger.valueOf(itemEmc).multiply(BigInteger.valueOf(amount)));
+        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
+        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalInserted = 0L;
 
-        if (mode == Actionable.MODULATE) {
-            totalEmc = getAmountAfterPowerExpenditure(totalEmc) / itemEmc * itemEmc;
-            insert(EMCKey.BASE, totalEmc, Actionable.MODULATE, source);
-        }
+        for (var i = 0; i < Container.LARGE_MAX_STACK_SIZE && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+            var canDeposit = itemEmc.longValue();
 
-        var inserted = totalEmc / itemEmc;
-        totalInserted += inserted;
-        source.player().ifPresent(player -> {
             if (mode == Actionable.MODULATE) {
-                AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+                canDeposit = getAmountAfterPowerExpenditure(canDeposit);
+                insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
             }
-        });
+
+            var inserted = canDeposit / itemEmc.longValue();
+            totalInserted += inserted;
+            source.player().ifPresent(player -> {
+                if (mode == Actionable.MODULATE) {
+                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+                }
+            });
+
+            totalEmc = totalEmc.subtract(itemEmc);
+        }
 
         if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
             source.player().ifPresent(player -> {
@@ -233,16 +240,15 @@ public final class EMCStorage implements MEStorage {
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalExtracted = 0L;
 
-        while (totalEmc.compareTo(BigInteger.ZERO) > 0) {
-            var toWithdraw = AppliedE.clampedLong(totalEmc);
-            var canWithdraw = extract(EMCKey.BASE, toWithdraw, Actionable.SIMULATE, source);
+        for (var i = 0; i < Container.LARGE_MAX_STACK_SIZE && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+            var canWithdraw = extract(EMCKey.BASE, itemEmc.longValue(), Actionable.SIMULATE, source);
 
             if (mode == Actionable.MODULATE) {
                 canWithdraw = getAmountAfterPowerExpenditure(canWithdraw);
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
-            var extracted = BigInteger.valueOf(canWithdraw).divide(itemEmc).longValue();
+            var extracted = canWithdraw / itemEmc.longValue();
             totalExtracted += extracted;
             source.player().ifPresent(player -> {
                 if (mode == Actionable.MODULATE) {
@@ -250,8 +256,7 @@ public final class EMCStorage implements MEStorage {
                 }
             });
 
-            var wouldHaveWithdrawn = BigInteger.valueOf(toWithdraw);
-            totalEmc = totalEmc.subtract(wouldHaveWithdrawn).add(wouldHaveWithdrawn.remainder(itemEmc));
+            totalEmc = totalEmc.subtract(itemEmc);
         }
 
         return totalExtracted;

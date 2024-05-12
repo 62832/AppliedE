@@ -135,10 +135,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         config.readFromChildTag(tag, "config");
         storage.readFromChildTag(tag, "storage");
         upgrades.readFromNBT(tag, "upgrades");
-
-        hasConfig = !config.isEmpty();
-        updatePlan();
-        notifyNeighbours();
+        readConfig();
     }
 
     public void writeToNBT(CompoundTag tag) {
@@ -298,11 +295,15 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         }
     }
 
-    private void onConfigRowChanged() {
+    private void readConfig() {
         hasConfig = !config.isEmpty();
-        host.saveChanges();
         updatePlan();
         notifyNeighbours();
+    }
+
+    private void onConfigRowChanged() {
+        readConfig();
+        host.saveChanges();
     }
 
     private void onStorageChanged() {
@@ -344,12 +345,8 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             var stack = storage.getStack(i);
 
             if (stack != null) {
-                stack.what()
-                        .addDrops(
-                                stack.amount(),
-                                drops,
-                                host.getBlockEntity().getLevel(),
-                                host.getBlockEntity().getBlockPos());
+                var be = host.getBlockEntity();
+                stack.what().addDrops(stack.amount(), drops, be.getLevel(), be.getBlockPos());
             }
         }
 
