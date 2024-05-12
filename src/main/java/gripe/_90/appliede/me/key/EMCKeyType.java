@@ -8,6 +8,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.AppliedEConfig;
 
 public final class EMCKeyType extends AEKeyType {
     public static final EMCKeyType TYPE = new EMCKeyType();
@@ -29,7 +30,7 @@ public final class EMCKeyType extends AEKeyType {
 
     @Override
     public int getAmountPerByte() {
-        return Integer.MAX_VALUE;
+        return AppliedEConfig.CONFIG.getEmcPerByte();
     }
 
     @Override

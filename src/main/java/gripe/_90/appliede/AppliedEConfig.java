@@ -13,11 +13,17 @@ public class AppliedEConfig {
     }
 
     private final ForgeConfigSpec.DoubleValue moduleEnergyUsage;
+    private final ForgeConfigSpec.IntValue emcPerByte;
     private final ForgeConfigSpec.BooleanValue terminalExtractFromOwnEmcOnly;
 
     private AppliedEConfig(ForgeConfigSpec.Builder builder) {
         moduleEnergyUsage = builder.comment("The amount of AE energy per tick used by the ME Transmutation Module.")
                 .defineInRange("moduleEnergyUsage", 25.0, 0, Double.MAX_VALUE);
+        emcPerByte = builder.comment(
+                        "The number of EMC units (of any tier) per byte as used in AE2 auto-crafting.",
+                        "It is not recommended to set this very low as this will require unreasonably large",
+                        "amounts of crafting storage for some jobs.")
+                .defineInRange("emcPerByte", 1000000, 1, Integer.MAX_VALUE);
         terminalExtractFromOwnEmcOnly = builder.comment(
                         "When extracting items from a Transmutation Terminal via EMC, deduct EMC only",
                         "from the player using the terminal rather than all players with modules attached.",
@@ -27,6 +33,10 @@ public class AppliedEConfig {
 
     public double getModuleEnergyUsage() {
         return moduleEnergyUsage.get();
+    }
+
+    public int getEmcPerByte() {
+        return emcPerByte.get();
     }
 
     public boolean terminalExtractFromOwnEmcOnly() {
