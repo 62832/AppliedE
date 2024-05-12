@@ -98,7 +98,7 @@ public final class EMCModulePart extends AEBasePart
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
         var grid = getMainNode().getGrid();
-        return grid != null ? grid.getService(KnowledgeService.class).getPatterns() : List.of();
+        return grid != null ? grid.getService(KnowledgeService.class).getPatterns(getMainNode()) : List.of();
     }
 
     @Override

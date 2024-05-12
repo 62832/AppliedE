@@ -1,5 +1,7 @@
 package gripe._90.appliede.me.service;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +21,7 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class TransmutationPattern implements IPatternDetails {
     private static final String NBT_ITEM = "item";
+    private static final String NBT_AMOUNT = "amount";
     private static final String NBT_TIER = "tier";
 
     private final AEItemKey definition;
@@ -26,6 +29,7 @@ public final class TransmutationPattern implements IPatternDetails {
     @Nullable
     private final AEItemKey item;
 
+    private final long amount;
     private final int tier;
 
     public TransmutationPattern(AEItemKey definition) {
@@ -34,21 +38,25 @@ public final class TransmutationPattern implements IPatternDetails {
 
         if (tag.contains(NBT_ITEM)) {
             item = AEItemKey.fromTag(tag.getCompound(NBT_ITEM));
+            amount = tag.getLong(NBT_AMOUNT);
             tier = 1;
         } else {
             item = null;
+            amount = 1;
             tier = tag.getInt(NBT_TIER);
         }
     }
 
-    public TransmutationPattern(@Nullable AEItemKey item, int tier) {
+    public TransmutationPattern(@Nullable AEItemKey item, long amount, int tier) {
         this.item = item;
+        this.amount = amount;
         this.tier = item != null ? 1 : tier;
 
         var tag = new CompoundTag();
 
         if (item != null) {
             tag.put(NBT_ITEM, item.toTag());
+            tag.putLong(NBT_AMOUNT, amount);
         }
 
         if (tier > 1) {
@@ -58,6 +66,14 @@ public final class TransmutationPattern implements IPatternDetails {
         definition = AEItemKey.of(AppliedE.TRANSMUTATION_PATTERN.get(), tag);
     }
 
+    public TransmutationPattern(@Nullable AEItemKey item, int tier) {
+        this(item, 1, tier);
+    }
+
+    public TransmutationPattern(AEItemKey item, long amount) {
+        this(item, amount, 1);
+    }
+
     @Override
     public AEItemKey getDefinition() {
         return definition;
@@ -65,14 +81,31 @@ public final class TransmutationPattern implements IPatternDetails {
 
     @Override
     public IInput[] getInputs() {
-        return new IInput[] {new Input(item != null ? IEMCProxy.INSTANCE.getValue(item.toStack()) : 1, tier)};
+        if (item == null) {
+            return new IInput[] {new Input(1, tier)};
+        }
+
+        var inputs = new ArrayList<IInput>();
+        var itemEmc = IEMCProxy.INSTANCE.getValue(item.toStack());
+        var totalEmc = BigInteger.valueOf(itemEmc).multiply(BigInteger.valueOf(amount));
+        var currentTier = 1;
+
+        while (totalEmc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
+            inputs.add(new Input(totalEmc.remainder(AppliedE.TIER_LIMIT).longValue(), currentTier));
+            totalEmc = totalEmc.divide(AppliedE.TIER_LIMIT);
+            currentTier++;
+        }
+
+        inputs.add(new Input(totalEmc.longValue(), currentTier));
+
+        return inputs.toArray(new IInput[0]);
     }
 
     @Override
     public GenericStack[] getOutputs() {
         return new GenericStack[] {
             item != null
-                    ? new GenericStack(item, 1)
+                    ? new GenericStack(item, amount)
                     : new GenericStack(EMCKey.tier(tier - 1), AppliedE.TIER_LIMIT.longValue())
         };
     }

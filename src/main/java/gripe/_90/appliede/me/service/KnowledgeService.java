@@ -2,6 +2,7 @@ package gripe._90.appliede.me.service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
+    private final List<IPatternDetails> temporaryPatterns = new ArrayList<>();
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     private final IGrid grid;
@@ -129,18 +131,33 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
                 .collect(Collectors.toSet());
     }
 
-    public List<IPatternDetails> getPatterns() {
-        var patterns = new ArrayList<IPatternDetails>();
+    public List<IPatternDetails> getPatterns(IManagedGridNode node) {
+        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.get(0))) {
+            var patterns = new ArrayList<IPatternDetails>();
 
-        for (var tier = storage.getHighestTier(); tier > 1; tier--) {
-            patterns.add(new TransmutationPattern(null, tier));
+            for (var tier = storage.getHighestTier(); tier > 1; tier--) {
+                patterns.add(new TransmutationPattern(null, tier));
+            }
+
+            for (var item : getKnownItems()) {
+                patterns.add(new TransmutationPattern(item, 1));
+            }
+
+            patterns.addAll(temporaryPatterns);
+            return patterns;
         }
 
-        for (var item : getKnownItems()) {
-            patterns.add(new TransmutationPattern(item, 1));
-        }
+        return Collections.emptyList();
+    }
 
-        return patterns;
+    public void addTemporaryPattern(IPatternDetails pattern) {
+        temporaryPatterns.add(pattern);
+        updatePatterns();
+    }
+
+    public void removeTemporaryPattern(IPatternDetails pattern) {
+        temporaryPatterns.remove(pattern);
+        updatePatterns();
     }
 
     void updatePatterns() {
