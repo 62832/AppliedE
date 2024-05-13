@@ -1,10 +1,14 @@
 package gripe._90.appliede.part;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.inventory.MenuType;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import appeng.api.behaviors.StackImportStrategy;
+import com.google.common.primitives.Ints;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+
+import appeng.api.config.Actionable;
 import appeng.api.networking.IGrid;
 import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
@@ -14,6 +18,7 @@ import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
 import appeng.items.parts.PartModels;
+import appeng.me.storage.ExternalStorageFacade;
 import appeng.menu.implementations.IOBusMenu;
 import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.parts.PartModel;
@@ -21,10 +26,7 @@ import appeng.parts.automation.IOBusPart;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.strategy.EMCItemImportStrategy;
-import gripe._90.appliede.me.strategy.EMCTransferContext;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EMCImportBusPart extends IOBusPart {
     public static final MenuType<IOBusMenu> MENU =
             MenuTypeBuilder.create(IOBusMenu::new, EMCImportBusPart.class).build("emc_import_bus");
@@ -41,8 +43,6 @@ public class EMCImportBusPart extends IOBusPart {
     private static final PartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, AppEng.makeId("part/import_bus_has_channel"));
 
-    private StackImportStrategy importStrategy;
-
     public EMCImportBusPart(IPartItem<?> partItem) {
         super(TickRates.ImportBus, AEItemKey.filter(), partItem);
     }
@@ -54,19 +54,47 @@ public class EMCImportBusPart extends IOBusPart {
 
     @Override
     protected boolean doBusWork(IGrid grid) {
-        if (importStrategy == null) {
-            var self = getHost().getBlockEntity();
-            var fromPos = self.getBlockPos().relative(getSide());
-            var fromSide = getSide().getOpposite();
-            importStrategy = new EMCItemImportStrategy((ServerLevel) getLevel(), fromPos, fromSide);
+        var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+        var blockEntity = getLevel().getBlockEntity(adjacentPos);
+
+        if (blockEntity == null) {
+            return false;
         }
 
-        var emc = grid.getService(KnowledgeService.class).getStorage();
-        var context = new EMCTransferContext(emc, source, getFilter(), getOperationsPerTick());
-        context.setInverted(isUpgradedWith(AEItems.INVERTER_CARD));
-        context.setCanLearn(isUpgradedWith(AppliedE.LEARNING_CARD.get()));
-        importStrategy.transfer(context);
-        return context.hasDoneWork();
+        var doneWork = new AtomicBoolean(false);
+
+        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(itemHandler -> {
+            var emcStorage = grid.getService(KnowledgeService.class).getStorage();
+            var adjacentStorage = ExternalStorageFacade.of(itemHandler);
+            var remaining = getOperationsPerTick();
+
+            for (var slot = 0; slot < itemHandler.getSlots() && remaining > 0; slot++) {
+                var item = AEItemKey.of(itemHandler.getStackInSlot(slot));
+
+                if (item == null) {
+                    continue;
+                }
+
+                if (!getFilter().isEmpty() && getFilter().isListed(item) == isUpgradedWith(AEItems.INVERTER_CARD)) {
+                    continue;
+                }
+
+                var amount = adjacentStorage.extract(item, remaining, Actionable.SIMULATE, source);
+
+                if (amount > 0) {
+                    var mayLearn = isUpgradedWith(AppliedE.LEARNING_CARD.get());
+                    amount = emcStorage.insertItem(item, amount, Actionable.MODULATE, source, mayLearn);
+                    adjacentStorage.extract(item, amount, Actionable.MODULATE, source);
+                    remaining -= Ints.saturatedCast(amount);
+                }
+            }
+
+            if (remaining < getOperationsPerTick()) {
+                doneWork.set(true);
+            }
+        });
+
+        return doneWork.get();
     }
 
     @Override

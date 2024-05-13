@@ -1,11 +1,19 @@
 package gripe._90.appliede.part;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.primitives.Ints;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.items.ItemHandlerHelper;
 
-import appeng.api.behaviors.StackExportStrategy;
+import appeng.api.config.Actionable;
 import appeng.api.config.SchedulingMode;
 import appeng.api.config.Settings;
 import appeng.api.networking.IGrid;
@@ -20,14 +28,10 @@ import appeng.menu.implementations.IOBusMenu;
 import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
-import appeng.util.prioritylist.DefaultPriorityList;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.strategy.EMCItemExportStrategy;
-import gripe._90.appliede.me.strategy.EMCTransferContext;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EMCExportBusPart extends IOBusPart {
     public static final MenuType<IOBusMenu> MENU =
             MenuTypeBuilder.create(IOBusMenu::new, EMCExportBusPart.class).build("emc_export_bus");
@@ -44,7 +48,8 @@ public class EMCExportBusPart extends IOBusPart {
     private static final PartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, AppEng.makeId("part/export_bus_has_channel"));
 
-    private StackExportStrategy strategy;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EMCExportBusPart.class);
+
     private int nextSlot = 0;
 
     public EMCExportBusPart(IPartItem<?> partItem) {
@@ -66,59 +71,73 @@ public class EMCExportBusPart extends IOBusPart {
 
     @Override
     protected boolean doBusWork(IGrid grid) {
-        var emcStorage = grid.getService(KnowledgeService.class).getStorage();
-        var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
-        var context = new EMCTransferContext(emcStorage, source, DefaultPriorityList.INSTANCE, getOperationsPerTick());
-        var slot = 0;
+        var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+        var blockEntity = getLevel().getBlockEntity(adjacentPos);
 
-        for (slot = 0; slot < availableSlots() && context.hasOperationsLeft(); slot++) {
-            var what = getConfig().getKey(getStartingSlot(schedulingMode, slot));
+        if (blockEntity == null) {
+            return false;
+        }
 
-            if (!(what instanceof AEItemKey item)) {
-                continue;
+        var doneWork = new AtomicBoolean(false);
+
+        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(itemHandler -> {
+            var emcStorage = grid.getService(KnowledgeService.class).getStorage();
+            var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
+            var remaining = getOperationsPerTick();
+            var slot = 0;
+
+            for (slot = 0; slot < availableSlots() && remaining > 0; slot++) {
+                // spotless:off
+                var startingSlot = switch (schedulingMode) {
+                    case RANDOM -> getLevel().getRandom().nextInt(availableSlots());
+                    case ROUNDROBIN -> (nextSlot + slot) % availableSlots();
+                    default -> slot;
+                };
+                // spotless:on
+                var what = getConfig().getKey(startingSlot);
+
+                if (!(what instanceof AEItemKey item)) {
+                    continue;
+                }
+
+                var stack = item.toStack(remaining);
+                var extracted = emcStorage.extractItem(item, remaining, Actionable.SIMULATE, source, true);
+                var remainder = ItemHandlerHelper.insertItem(itemHandler, stack, true);
+                var wasInserted = extracted - remainder.getCount();
+
+                if (wasInserted > 0) {
+                    extracted = emcStorage.extractItem(item, remaining, Actionable.MODULATE, source, true);
+                    remainder = ItemHandlerHelper.insertItem(itemHandler, stack, false);
+                    wasInserted = extracted - remainder.getCount();
+
+                    if (wasInserted < extracted) {
+                        var leftover = extracted - wasInserted;
+                        emcStorage.insertItem(item, leftover, Actionable.MODULATE, source, false);
+
+                        if (leftover > 0) {
+                            LOGGER.error(
+                                    "Storage export: adjacent block unexpectedly refused insert, voided {}x{}",
+                                    leftover,
+                                    item);
+                        }
+                    }
+                }
+
+                if (wasInserted > 0) {
+                    remaining -= Ints.saturatedCast(wasInserted);
+                }
             }
 
-            var amount = getStrategy().transfer(context, item, context.getOperationsRemaining());
+            if (remaining < getOperationsPerTick()) {
+                if (schedulingMode == SchedulingMode.ROUNDROBIN) {
+                    nextSlot = (nextSlot + slot) % availableSlots();
+                }
 
-            if (amount > 0) {
-                context.reduceOperationsRemaining(amount);
+                doneWork.set(true);
             }
-        }
+        });
 
-        if (context.hasDoneWork()) {
-            updateSchedulingMode(schedulingMode, slot);
-        }
-
-        return context.hasDoneWork();
-    }
-
-    private StackExportStrategy getStrategy() {
-        if (strategy == null) {
-            var self = getHost().getBlockEntity();
-            var fromPos = self.getBlockPos().relative(getSide());
-            var fromSide = getSide().getOpposite();
-            strategy = new EMCItemExportStrategy((ServerLevel) getLevel(), fromPos, fromSide);
-        }
-
-        return strategy;
-    }
-
-    private int getStartingSlot(SchedulingMode schedulingMode, int x) {
-        if (schedulingMode == SchedulingMode.RANDOM) {
-            return getLevel().getRandom().nextInt(availableSlots());
-        }
-
-        if (schedulingMode == SchedulingMode.ROUNDROBIN) {
-            return (nextSlot + x) % availableSlots();
-        }
-
-        return x;
-    }
-
-    private void updateSchedulingMode(SchedulingMode schedulingMode, int x) {
-        if (schedulingMode == SchedulingMode.ROUNDROBIN) {
-            nextSlot = (nextSlot + x) % availableSlots();
-        }
+        return doneWork.get();
     }
 
     @Override
