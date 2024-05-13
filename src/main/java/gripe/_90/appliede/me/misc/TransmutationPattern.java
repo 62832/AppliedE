@@ -1,10 +1,7 @@
-package gripe._90.appliede.me.service;
+package gripe._90.appliede.me.misc;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Objects;
-
-import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -24,54 +21,28 @@ public final class TransmutationPattern implements IPatternDetails {
     private static final String NBT_AMOUNT = "amount";
     private static final String NBT_TIER = "tier";
 
-    private final AEItemKey definition;
-
-    @Nullable
     private final AEItemKey item;
-
     private final long amount;
     private final int tier;
 
-    public TransmutationPattern(AEItemKey definition) {
-        this.definition = definition;
-        var tag = Objects.requireNonNull(definition.getTag());
+    private final AEItemKey definition;
 
-        if (tag.contains(NBT_ITEM)) {
-            item = AEItemKey.fromTag(tag.getCompound(NBT_ITEM));
-            amount = tag.getLong(NBT_AMOUNT);
-            tier = 1;
-        } else {
-            item = null;
-            amount = 1;
-            tier = tag.getInt(NBT_TIER);
-        }
-    }
-
-    public TransmutationPattern(@Nullable AEItemKey item, long amount, int tier) {
-        this.item = item;
-        this.amount = item != null ? amount : 1;
-        this.tier = item != null ? 1 : tier;
+    public TransmutationPattern(AEItemKey item, long amount) {
+        tier = 0;
 
         var tag = new CompoundTag();
-
-        if (item != null) {
-            tag.put(NBT_ITEM, item.toTag());
-            tag.putLong(NBT_AMOUNT, amount);
-        }
-
-        if (tier > 1) {
-            tag.putInt(NBT_TIER, tier);
-        }
-
-        definition = AEItemKey.of(AppliedE.TRANSMUTATION_PATTERN.get(), tag);
+        tag.put(NBT_ITEM, (this.item = item).toTag());
+        tag.putLong(NBT_AMOUNT, this.amount = amount);
+        definition = AEItemKey.of(AppliedE.DUMMY_EMC_ITEM.get(), tag);
     }
 
     public TransmutationPattern(int tier) {
-        this(null, 1, tier);
-    }
+        item = null;
+        amount = 0;
 
-    public TransmutationPattern(AEItemKey item, long amount) {
-        this(item, amount, 1);
+        var tag = new CompoundTag();
+        tag.putInt(NBT_TIER, this.tier = tier);
+        definition = AEItemKey.of(AppliedE.DUMMY_EMC_ITEM.get(), tag);
     }
 
     @Override
@@ -136,7 +107,6 @@ public final class TransmutationPattern implements IPatternDetails {
             return input.matches(getPossibleInputs()[0]);
         }
 
-        @Nullable
         @Override
         public AEKey getRemainingKey(AEKey template) {
             return null;

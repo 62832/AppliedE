@@ -63,7 +63,6 @@ import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.misc.LearnAllItemsPacket;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.service.TransmutationPatternItem;
 import gripe._90.appliede.me.strategy.EMCContainerItemStrategy;
 import gripe._90.appliede.me.strategy.EMCExportStrategy;
 import gripe._90.appliede.me.strategy.EMCImportStrategy;
@@ -104,7 +103,6 @@ public final class AppliedE {
 
         return part(EMCModulePart.class, EMCModulePart::new);
     });
-    public static final RegistryObject<Item> TRANSMUTATION_PATTERN = ITEMS.register("transmutation_pattern", TransmutationPatternItem::new);
 
     public static final RegistryObject<EMCInterfaceBlock> EMC_INTERFACE = BLOCKS.register("emc_interface", () -> {
         var block = new EMCInterfaceBlock();
@@ -126,13 +124,13 @@ public final class AppliedE {
     public static final RegistryObject<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
     public static final RegistryObject<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
+    public static final RegistryObject<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
+
     public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> Addons.AE2WTLIB.isLoaded()
             ? AE2WTIntegration.getWirelessTerminalItem()
             : new DummyIntegrationItem(new Item.Properties().stacksTo(1), Addons.AE2WTLIB));
 
     static {
-        ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
-
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
         MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
         MENU_TYPES.register("emc_export_bus", () -> EMCExportBusPart.MENU);
@@ -238,30 +236,38 @@ public final class AppliedE {
         private static void setup(IEventBus bus) {
             ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AppliedEConfig.Client.SPEC);
 
-            bus.addListener((FMLClientSetupEvent event) -> {
-                event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, EMCRenderer.INSTANCE));
-                event.enqueueWork(() -> {
-                    InitScreens.register(
-                            EMCInterfaceMenu.TYPE,
-                            EMCInterfaceScreen<EMCInterfaceMenu>::new,
-                            "/screens/appliede/emc_interface.json");
-                    InitScreens.register(
-                            EMCSetStockAmountMenu.TYPE, EMCSetStockAmountScreen::new, "/screens/set_stock_amount.json");
-                    InitScreens.register(EMCExportBusPart.MENU, IOBusScreen::new, "/screens/export_bus.json");
-                    InitScreens.register(EMCImportBusPart.MENU, IOBusScreen::new, "/screens/import_bus.json");
-                    InitScreens.register(
-                            TransmutationTerminalMenu.TYPE,
-                            TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
-                            "/screens/appliede/transmutation_terminal.json");
+            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
+                AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, EMCRenderer.INSTANCE);
 
-                    if (Addons.AE2WTLIB.isLoaded()) {
-                        AE2WTIntegration.Client.initScreen();
-                    }
-                });
-            });
+                InitScreens.register(
+                        EMCInterfaceMenu.TYPE,
+                        EMCInterfaceScreen<EMCInterfaceMenu>::new,
+                        "/screens/appliede/emc_interface.json");
+                InitScreens.register(
+                        EMCSetStockAmountMenu.TYPE,
+                        EMCSetStockAmountScreen::new,
+                        "/screens/set_stock_amount.json");
+                InitScreens.register(
+                        EMCExportBusPart.MENU,
+                        IOBusScreen::new,
+                        "/screens/export_bus.json");
+                InitScreens.register(
+                        EMCImportBusPart.MENU,
+                        IOBusScreen::new,
+                        "/screens/import_bus.json");
+                InitScreens.register(
+                        TransmutationTerminalMenu.TYPE,
+                        TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
+                        "/screens/appliede/transmutation_terminal.json");
 
-            bus.addListener((RegisterColorHandlersEvent.Item event) ->
-                    event.register(new StaticItemColor(AEColor.TRANSPARENT), AppliedE.TRANSMUTATION_TERMINAL.get()));
+                if (Addons.AE2WTLIB.isLoaded()) {
+                    AE2WTIntegration.Client.initScreen();
+                }
+            }));
+
+            bus.addListener((RegisterColorHandlersEvent.Item event) -> event.register(
+                    new StaticItemColor(AEColor.TRANSPARENT),
+                    AppliedE.TRANSMUTATION_TERMINAL.get()));
         }
     }
 }

@@ -39,8 +39,8 @@ import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
+import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.service.TransmutationPattern;
 
 public final class EMCModulePart extends AEBasePart
         implements IStorageProvider, ICraftingProvider, IPriorityHost, IGridTickable {

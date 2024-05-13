@@ -32,6 +32,7 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
+import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.mixin.misc.TransmutationOfflineAccessor;
 import gripe._90.appliede.part.EMCModulePart;
 

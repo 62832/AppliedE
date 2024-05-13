@@ -13,8 +13,8 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.crafting.ICraftingPlan;
 import appeng.menu.me.crafting.CraftConfirmMenu;
 
+import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(value = CraftConfirmMenu.class, remap = false)
 public abstract class CraftConfirmMenuMixin {
