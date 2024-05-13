@@ -32,23 +32,23 @@ public record EMCImportStrategy(ServerLevel level, BlockPos pos, Direction side)
         }
 
         var remainingTransfer = context.getOperationsRemaining() * EMCKeyType.TYPE.getAmountPerOperation();
-        var inserted = new AtomicLong(0);
+        var transferred = new AtomicLong(0);
 
         be.getCapability(PECapabilities.EMC_STORAGE_CAPABILITY).ifPresent(emcStorage -> {
-            inserted.set(Math.min(remainingTransfer, emcStorage.getStoredEmc()));
-            StorageHelper.poweredInsert(
+            var inserted = StorageHelper.poweredInsert(
                     context.getEnergySource(),
                     context.getInternalStorage().getInventory(),
                     EMCKey.BASE,
-                    inserted.get(),
+                    Math.min(remainingTransfer, emcStorage.getStoredEmc()),
                     context.getActionSource(),
                     Actionable.MODULATE);
-            emcStorage.extractEmc(inserted.get(), IEmcStorage.EmcAction.EXECUTE);
+            emcStorage.extractEmc(inserted, IEmcStorage.EmcAction.EXECUTE);
 
-            var opsUsed = Math.max(1, inserted.get() / EMCKeyType.TYPE.getAmountPerOperation());
+            var opsUsed = Math.max(1, inserted / EMCKeyType.TYPE.getAmountPerOperation());
             context.reduceOperationsRemaining(opsUsed);
+            transferred.set(inserted);
         });
 
-        return inserted.get() > 0;
+        return transferred.get() > 0;
     }
 }
