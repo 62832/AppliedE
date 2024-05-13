@@ -357,6 +357,11 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         }
     }
 
+    public void clearContent() {
+        storage.clear();
+        upgrades.clear();
+    }
+
     public <T> LazyOptional<T> getCapability(Capability<T> cap) {
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return storageHolder.cast();

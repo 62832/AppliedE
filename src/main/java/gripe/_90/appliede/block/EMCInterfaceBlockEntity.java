@@ -78,7 +78,7 @@ public class EMCInterfaceBlockEntity extends AENetworkBlockEntity implements EMC
     @Override
     public void clearContent() {
         super.clearContent();
-        getStorage().clear();
+        logic.clearContent();
     }
 
     @Override

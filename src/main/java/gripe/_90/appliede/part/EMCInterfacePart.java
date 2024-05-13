@@ -91,7 +91,7 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     @Override
     public void clearContent() {
         super.clearContent();
-        getStorage().clear();
+        logic.clearContent();
     }
 
     @Override
