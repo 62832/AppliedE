@@ -76,21 +76,19 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
             var knowledge = grid.getService(KnowledgeService.class);
 
-            if (knowledge != null) {
-                if (!knowledge.isTrackingPlayer(player)) {
-                    return 0;
-                }
-
-                return (int) knowledge
-                        .getStorage()
-                        .insertItem(
-                                AEItemKey.of(stack),
-                                singleItem ? 1 : stack.getCount(),
-                                Actionable.MODULATE,
-                                IActionSource.ofPlayer(player),
-                                true,
-                                this::showLearned);
+            if (!knowledge.isTrackingPlayer(player)) {
+                return 0;
             }
+
+            return (int) knowledge
+                    .getStorage()
+                    .insertItem(
+                            AEItemKey.of(stack),
+                            singleItem ? 1 : stack.getCount(),
+                            Actionable.MODULATE,
+                            IActionSource.ofPlayer(player),
+                            true,
+                            this::showLearned);
         }
 
         return 0;

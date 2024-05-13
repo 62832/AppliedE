@@ -169,8 +169,8 @@ public final class AppliedE {
 
     static {
         PACKET_HANDLER.messageBuilder(LearnAllItemsPacket.class, 0)
-                .encoder(LearnAllItemsPacket::encode)
-                .decoder(LearnAllItemsPacket::decode)
+                .encoder((packet, buffer) -> {})
+                .decoder(buffer -> new LearnAllItemsPacket())
                 .consumerMainThread(LearnAllItemsPacket::handle)
                 .add();
     }
