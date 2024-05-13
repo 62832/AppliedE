@@ -9,7 +9,6 @@ import com.google.common.primitives.Ints;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 
 import appeng.api.config.Actionable;
@@ -32,6 +31,8 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class EMCStorage implements MEStorage {
+    private static final int MAX_OPERATIONS = 96;
+
     private final KnowledgeService service;
     private int highestTier = 1;
 
@@ -177,7 +178,7 @@ public final class EMCStorage implements MEStorage {
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalInserted = 0L;
 
-        for (var i = 0; i < Container.LARGE_MAX_STACK_SIZE && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
             var canDeposit = itemEmc.longValue();
 
             if (mode == Actionable.MODULATE) {
@@ -185,7 +186,12 @@ public final class EMCStorage implements MEStorage {
                 insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
             }
 
-            var inserted = canDeposit / itemEmc.longValue();
+            var inserted = canDeposit >= itemEmc.longValue() ? 1 : 0;
+
+            if (inserted == 0) {
+                break;
+            }
+
             totalInserted += inserted;
             source.player().ifPresent(player -> {
                 if (mode == Actionable.MODULATE) {
@@ -240,7 +246,7 @@ public final class EMCStorage implements MEStorage {
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalExtracted = 0L;
 
-        for (var i = 0; i < Container.LARGE_MAX_STACK_SIZE && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
             var canWithdraw = extract(EMCKey.BASE, itemEmc.longValue(), Actionable.SIMULATE, source);
 
             if (mode == Actionable.MODULATE) {
@@ -248,7 +254,12 @@ public final class EMCStorage implements MEStorage {
                 extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
             }
 
-            var extracted = canWithdraw / itemEmc.longValue();
+            var extracted = canWithdraw >= itemEmc.longValue() ? 1 : 0;
+
+            if (extracted == 0) {
+                break;
+            }
+
             totalExtracted += extracted;
             source.player().ifPresent(player -> {
                 if (mode == Actionable.MODULATE) {
