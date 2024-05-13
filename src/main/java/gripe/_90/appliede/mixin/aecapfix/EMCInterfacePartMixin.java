@@ -10,13 +10,13 @@ import gripe._90.aecapfix.AECapFix;
 import gripe._90.appliede.me.misc.EMCInterfaceLogic;
 import gripe._90.appliede.part.EMCInterfacePart;
 
-@Mixin(value = EMCInterfacePart.class, remap = false)
+@Mixin(EMCInterfacePart.class)
 public abstract class EMCInterfacePartMixin extends AEBasePart implements AECapFix.Invalidator {
     public EMCInterfacePartMixin(IPartItem<?> partItem) {
         super(partItem);
     }
 
-    @Shadow
+    @Shadow(remap = false)
     public abstract EMCInterfaceLogic getInterfaceLogic();
 
     @Override

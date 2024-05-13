@@ -10,9 +10,9 @@ import net.minecraft.world.item.Item;
 
 import appeng.api.features.P2PTunnelAttunement;
 
-@Mixin(value = P2PTunnelAttunement.class, remap = false)
+@Mixin(P2PTunnelAttunement.class)
 public interface P2PTunnelAttunementAccessor {
-    @Accessor
+    @Accessor(remap = false)
     static Map<TagKey<Item>, Item> getTagTunnels() {
         throw new AssertionError();
     }

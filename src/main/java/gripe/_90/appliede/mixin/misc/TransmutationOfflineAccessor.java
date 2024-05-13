@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.impl.TransmutationOffline;
 
-@Mixin(value = TransmutationOffline.class, remap = false)
+@Mixin(TransmutationOffline.class)
 public interface TransmutationOfflineAccessor {
-    @Invoker
+    @Invoker(remap = false)
     static IKnowledgeProvider invokeForPlayer(UUID uuid) {
         throw new AssertionError();
     }

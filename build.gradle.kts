@@ -57,7 +57,6 @@ repositories {
 minecraft {
     mappings("parchment", "2023.09.03-1.20.1")
     copyIdeResources.set(true)
-    accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
 
     runs {
         configureEach {

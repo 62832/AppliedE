@@ -7,8 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import appeng.core.sync.BasePacket;
 
-@Mixin(value = BasePacket.class, remap = false)
+@Mixin(BasePacket.class)
 public interface BasePacketAccessor {
-    @Invoker
+    @Invoker(remap = false)
     void invokeConfigureWrite(FriendlyByteBuf data);
 }

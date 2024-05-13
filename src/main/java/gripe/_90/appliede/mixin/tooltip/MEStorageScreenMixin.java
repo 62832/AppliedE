@@ -34,8 +34,7 @@ public abstract class MEStorageScreenMixin<C extends MEStorageMenu> extends AEBa
             method = "renderGridInventoryEntryTooltip",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;",
-                    remap = true),
+                    target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             remap = false)
     // spotless:on

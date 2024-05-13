@@ -27,7 +27,7 @@ public class EMCInterfaceScreen<M extends EMCInterfaceMenu> extends UpgradeableS
             var button = new SetAmountButton(btn -> {
                 var idx = amountButtons.indexOf(btn);
                 var configSlot = configSlots.get(idx);
-                menu.openSetAmountMenu(configSlot.slot);
+                menu.openSetAmountMenu(configSlot.getSlotIndex());
             });
 
             button.setDisableBackground(true);
