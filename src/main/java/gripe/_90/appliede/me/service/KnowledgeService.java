@@ -90,7 +90,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     private void addProvider(UUID playerUUID) {
-        providers.put(playerUUID, () -> {
+        providers.putIfAbsent(playerUUID, () -> {
             try {
                 return ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
             } catch (NullPointerException e) {
@@ -171,9 +171,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     BigInteger getEmc() {
         return providers.entrySet().stream()
                 .filter(tpeHandler::notSharingEmc)
-                .map(provider -> provider.getValue().get())
-                .distinct()
-                .map(IKnowledgeProvider::getEmc)
+                .map(provider -> provider.getValue().get().getEmc())
                 .reduce(BigInteger.ZERO, BigInteger::add);
     }
 
