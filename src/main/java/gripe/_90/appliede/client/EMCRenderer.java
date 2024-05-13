@@ -14,18 +14,14 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import appeng.api.client.AEKeyRenderHandler;
-import appeng.api.client.AEKeyRendering;
 import appeng.client.gui.style.Blitter;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
-import gripe._90.appliede.me.key.EMCKeyType;
 
-@SuppressWarnings("unused")
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     public static final EMCRenderer INSTANCE = new EMCRenderer();
 
@@ -34,10 +30,6 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
             .apply(AppliedE.id("item/dummy_emc_item"));
 
     private EMCRenderer() {}
-
-    public static void register(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, new EMCRenderer()));
-    }
 
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics guiGraphics, int x, int y, EMCKey stack) {

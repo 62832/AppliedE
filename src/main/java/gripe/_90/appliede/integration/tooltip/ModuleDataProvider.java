@@ -1,5 +1,7 @@
 package gripe._90.appliede.integration.tooltip;
 
+import java.util.Objects;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -20,17 +22,17 @@ public class ModuleDataProvider implements BodyProvider<EMCModulePart>, ServerDa
 
     @Override
     public void provideServerData(Player player, EMCModulePart module, CompoundTag serverData) {
-        var node = module.getGridNode();
-        if (node == null) return;
-
+        var node = Objects.requireNonNull(module.getGridNode());
         var uuid = node.getOwningPlayerProfileId();
-        if (uuid == null) return;
 
-        var profileCache = node.getLevel().getServer().getProfileCache();
-        if (profileCache == null) return;
+        if (uuid != null) {
+            var profileCache = node.getLevel().getServer().getProfileCache();
 
-        var profile = profileCache.get(uuid);
-        profile.ifPresent(p -> serverData.putString("owner", p.getName()));
+            if (profileCache != null) {
+                var profile = profileCache.get(uuid);
+                profile.ifPresent(p -> serverData.putString("owner", p.getName()));
+            }
+        }
     }
 
     @Override
@@ -38,11 +40,8 @@ public class ModuleDataProvider implements BodyProvider<EMCModulePart>, ServerDa
         var serverData = context.serverData();
 
         if (serverData.contains("owner")) {
-            tooltip.addLine(tooltipFor(serverData.getString("owner")));
+            var owner = serverData.getString("owner");
+            tooltip.addLine(Component.translatable("tooltip." + AppliedE.MODID + ".owner", owner));
         }
-    }
-
-    private Component tooltipFor(String username) {
-        return Component.translatable("tooltip." + AppliedE.MODID + ".owner", username);
     }
 }

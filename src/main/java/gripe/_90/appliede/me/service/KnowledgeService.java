@@ -136,7 +136,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             var patterns = new ArrayList<IPatternDetails>();
 
             for (var tier = storage.getHighestTier(); tier > 1; tier--) {
-                patterns.add(new TransmutationPattern(null, tier));
+                patterns.add(new TransmutationPattern(tier));
             }
 
             for (var item : getKnownItems()) {

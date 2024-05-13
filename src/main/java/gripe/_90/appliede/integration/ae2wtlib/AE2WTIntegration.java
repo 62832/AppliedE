@@ -29,14 +29,18 @@ public class AE2WTIntegration {
     }
 
     public static ItemStack getChargedTerminal() {
-        var stack = TERMINAL.getDefaultInstance();
-        var terminal = (WTTItem) TERMINAL;
-        terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
-        return stack;
+        if (TERMINAL != null) {
+            var stack = TERMINAL.getDefaultInstance();
+            var terminal = (WTTItem) TERMINAL;
+            terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
+            return stack;
+        }
+
+        return ItemStack.EMPTY;
     }
 
     public static void addTerminalToAE2WTLibTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().location().getNamespace().equals(Addons.AE2WTLIB.getModId())) {
+        if (TERMINAL != null && event.getTabKey().location().getNamespace().equals(Addons.AE2WTLIB.getModId())) {
             event.accept(TERMINAL);
             event.accept(AE2WTIntegration.getChargedTerminal());
         }

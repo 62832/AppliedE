@@ -49,7 +49,7 @@ public final class TransmutationPattern implements IPatternDetails {
 
     public TransmutationPattern(@Nullable AEItemKey item, long amount, int tier) {
         this.item = item;
-        this.amount = amount;
+        this.amount = item != null ? amount : 1;
         this.tier = item != null ? 1 : tier;
 
         var tag = new CompoundTag();
@@ -66,8 +66,8 @@ public final class TransmutationPattern implements IPatternDetails {
         definition = AEItemKey.of(AppliedE.TRANSMUTATION_PATTERN.get(), tag);
     }
 
-    public TransmutationPattern(@Nullable AEItemKey item, int tier) {
-        this(item, 1, tier);
+    public TransmutationPattern(int tier) {
+        this(null, 1, tier);
     }
 
     public TransmutationPattern(AEItemKey item, long amount) {
