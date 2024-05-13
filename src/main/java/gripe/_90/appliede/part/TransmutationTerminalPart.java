@@ -71,6 +71,6 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements I
 
     @Override
     public IPartModel getStaticModels() {
-        return selectModel(MODELS_OFF, MODELS_ON, MODELS_HAS_CHANNEL);
+        return isActive() ? MODELS_HAS_CHANNEL : isPowered() ? MODELS_ON : MODELS_OFF;
     }
 }

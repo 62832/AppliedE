@@ -25,7 +25,7 @@ public class EMCItemImportStrategy implements StackImportStrategy {
 
     @Override
     public boolean transfer(StackTransferContext context) {
-        if (!(context instanceof EMCItemTransferContext ctx)) {
+        if (!(context instanceof EMCTransferContext ctx)) {
             return false;
         }
 

@@ -33,7 +33,7 @@ public class EMCItemExportStrategy implements StackExportStrategy {
 
     @Override
     public long transfer(StackTransferContext context, AEKey what, long amount) {
-        if (!(context instanceof EMCItemTransferContext emcContext)) {
+        if (!(context instanceof EMCTransferContext emcContext)) {
             return 0;
         }
 

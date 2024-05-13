@@ -121,13 +121,7 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
 
     @Override
     public IPartModel getStaticModels() {
-        if (this.isActive() && this.isPowered()) {
-            return MODELS_HAS_CHANNEL;
-        } else if (this.isPowered()) {
-            return MODELS_ON;
-        } else {
-            return MODELS_OFF;
-        }
+        return isActive() ? MODELS_HAS_CHANNEL : isPowered() ? MODELS_ON : MODELS_OFF;
     }
 
     @Override

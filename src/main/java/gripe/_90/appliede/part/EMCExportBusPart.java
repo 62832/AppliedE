@@ -25,7 +25,7 @@ import appeng.util.prioritylist.DefaultPriorityList;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.strategy.EMCItemExportStrategy;
-import gripe._90.appliede.me.strategy.EMCItemTransferContext;
+import gripe._90.appliede.me.strategy.EMCTransferContext;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCExportBusPart extends IOBusPart {
@@ -68,12 +68,11 @@ public class EMCExportBusPart extends IOBusPart {
     protected boolean doBusWork(IGrid grid) {
         var emcStorage = grid.getService(KnowledgeService.class).getStorage();
         var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
-        var context =
-                new EMCItemTransferContext(emcStorage, source, DefaultPriorityList.INSTANCE, getOperationsPerTick());
+        var context = new EMCTransferContext(emcStorage, source, DefaultPriorityList.INSTANCE, getOperationsPerTick());
+        var slot = 0;
 
-        var i = 0;
-        for (i = 0; i < availableSlots() && context.hasOperationsLeft(); i++) {
-            var what = getConfig().getKey(getStartingSlot(schedulingMode, i));
+        for (slot = 0; slot < availableSlots() && context.hasOperationsLeft(); slot++) {
+            var what = getConfig().getKey(getStartingSlot(schedulingMode, slot));
 
             if (!(what instanceof AEItemKey item)) {
                 continue;
@@ -87,7 +86,7 @@ public class EMCExportBusPart extends IOBusPart {
         }
 
         if (context.hasDoneWork()) {
-            updateSchedulingMode(schedulingMode, i);
+            updateSchedulingMode(schedulingMode, slot);
         }
 
         return context.hasDoneWork();
@@ -137,12 +136,6 @@ public class EMCExportBusPart extends IOBusPart {
 
     @Override
     public IPartModel getStaticModels() {
-        if (this.isActive() && this.isPowered()) {
-            return MODELS_HAS_CHANNEL;
-        } else if (this.isPowered()) {
-            return MODELS_ON;
-        } else {
-            return MODELS_OFF;
-        }
+        return isActive() ? MODELS_HAS_CHANNEL : isPowered() ? MODELS_ON : MODELS_OFF;
     }
 }

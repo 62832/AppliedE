@@ -14,7 +14,7 @@ import appeng.util.prioritylist.IPartitionList;
 import gripe._90.appliede.me.service.EMCStorage;
 
 @SuppressWarnings({"UnstableApiUsage", "NonExtendableApiUsage"})
-public class EMCItemTransferContext implements StackTransferContext {
+public class EMCTransferContext implements StackTransferContext {
     private final EMCStorage emcStorage;
     private final IActionSource actionSource;
     private final IPartitionList filter;
@@ -24,7 +24,7 @@ public class EMCItemTransferContext implements StackTransferContext {
     private boolean isInverted;
     private boolean canLearn;
 
-    public EMCItemTransferContext(
+    public EMCTransferContext(
             EMCStorage emcStorage, IActionSource actionSource, IPartitionList filter, int operationsRemaining) {
         this.emcStorage = emcStorage;
         this.actionSource = actionSource;

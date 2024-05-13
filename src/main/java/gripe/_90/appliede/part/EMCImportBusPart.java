@@ -22,7 +22,7 @@ import appeng.parts.automation.IOBusPart;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.strategy.EMCItemImportStrategy;
-import gripe._90.appliede.me.strategy.EMCItemTransferContext;
+import gripe._90.appliede.me.strategy.EMCTransferContext;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EMCImportBusPart extends IOBusPart {
@@ -61,8 +61,8 @@ public class EMCImportBusPart extends IOBusPart {
             importStrategy = new EMCItemImportStrategy((ServerLevel) getLevel(), fromPos, fromSide);
         }
 
-        var context = new EMCItemTransferContext(
-                grid.getService(KnowledgeService.class).getStorage(), source, getFilter(), getOperationsPerTick());
+        var emc = grid.getService(KnowledgeService.class).getStorage();
+        var context = new EMCTransferContext(emc, source, getFilter(), getOperationsPerTick());
         context.setInverted(isUpgradedWith(AEItems.INVERTER_CARD));
         context.setCanLearn(isUpgradedWith(AppliedE.LEARNING_CARD.get()));
         importStrategy.transfer(context);
@@ -78,12 +78,6 @@ public class EMCImportBusPart extends IOBusPart {
 
     @Override
     public IPartModel getStaticModels() {
-        if (this.isActive() && this.isPowered()) {
-            return MODELS_HAS_CHANNEL;
-        } else if (this.isPowered()) {
-            return MODELS_ON;
-        } else {
-            return MODELS_OFF;
-        }
+        return isActive() ? MODELS_HAS_CHANNEL : isPowered() ? MODELS_ON : MODELS_OFF;
     }
 }
