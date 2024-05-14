@@ -49,7 +49,6 @@ public final class EMCModulePart extends AEBasePart
 
     private final Object2LongMap<AEKey> outputs = new Object2LongOpenHashMap<>();
 
-    private boolean wasOnline = false;
     private int priority = 0;
 
     public EMCModulePart(IPartItem<?> partItem) {
@@ -77,13 +76,8 @@ public final class EMCModulePart extends AEBasePart
     @Override
     protected void onMainNodeStateChanged(IGridNodeListener.State reason) {
         super.onMainNodeStateChanged(reason);
-        var online = getMainNode().isOnline();
-
-        if (wasOnline != online) {
-            wasOnline = online;
-            IStorageProvider.requestUpdate(getMainNode());
-            ICraftingProvider.requestUpdate(getMainNode());
-        }
+        IStorageProvider.requestUpdate(getMainNode());
+        ICraftingProvider.requestUpdate(getMainNode());
     }
 
     @Override

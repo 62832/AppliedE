@@ -125,7 +125,9 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public MEStorage getStorage(IManagedGridNode node) {
-        return !moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) ? storage : NullInventory.of();
+        return !moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) && node.isActive()
+                ? storage
+                : NullInventory.of();
     }
 
     public Set<AEItemKey> getKnownItems() {
@@ -137,7 +139,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
-        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.get(0))) {
+        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) && node.isActive()) {
             var patterns = new ArrayList<IPatternDetails>();
 
             for (var tier = storage.getHighestTier(); tier > 1; tier--) {
