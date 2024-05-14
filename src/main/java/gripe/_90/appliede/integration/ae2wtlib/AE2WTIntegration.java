@@ -13,14 +13,14 @@ import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
-    private static Item TERMINAL;
+    private static final Item TERMINAL;
+
+    static {
+        TERMINAL = new WTTItem();
+        GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
+    }
 
     public static Item getWirelessTerminalItem() {
-        if (TERMINAL == null) {
-            TERMINAL = new WTTItem();
-            GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
-        }
-
         return TERMINAL;
     }
 
@@ -29,18 +29,14 @@ public class AE2WTIntegration {
     }
 
     public static ItemStack getChargedTerminal() {
-        if (TERMINAL != null) {
-            var stack = TERMINAL.getDefaultInstance();
-            var terminal = (WTTItem) TERMINAL;
-            terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
-            return stack;
-        }
-
-        return ItemStack.EMPTY;
+        var stack = TERMINAL.getDefaultInstance();
+        var terminal = (WTTItem) TERMINAL;
+        terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
+        return stack;
     }
 
     public static void addTerminalToAE2WTLibTab(BuildCreativeModeTabContentsEvent event) {
-        if (TERMINAL != null && event.getTabKey().location().getNamespace().equals(Addons.AE2WTLIB.getModId())) {
+        if (event.getTabKey().location().getNamespace().equals(Addons.AE2WTLIB.getModId())) {
             event.accept(TERMINAL);
             event.accept(AE2WTIntegration.getChargedTerminal());
         }
