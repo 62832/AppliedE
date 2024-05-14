@@ -28,7 +28,7 @@ public final class TransmutationPattern implements IPatternDetails {
     private final AEItemKey definition;
 
     public TransmutationPattern(AEItemKey item, long amount) {
-        tier = 0;
+        tier = 1;
 
         var tag = new CompoundTag();
         tag.put(NBT_ITEM, (this.item = item).toTag());
@@ -38,7 +38,7 @@ public final class TransmutationPattern implements IPatternDetails {
 
     public TransmutationPattern(int tier) {
         item = null;
-        amount = 0;
+        amount = 1;
 
         var tag = new CompoundTag();
         tag.putInt(NBT_TIER, this.tier = tier);
