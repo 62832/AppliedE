@@ -76,7 +76,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
         storage = ConfigInventory.storage(this::storageFilter, slots, this::onStorageChanged);
-        upgrades = UpgradeInventories.forMachine(is, 1, this::onUpgradesChanged);
+        upgrades = UpgradeInventories.forMachine(is, 1, host::saveChanges);
 
         localInvHandler = new DelegatingMEInventory(storage);
         plannedWork = new GenericStack[slots];
@@ -126,7 +126,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         var knowledge = grid.getService(KnowledgeService.class);
         return knowledge.knowsItem(item)
-                || (upgrades.isInstalled(AppliedE.LEARNING_CARD.get())
+                || (isUpgradedWith(AppliedE.LEARNING_CARD.get())
                         && IEMCProxy.INSTANCE.hasValue(item.toStack())
                         && knowledge.getProviderFor(uuid) != null);
     }
@@ -253,11 +253,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             var depositedItems = grid.getService(KnowledgeService.class)
                     .getStorage()
                     .insertItem(
-                            item,
-                            amount,
-                            Actionable.MODULATE,
-                            source,
-                            upgrades.isInstalled(AppliedE.LEARNING_CARD.get()));
+                            item, amount, Actionable.MODULATE, source, isUpgradedWith(AppliedE.LEARNING_CARD.get()));
 
             if (depositedItems > 0) {
                 storage.extract(slot, what, depositedItems, Actionable.MODULATE);
@@ -309,14 +305,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private void onStorageChanged() {
         host.saveChanges();
         updatePlan();
-    }
-
-    private void onUpgradesChanged() {
-        if (emcStorage != null) {
-            emcStorage.setMayLearn(upgrades.isInstalled(AppliedE.LEARNING_CARD.get()));
-        }
-
-        host.saveChanges();
     }
 
     public void notifyNeighbours() {
@@ -377,23 +365,18 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         localInvHolder.invalidate();
     }
 
-    private static class WrappedEMCStorage implements MEStorage {
+    private class WrappedEMCStorage implements MEStorage {
         private final EMCStorage storage;
-        private boolean mayLearn;
 
         private WrappedEMCStorage(EMCStorage storage) {
             this.storage = storage;
         }
 
-        private void setMayLearn(boolean mayLearn) {
-            this.mayLearn = mayLearn;
-        }
-
         @Override
         public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-            return what instanceof AEItemKey item
-                    ? storage.insertItem(item, amount, mode, source, mayLearn)
-                    : storage.insert(what, amount, mode, source);
+            return what instanceof AEItemKey item && mainNode.isActive()
+                    ? storage.insertItem(item, amount, mode, source, isUpgradedWith(AppliedE.LEARNING_CARD.get()))
+                    : localInvHandler.insert(what, amount, mode, source);
         }
 
         @Override
