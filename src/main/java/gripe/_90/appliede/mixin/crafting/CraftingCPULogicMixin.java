@@ -52,8 +52,7 @@ public abstract class CraftingCPULogicMixin {
             method = "finishJob",
             at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void removeOnCancel(
-            boolean success, CallbackInfo ci, Iterator<?> iter, Map.Entry<IPatternDetails, ?> entry) {
+    private void removeOnCancel(boolean success, CallbackInfo ci, Iterator<?> it, Map.Entry<IPatternDetails, ?> entry) {
         appliede$removeTemporaryPattern(entry.getKey());
     }
 

@@ -48,11 +48,7 @@ final class TeamProjectEHandler {
     }
 
     static class Proxy {
-        private final Object handler;
-
-        Proxy() {
-            handler = Addons.TEAMPE.isLoaded() ? new TeamProjectEHandler() : null;
-        }
+        private final Object handler = Addons.TEAMPE.isLoaded() ? new TeamProjectEHandler() : null;
 
         boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
             return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);

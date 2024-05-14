@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -77,12 +78,14 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
             for (var mainNode : moduleNodes) {
                 var node = mainNode.getNode();
-                if (node == null) continue;
 
-                var uuid = node.getOwningPlayerProfileId();
-                if (uuid == null) continue;
+                if (node != null) {
+                    var uuid = node.getOwningPlayerProfileId();
 
-                addProvider(uuid);
+                    if (uuid != null) {
+                        addProvider(uuid);
+                    }
+                }
             }
 
             moduleNodes.forEach(IStorageProvider::requestUpdate);
@@ -94,14 +97,14 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         providers.putIfAbsent(playerUUID, () -> {
             try {
                 return ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
-            } catch (NullPointerException e) {
+            } catch (Throwable e) {
                 return TransmutationOfflineAccessor.invokeForPlayer(playerUUID);
             }
         });
     }
 
-    Set<IKnowledgeProvider> getProviders() {
-        return providers.values().stream().map(Supplier::get).collect(Collectors.toUnmodifiableSet());
+    List<IKnowledgeProvider> getProviders() {
+        return providers.values().stream().map(Supplier::get).toList();
     }
 
     public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
@@ -129,7 +132,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return getProviders().stream()
                 .flatMap(provider -> provider.getKnowledge().stream())
                 .map(item -> AEItemKey.of(item.createStack()))
-                .collect(Collectors.toSet());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
