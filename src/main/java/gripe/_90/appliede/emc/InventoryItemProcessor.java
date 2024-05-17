@@ -1,16 +1,13 @@
 package gripe._90.appliede.emc;
 
-import java.math.BigInteger;
-
 import org.jetbrains.annotations.NotNull;
 
-import appeng.api.stacks.AEItemKey;
+import net.minecraft.world.item.ItemStack;
+
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.IUpgradeableItem;
 import appeng.items.contents.NetworkToolMenuHost;
 import appeng.items.tools.NetworkToolItem;
-
-import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.nbt.INBTProcessor;
@@ -32,43 +29,43 @@ public class InventoryItemProcessor implements INBTProcessor {
 
     @Override
     public long recalculateEMC(@NotNull ItemInfo itemInfo, long currentEmc) throws ArithmeticException {
-        if (itemInfo.getItem() instanceof NetworkToolItem) {
-            var stack = itemInfo.createStack();
-            var bigEmc = BigInteger.valueOf(currentEmc);
+        var stack = itemInfo.createStack();
+
+        if (stack.getItem() instanceof NetworkToolItem) {
             var inventory = new NetworkToolMenuHost(null, -1, stack, null).getInventory();
 
             for (var item : inventory) {
-                var itemEmc = IEMCProxy.INSTANCE.getValue(item);
-                bigEmc = bigEmc.add(BigInteger.valueOf(itemEmc).multiply(BigInteger.valueOf(item.getCount())));
+                currentEmc = addEmc(currentEmc, item);
             }
 
-            return AppliedE.clampedLong(bigEmc);
-        }
-
-        if (!(itemInfo.getItem() instanceof IUpgradeableItem upgradeable)) {
             return currentEmc;
         }
 
-        var stack = itemInfo.createStack();
-        var bigEmc = BigInteger.valueOf(currentEmc);
+        if (!(stack.getItem() instanceof IUpgradeableItem upgradeable)) {
+            return currentEmc;
+        }
 
         for (var upgrade : upgradeable.getUpgrades(stack)) {
-            bigEmc = bigEmc.add(BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(upgrade)));
+            currentEmc = addEmc(currentEmc, upgrade);
         }
 
-        var cell = StorageCells.getCellInventory(itemInfo.createStack(), null);
+        var cell = StorageCells.getCellInventory(stack, null);
 
-        if (cell == null) {
-            return AppliedE.clampedLong(bigEmc);
+        if (cell != null && !cell.getAvailableStacks().isEmpty()) {
+            return 0;
         }
 
-        for (var key : cell.getAvailableStacks()) {
-            if (key.getKey() instanceof AEItemKey item) {
-                var keyEmc = IEMCProxy.INSTANCE.getValue(item.toStack());
-                bigEmc = bigEmc.add(BigInteger.valueOf(keyEmc).multiply(BigInteger.valueOf(key.getLongValue())));
-            }
+        return currentEmc;
+    }
+
+    private long addEmc(long currentEmc, ItemStack stack) throws ArithmeticException {
+        var itemEmc = IEMCProxy.INSTANCE.getValue(stack);
+
+        if (itemEmc > 0) {
+            var stackEmc = Math.multiplyExact(itemEmc, stack.getCount());
+            currentEmc = Math.addExact(currentEmc, stackEmc);
         }
 
-        return AppliedE.clampedLong(bigEmc);
+        return currentEmc;
     }
 }

@@ -219,10 +219,6 @@ public final class AppliedE {
         return new ResourceLocation(MODID, path);
     }
 
-    public static long clampedLong(BigInteger toClamp) {
-        return toClamp.min(BigInteger.valueOf(Long.MAX_VALUE)).longValue();
-    }
-
     private static void registerEMC(ItemLike item, int emc) {
         APICustomEMCMapper.INSTANCE.registerCustomEMC(MODID, new CustomEMCRegistration(NSSItem.createItem(item), emc));
     }
