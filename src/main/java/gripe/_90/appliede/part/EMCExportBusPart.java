@@ -69,9 +69,11 @@ public class EMCExportBusPart extends IOBusPart {
         extra.putInt("nextSlot", nextSlot);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     protected boolean doBusWork(IGrid grid) {
         var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+        var facing = getSide().getOpposite();
         var blockEntity = getLevel().getBlockEntity(adjacentPos);
 
         if (blockEntity == null) {
@@ -80,20 +82,19 @@ public class EMCExportBusPart extends IOBusPart {
 
         var doneWork = new AtomicBoolean(false);
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(itemHandler -> {
+        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing).ifPresent(itemHandler -> {
             var emcStorage = grid.getService(KnowledgeService.class).getStorage();
             var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
             var remaining = getOperationsPerTick();
             var slot = 0;
 
             for (slot = 0; slot < availableSlots() && remaining > 0; slot++) {
-                // spotless:off
-                var startingSlot = switch (schedulingMode) {
-                    case RANDOM -> getLevel().getRandom().nextInt(availableSlots());
-                    case ROUNDROBIN -> (nextSlot + slot) % availableSlots();
-                    default -> slot;
-                };
-                // spotless:on
+                var startingSlot =
+                        switch (schedulingMode) {
+                            case RANDOM -> getLevel().getRandom().nextInt(availableSlots());
+                            case ROUNDROBIN -> (nextSlot + slot) % availableSlots();
+                            default -> slot;
+                        };
                 var what = getConfig().getKey(startingSlot);
 
                 if (!(what instanceof AEItemKey item)) {

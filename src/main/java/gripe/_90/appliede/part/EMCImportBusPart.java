@@ -52,9 +52,11 @@ public class EMCImportBusPart extends IOBusPart {
         return MENU;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     protected boolean doBusWork(IGrid grid) {
         var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+        var facing = getSide().getOpposite();
         var blockEntity = getLevel().getBlockEntity(adjacentPos);
 
         if (blockEntity == null) {
@@ -63,7 +65,7 @@ public class EMCImportBusPart extends IOBusPart {
 
         var doneWork = new AtomicBoolean(false);
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(itemHandler -> {
+        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing).ifPresent(itemHandler -> {
             var emcStorage = grid.getService(KnowledgeService.class).getStorage();
             var adjacentStorage = ExternalStorageFacade.of(itemHandler);
             var remaining = getOperationsPerTick();
