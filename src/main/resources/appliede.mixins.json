@@ -11,6 +11,7 @@
     "crafting.CraftConfirmMenuMixin",
     "crafting.CraftingCPULogicMixin",
     "crafting.CraftingTreeNodeMixin",
+    "misc.KnowledgeSyncEmcPKTMixin",
     "misc.MEStorageMenuMixin",
     "misc.P2PTunnelAttunementAccessor",
     "misc.TransmutationOfflineAccessor",
