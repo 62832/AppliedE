@@ -56,7 +56,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final IActionSource source = IActionSource.ofMachine(this);
 
     private final LazyOptional<IItemHandler> storageHolder;
-    private final LazyOptional<MEStorage> localInvHolder;
 
     @Nullable
     private WrappedEMCStorage emcStorage;
@@ -85,7 +84,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         storage.useRegisteredCapacities();
 
         storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
-        localInvHolder = LazyOptional.of(this::getInventory);
     }
 
     public ConfigInventory getConfig() {
@@ -298,8 +296,8 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     private void onConfigRowChanged() {
-        readConfig();
         host.saveChanges();
+        readConfig();
     }
 
     private void onStorageChanged() {
@@ -354,7 +352,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return storageHolder.cast();
         } else if (cap == Capabilities.STORAGE) {
-            return localInvHolder.cast();
+            return LazyOptional.of(this::getInventory).cast();
         } else {
             return LazyOptional.empty();
         }
@@ -362,7 +360,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
     public void invalidateCaps() {
         storageHolder.invalidate();
-        localInvHolder.invalidate();
     }
 
     private class WrappedEMCStorage implements MEStorage {
