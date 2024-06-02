@@ -373,7 +373,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
             return what instanceof AEItemKey item && mainNode.isActive()
                     ? storage.insertItem(item, amount, mode, source, isUpgradedWith(AppliedE.LEARNING_CARD.get()))
-                    : localInvHandler.insert(what, amount, mode, source);
+                    : 0;
         }
 
         @Override
