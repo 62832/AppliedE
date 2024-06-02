@@ -117,7 +117,13 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     Supplier<IKnowledgeProvider> getProviderFor(IActionHost host) {
         var node = host.getActionableNode();
-        return node != null ? getProviderFor(node.getOwningPlayerProfileId()) : null;
+
+        if (node != null) {
+            var uuid = node.getOwningPlayerProfileId();
+            return uuid != null ? getProviderFor(uuid) : null;
+        }
+
+        return null;
     }
 
     public EMCStorage getStorage() {

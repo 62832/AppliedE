@@ -7,7 +7,7 @@ import appeng.core.sync.packets.MEInventoryUpdatePacket;
 
 @Mixin(MEInventoryUpdatePacket.class)
 public interface MEInventoryUpdatePacketAccessor {
-    @Invoker(value = "<init>", remap = false)
+    @Invoker("<init>")
     static MEInventoryUpdatePacket create() {
         throw new AssertionError();
     }
