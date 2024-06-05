@@ -157,7 +157,7 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        if (!mayLearn && !service.knowsItem(what) || !IEMCProxy.INSTANCE.hasValue(what.toStack())) {
+        if (!mayLearn && !service.getKnownItems().contains(what) || !IEMCProxy.INSTANCE.hasValue(what.toStack())) {
             return 0;
         }
 
@@ -232,7 +232,7 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        if (amount <= 0 || !service.knowsItem(what)) {
+        if (amount <= 0 || !service.getKnownItems().contains(what)) {
             return 0;
         }
 

@@ -2,6 +2,7 @@ package gripe._90.appliede.me.misc;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -54,13 +55,14 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final MEStorage localInvHandler;
     private final GenericStack[] plannedWork;
     private final IActionSource source = IActionSource.ofMachine(this);
+    private final UUID ownerUUID;
 
     private final LazyOptional<IItemHandler> storageHolder;
 
     @Nullable
     private WrappedEMCStorage emcStorage;
 
-    private boolean hasConfig = false;
+    private boolean hasConfig;
 
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
         this(node, host, is, 9);
@@ -84,6 +86,9 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         storage.useRegisteredCapacities();
 
         storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
+
+        var gridNode = mainNode.getNode();
+        ownerUUID = gridNode != null ? gridNode.getOwningPlayerProfileId() : null;
     }
 
     public ConfigInventory getConfig() {
@@ -116,17 +121,15 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             return true;
         }
 
-        var uuid = node.getOwningPlayerProfileId();
-
-        if (uuid == null) {
+        if (ownerUUID == null) {
             return false;
         }
 
         var knowledge = grid.getService(KnowledgeService.class);
-        return knowledge.knowsItem(item)
+        return knowledge.getKnownItems().contains(item)
                 || (isUpgradedWith(AppliedE.LEARNING_CARD.get())
                         && IEMCProxy.INSTANCE.hasValue(item.toStack())
-                        && knowledge.getProviderFor(uuid) != null);
+                        && knowledge.getProviderFor(ownerUUID) != null);
     }
 
     public void readFromNBT(CompoundTag tag) {

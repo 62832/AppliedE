@@ -49,15 +49,20 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     private final IGrid grid;
+    private Set<AEItemKey> knownItemCache;
 
     public KnowledgeService(IGrid grid) {
         this.grid = grid;
-        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> updatePatterns());
+        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
+            knownItemCache = null;
+            updatePatterns();
+        });
     }
 
     @Override
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
+            knownItemCache = null;
             moduleNodes.add(module.getMainNode());
             var uuid = gridNode.getOwningPlayerProfileId();
 
@@ -72,6 +77,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     @Override
     public void removeNode(IGridNode gridNode) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
+            knownItemCache = null;
             moduleNodes.remove(module.getMainNode());
             providers.clear();
             tpeHandler.clear();
@@ -137,11 +143,15 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public Set<AEItemKey> getKnownItems() {
-        return getProviders().stream()
-                .flatMap(provider -> provider.getKnowledge().stream())
-                .map(item -> AEItemKey.of(item.createStack()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toUnmodifiableSet());
+        if (knownItemCache == null) {
+            knownItemCache = getProviders().stream()
+                    .flatMap(provider -> provider.getKnowledge().stream())
+                    .map(item -> AEItemKey.of(item.createStack()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet());
+        }
+
+        return knownItemCache;
     }
 
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
@@ -186,10 +196,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
                 .filter(tpeHandler::notSharingEmc)
                 .map(provider -> provider.getValue().get().getEmc())
                 .reduce(BigInteger.ZERO, BigInteger::add);
-    }
-
-    public boolean knowsItem(AEItemKey item) {
-        return getProviders().stream().anyMatch(provider -> provider.hasKnowledge(item.toStack()));
     }
 
     public boolean isTrackingPlayer(Player player) {
