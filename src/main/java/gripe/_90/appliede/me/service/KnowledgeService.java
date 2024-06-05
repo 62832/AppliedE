@@ -42,6 +42,8 @@ import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
+    private static final int TICKS_PER_SYNC = 20;
+
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
@@ -50,6 +52,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     private final IGrid grid;
     private Set<AEItemKey> knownItemCache;
+    private int ticksSinceLastSync;
 
     public KnowledgeService(IGrid grid) {
         this.grid = grid;
@@ -96,6 +99,13 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
             moduleNodes.forEach(IStorageProvider::requestUpdate);
             updatePatterns();
+        }
+    }
+
+    @Override
+    public void onServerStartTick() {
+        if (ticksSinceLastSync < TICKS_PER_SYNC) {
+            ticksSinceLastSync++;
         }
     }
 
@@ -204,17 +214,21 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     void syncEmc() {
-        var server = ServerLifecycleHooks.getCurrentServer();
+        if (ticksSinceLastSync == TICKS_PER_SYNC) {
+            var server = ServerLifecycleHooks.getCurrentServer();
 
-        if (server != null) {
-            providers.forEach((uuid, provider) -> {
-                var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
-                var player = IPlayerRegistry.getConnected(server, id);
+            if (server != null) {
+                providers.forEach((uuid, provider) -> {
+                    var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
+                    var player = IPlayerRegistry.getConnected(server, id);
 
-                if (player != null) {
-                    provider.get().syncEmc(player);
-                }
-            });
+                    if (player != null) {
+                        provider.get().syncEmc(player);
+                    }
+                });
+            }
+
+            ticksSinceLastSync = 0;
         }
     }
 }
