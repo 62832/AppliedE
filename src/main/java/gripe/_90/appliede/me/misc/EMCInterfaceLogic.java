@@ -55,7 +55,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final MEStorage localInvHandler;
     private final GenericStack[] plannedWork;
     private final IActionSource source = IActionSource.ofMachine(this);
-    private final UUID ownerUUID;
 
     private final LazyOptional<IItemHandler> storageHolder;
 
@@ -63,6 +62,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private WrappedEMCStorage emcStorage;
 
     private boolean hasConfig;
+    private UUID ownerUUID;
 
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
         this(node, host, is, 9);
@@ -86,9 +86,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         storage.useRegisteredCapacities();
 
         storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
-
-        var gridNode = mainNode.getNode();
-        ownerUUID = gridNode != null ? gridNode.getOwningPlayerProfileId() : null;
     }
 
     public ConfigInventory getConfig() {
@@ -122,7 +119,13 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         }
 
         if (ownerUUID == null) {
-            return false;
+            var uuid = node.getOwningPlayerProfileId();
+
+            if (uuid == null) {
+                return false;
+            }
+
+            ownerUUID = uuid;
         }
 
         var knowledge = grid.getService(KnowledgeService.class);
