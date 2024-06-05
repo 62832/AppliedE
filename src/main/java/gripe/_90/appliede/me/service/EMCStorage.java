@@ -69,14 +69,26 @@ public final class EMCStorage implements MEStorage {
             var providers = new ArrayList<>(service.getProviders());
             Collections.shuffle(providers);
 
-            var toInsert = BigInteger.valueOf(amount).multiply(AppliedE.TIER_LIMIT.pow(emc.getTier() - 1));
-            var divisor = BigInteger.valueOf(service.getProviders().size());
-            var quotient = toInsert.divide(divisor);
-            var remainder = toInsert.remainder(divisor).longValue();
+            if (emc.getTier() == 1) {
+                var divisor = service.getProviders().size();
+                var quotient = amount / divisor;
+                var remainder = amount % divisor;
 
-            for (var p = 0; p < providers.size(); p++) {
-                var provider = providers.get(p);
-                provider.setEmc(provider.getEmc().add(quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO)));
+                for (var p = 0; p < providers.size(); p++) {
+                    var provider = providers.get(p);
+                    provider.setEmc(provider.getEmc().add(BigInteger.valueOf(quotient + (p < remainder ? 1 : 0))));
+                }
+            } else {
+                var toInsert = BigInteger.valueOf(amount).multiply(AppliedE.TIER_LIMIT.pow(emc.getTier() - 1));
+                var divisor = BigInteger.valueOf(service.getProviders().size());
+                var quotient = toInsert.divide(divisor);
+                var remainder = toInsert.remainder(divisor).longValue();
+
+                for (var p = 0; p < providers.size(); p++) {
+                    var provider = providers.get(p);
+                    var added = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
+                    provider.setEmc(provider.getEmc().add(added));
+                }
             }
 
             service.syncEmc();
