@@ -98,6 +98,7 @@ dependencies {
     runtimeOnly(fg.deobf(libs.projectex.get()))
     runtimeOnly(fg.deobf(libs.jei.get()))
     runtimeOnly(fg.deobf(libs.jade.get()))
+    runtimeOnly(fg.deobf(libs.spark.get()))
 }
 
 tasks {
