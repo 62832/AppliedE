@@ -32,6 +32,7 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class EMCStorage implements MEStorage {
     private static final int MAX_OPERATIONS = 96;
+    private static final BigInteger MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
 
     private final KnowledgeService service;
     private int highestTier = 1;
@@ -186,32 +187,51 @@ public final class EMCStorage implements MEStorage {
             }
         }
 
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
+        var itemEmcLong = IEMCProxy.INSTANCE.getSellValue(what.toStack());
+        var itemEmc = BigInteger.valueOf(itemEmcLong);
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
         var totalInserted = 0L;
-
-        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
-            var canDeposit = itemEmc.longValue();
-
+        if (totalEmc.compareTo(MAX_LONG) < 0) {
+            var totalEmcLong = totalEmc.longValue();
             if (mode == Actionable.MODULATE) {
-                canDeposit = getAmountAfterPowerExpenditure(canDeposit);
-                insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
+                totalEmcLong = getAmountAfterPowerExpenditure(totalEmcLong);
+                // round up
+                var possibleAmount = (totalEmcLong + (itemEmcLong - 1)) / itemEmcLong;
+                totalEmcLong = itemEmc.longValue() * possibleAmount;
+                insert(EMCKey.BASE, totalEmcLong, Actionable.MODULATE, source);
+                totalInserted = totalEmcLong / itemEmc.longValue();
+                var finalInserted = totalInserted;
+                source.player().ifPresent(player -> {
+                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(finalInserted));
+                });
+            } else {
+                totalInserted = amount;
             }
+        } else {
+            for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+                var canDeposit = itemEmc.longValue();
 
-            var inserted = canDeposit >= itemEmc.longValue() ? 1 : 0;
-
-            if (inserted == 0) {
-                break;
-            }
-
-            totalInserted += inserted;
-            source.player().ifPresent(player -> {
                 if (mode == Actionable.MODULATE) {
-                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+                    canDeposit = getAmountAfterPowerExpenditure(canDeposit);
+                    insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
                 }
-            });
 
-            totalEmc = totalEmc.subtract(itemEmc);
+                var inserted = canDeposit >= itemEmc.longValue() ? 1 : 0;
+
+                if (inserted == 0) {
+                    break;
+                }
+
+                totalInserted += inserted;
+
+                if (mode == Actionable.MODULATE) {
+                    source.player().ifPresent(player -> {
+                        AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
+                    });
+                }
+
+                totalEmc = totalEmc.subtract(itemEmc);
+            }
         }
 
         if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
@@ -254,35 +274,51 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
+        var itemEmcLong = IEMCProxy.INSTANCE.getValue(what.toStack());
+        var itemEmc = BigInteger.valueOf(itemEmcLong);
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var totalExtracted = 0L;
-
-        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
-            var canWithdraw = extract(EMCKey.BASE, itemEmc.longValue(), Actionable.SIMULATE, source);
-
+        if (totalEmc.compareTo(MAX_LONG) < 0) {
+            var totalEmcLong = totalEmc.longValue();
             if (mode == Actionable.MODULATE) {
-                canWithdraw = getAmountAfterPowerExpenditure(canWithdraw);
-                extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
+                totalEmcLong = getAmountAfterPowerExpenditure(totalEmcLong);
+                // round up
+                var possibleAmount = (totalEmcLong + (itemEmcLong - 1)) / itemEmcLong;
+                totalEmcLong = itemEmc.longValue() * possibleAmount;
+                extract(EMCKey.BASE, totalEmcLong, Actionable.MODULATE, source);
+                var finalLongEmc = totalEmcLong;
+                source.player().ifPresent(player -> {
+                    AeStats.ItemsExtracted.addToPlayer(player, Ints.saturatedCast(finalLongEmc / itemEmc.longValue()));
+                });
             }
+            return totalEmcLong / itemEmc.longValue();
+        }  else {
+            var totalExtracted = 0L;
 
-            var extracted = canWithdraw >= itemEmc.longValue() ? 1 : 0;
+            for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
+                var canWithdraw = extract(EMCKey.BASE, itemEmc.longValue(), Actionable.SIMULATE, source);
 
-            if (extracted == 0) {
-                break;
-            }
-
-            totalExtracted += extracted;
-            source.player().ifPresent(player -> {
                 if (mode == Actionable.MODULATE) {
-                    AeStats.ItemsExtracted.addToPlayer(player, Ints.saturatedCast(extracted));
+                    canWithdraw = getAmountAfterPowerExpenditure(canWithdraw);
+                    extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
                 }
-            });
 
-            totalEmc = totalEmc.subtract(itemEmc);
+                var extracted = canWithdraw >= itemEmc.longValue() ? 1 : 0;
+
+                if (extracted == 0) {
+                    break;
+                }
+
+                totalExtracted += extracted;
+                if (mode == Actionable.MODULATE) {
+                    source.player().ifPresent(player -> {
+                        AeStats.ItemsExtracted.addToPlayer(player, Ints.saturatedCast(extracted));
+                    });
+                }
+
+                totalEmc = totalEmc.subtract(itemEmc);
+            }
+            return totalExtracted;
         }
-
-        return totalExtracted;
     }
 
     private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
