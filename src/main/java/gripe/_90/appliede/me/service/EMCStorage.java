@@ -1,11 +1,12 @@
 package gripe._90.appliede.me.service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
-
-import com.google.common.primitives.Ints;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +20,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
-import appeng.core.stats.AeStats;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
@@ -31,10 +31,8 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class EMCStorage implements MEStorage {
-    private static final int MAX_OPERATIONS = 96;
-
     private final KnowledgeService service;
-    private int highestTier = 1;
+    private int highestTier;
 
     EMCStorage(KnowledgeService service) {
         this.service = service;
@@ -80,15 +78,7 @@ public final class EMCStorage implements MEStorage {
                 }
             } else {
                 var toInsert = BigInteger.valueOf(amount).multiply(AppliedE.TIER_LIMIT.pow(emc.getTier() - 1));
-                var divisor = BigInteger.valueOf(service.getProviders().size());
-                var quotient = toInsert.divide(divisor);
-                var remainder = toInsert.remainder(divisor).longValue();
-
-                for (var p = 0; p < providers.size(); p++) {
-                    var provider = providers.get(p);
-                    var added = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
-                    provider.setEmc(provider.getEmc().add(added));
-                }
+                distributeEmc(toInsert, providers);
             }
 
             service.syncEmc();
@@ -115,20 +105,13 @@ public final class EMCStorage implements MEStorage {
         var rawEmc = BigInteger.valueOf(amount).multiply(multiplier);
         var extracted = BigInteger.ZERO;
 
-        var providers = new ArrayList<IKnowledgeProvider>();
-
-        if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
-            var provider = service.getProviderFor(source.player().get());
-            providers.add(provider.get());
-        } else {
-            providers.addAll(service.getProviders());
-        }
+        var providers = getProvidersForExtraction(source);
 
         while (!providers.isEmpty() && extracted.compareTo(rawEmc) < 0) {
             Collections.shuffle(providers);
 
             var toExtract = rawEmc.subtract(extracted);
-            var divisor = BigInteger.valueOf(service.getProviders().size());
+            var divisor = BigInteger.valueOf(providers.size());
             var quotient = toExtract.divide(divisor);
             var remainder = toExtract.remainder(divisor).longValue();
 
@@ -173,65 +156,46 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var playerProvider = source.player().map(service::getProviderFor).orElse(null);
-        var machineProvider = source.machine().map(service::getProviderFor).orElse(null);
+        var player = source.player().orElse(null);
+        var machine = source.machine().orElse(null);
+        var playerProvider = player != null ? service.getProviderFor(player) : null;
+        var machineProvider = machine != null ? service.getProviderFor(machine) : null;
 
         if (mayLearn) {
-            if (source.player().isPresent() && playerProvider == null) {
+            if (player != null && playerProvider == null) {
                 return 0;
             }
 
-            if (source.machine().isPresent() && machineProvider == null) {
+            if (machine != null && machineProvider == null) {
                 return 0;
             }
         }
 
-        var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
-        var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var totalInserted = 0L;
+        if (mode == Actionable.MODULATE) {
+            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
+            var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
-        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
-            var canDeposit = itemEmc.longValue();
+            var providers = new ArrayList<>(service.getProviders());
+            Collections.shuffle(providers);
+            distributeEmc(totalEmc, providers);
+            service.syncEmc();
 
-            if (mode == Actionable.MODULATE) {
-                canDeposit = getAmountAfterPowerExpenditure(canDeposit);
-                insert(EMCKey.BASE, canDeposit, Actionable.MODULATE, source);
-            }
-
-            var inserted = canDeposit >= itemEmc.longValue() ? 1 : 0;
-
-            if (inserted == 0) {
-                break;
-            }
-
-            totalInserted += inserted;
-            source.player().ifPresent(player -> {
-                if (mode == Actionable.MODULATE) {
-                    AeStats.ItemsInserted.addToPlayer(player, Ints.saturatedCast(inserted));
-                }
-            });
-
-            totalEmc = totalEmc.subtract(itemEmc);
-        }
-
-        if (mode == Actionable.MODULATE && mayLearn && totalInserted > 0) {
-            source.player().ifPresent(player -> {
-                if (playerProvider != null && !playerProvider.get().hasKnowledge(what.toStack())) {
+            if (mayLearn) {
+                if (player != null && !playerProvider.get().hasKnowledge(what.toStack())) {
                     addKnowledge(what, playerProvider.get(), player);
                     onLearn.run();
                 }
-            });
-            source.machine().ifPresent(host -> {
-                if (machineProvider != null && !machineProvider.get().hasKnowledge(what.toStack())) {
-                    var node = Objects.requireNonNull(host.getActionableNode());
-                    var player = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
-                    addKnowledge(what, machineProvider.get(), player);
+
+                if (machine != null && !machineProvider.get().hasKnowledge(what.toStack())) {
+                    var node = Objects.requireNonNull(machine.getActionableNode());
+                    var owner = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
+                    addKnowledge(what, machineProvider.get(), owner);
                     onLearn.run();
                 }
-            });
+            }
         }
 
-        return totalInserted;
+        return amount;
     }
 
     public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
@@ -256,33 +220,96 @@ public final class EMCStorage implements MEStorage {
 
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
-        var totalExtracted = 0L;
 
-        for (var i = 0; i < MAX_OPERATIONS && totalEmc.compareTo(BigInteger.ZERO) > 0; i++) {
-            var canWithdraw = extract(EMCKey.BASE, itemEmc.longValue(), Actionable.SIMULATE, source);
+        if (mode == Actionable.MODULATE) {
+            var providers = getProvidersForExtraction(source);
+            var availableEmc = totalEmc.min(
+                    providers.equals(service.getProviders())
+                            ? service.getEmc()
+                            : providers.get(0).getEmc());
+            amount = availableEmc.divide(itemEmc).longValue();
 
-            if (mode == Actionable.MODULATE) {
-                canWithdraw = getAmountAfterPowerExpenditure(canWithdraw);
-                extract(EMCKey.BASE, canWithdraw, Actionable.MODULATE, source);
+            if (amount == 0) {
+                return 0;
             }
 
-            var extracted = canWithdraw >= itemEmc.longValue() ? 1 : 0;
+            var withdrawn = BigInteger.ZERO;
 
-            if (extracted == 0) {
-                break;
-            }
+            while (!providers.isEmpty() && withdrawn.compareTo(availableEmc) < 0) {
+                Collections.shuffle(providers);
 
-            totalExtracted += extracted;
-            source.player().ifPresent(player -> {
-                if (mode == Actionable.MODULATE) {
-                    AeStats.ItemsExtracted.addToPlayer(player, Ints.saturatedCast(extracted));
+                var toWithdraw = availableEmc.subtract(withdrawn);
+                var divisor = BigInteger.valueOf(providers.size());
+                var quotient = toWithdraw.divide(divisor);
+                var remainder = toWithdraw.remainder(divisor).longValue();
+
+                for (var p = 0; p < providers.size(); p++) {
+                    var provider = providers.get(p);
+
+                    var currentEmc = provider.getEmc();
+                    var toWithdrawFrom = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
+
+                    if (currentEmc.compareTo(toWithdrawFrom) <= 0) {
+                        provider.setEmc(BigInteger.ZERO);
+                        withdrawn = withdrawn.add(currentEmc);
+                        // provider exhausted, remove from current list to re-extract deficit from remaining providers
+                        providers.remove(provider);
+                    } else {
+                        provider.setEmc(currentEmc.subtract(toWithdrawFrom));
+                        withdrawn = withdrawn.add(toWithdrawFrom);
+                    }
                 }
-            });
+            }
 
-            totalEmc = totalEmc.subtract(itemEmc);
+            service.syncEmc();
         }
 
-        return totalExtracted;
+        return amount;
+    }
+
+    private void distributeEmc(BigInteger totalEmc, ArrayList<IKnowledgeProvider> providers) {
+        var divisor = BigInteger.valueOf(service.getProviders().size());
+        var quotient = totalEmc.divide(divisor);
+        var remainder = totalEmc.remainder(divisor).longValue();
+
+        for (var p = 0; p < providers.size(); p++) {
+            var provider = providers.get(p);
+            var added = quotient.add(p < remainder ? BigInteger.ONE : BigInteger.ZERO);
+            provider.setEmc(provider.getEmc().add(added));
+        }
+    }
+
+    private List<IKnowledgeProvider> getProvidersForExtraction(IActionSource source) {
+        var providers = new ArrayList<IKnowledgeProvider>();
+
+        if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
+            var provider = service.getProviderFor(source.player().get());
+            providers.add(provider.get());
+        } else {
+            providers.addAll(service.getProviders());
+        }
+
+        return providers;
+    }
+
+    // FIXME
+    private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
+        var energyService = service.getGrid().getEnergyService();
+        var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier);
+        var toExpend = new BigDecimal(maxEmc).multiply(multiplier).min(BigDecimal.valueOf(Double.MAX_VALUE));
+
+        var available = energyService.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
+        var expended = Math.min(available, toExpend.doubleValue());
+        energyService.extractAEPower(expended, Actionable.MODULATE, PowerMultiplier.ONE);
+
+        return expended == available
+                ? maxEmc.divide(itemEmc).longValue()
+                : BigDecimal.valueOf(available)
+                        .min(toExpend)
+                        .divide(multiplier, RoundingMode.HALF_UP)
+                        .toBigInteger()
+                        .divide(itemEmc)
+                        .longValue();
     }
 
     private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
@@ -294,14 +321,11 @@ public final class EMCStorage implements MEStorage {
         }
     }
 
-    private long getAmountAfterPowerExpenditure(long maxAmount) {
-        var energyService = service.getGrid().getEnergyService();
-        var availablePower = energyService.extractAEPower(maxAmount, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-        energyService.extractAEPower(Math.min(maxAmount, availablePower), Actionable.MODULATE, PowerMultiplier.CONFIG);
-        return (double) maxAmount <= availablePower ? maxAmount : (long) availablePower;
-    }
-
     int getHighestTier() {
+        if (highestTier == 0) {
+            getAvailableStacks(new KeyCounter());
+        }
+
         return highestTier;
     }
 
