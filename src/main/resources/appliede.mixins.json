@@ -14,7 +14,6 @@
     "misc.MEStorageMenuMixin",
     "misc.P2PTunnelAttunementAccessor",
     "misc.TransmutationOfflineAccessor",
-    "teamprojecte.TeamKnowledgeProviderMixin",
     "tooltip.BasePacketAccessor",
     "tooltip.GridInventoryEntryMixin",
     "tooltip.MEInventoryUpdatePacketAccessor",

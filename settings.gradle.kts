@@ -22,7 +22,7 @@ dependencyResolutionManagement {
             library("ae2", "appeng", "appliedenergistics2-forge").version("15.1.0")
             library("projecte", "curse.maven", "projecte-226410").version("4901949-api-4901951")
 
-            library("teampe", "curse.maven", "team-projecte-689273").version("5313878")
+            library("teampe", "curse.maven", "team-projecte-689273").version("5402805")
             library("ae2wtlib", "curse.maven", "applied-energistics-2-wireless-terminals-459929").version("5217955")
             library("aecapfix", "curse.maven", "aecapfix-914685").version("5017517")
 
