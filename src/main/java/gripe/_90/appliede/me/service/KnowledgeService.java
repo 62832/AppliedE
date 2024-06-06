@@ -4,13 +4,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -120,7 +119,13 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     List<IKnowledgeProvider> getProviders() {
-        return providers.values().stream().map(Supplier::get).toList();
+        var list = new ArrayList<IKnowledgeProvider>(providers.size());
+
+        for (var provider : providers.values()) {
+            list.add(provider.get());
+        }
+
+        return list;
     }
 
     public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
@@ -154,11 +159,17 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     public Set<AEItemKey> getKnownItems() {
         if (knownItemCache == null) {
-            knownItemCache = getProviders().stream()
-                    .flatMap(provider -> provider.getKnowledge().stream())
-                    .map(item -> AEItemKey.of(item.createStack()))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toUnmodifiableSet());
+            knownItemCache = new HashSet<>();
+
+            for (var provider : getProviders()) {
+                for (var item : provider.getKnowledge()) {
+                    var key = AEItemKey.of(item.createStack());
+
+                    if (key != null) {
+                        knownItemCache.add(key);
+                    }
+                }
+            }
         }
 
         return knownItemCache;
@@ -202,10 +213,15 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     BigInteger getEmc() {
-        return providers.entrySet().stream()
-                .filter(tpeHandler::notSharingEmc)
-                .map(provider -> provider.getValue().get().getEmc())
-                .reduce(BigInteger.ZERO, BigInteger::add);
+        var emc = BigInteger.ZERO;
+
+        for (var entry : providers.entrySet()) {
+            if (tpeHandler.notSharingEmc(entry)) {
+                emc = emc.add(entry.getValue().get().getEmc());
+            }
+        }
+
+        return emc;
     }
 
     public boolean isTrackingPlayer(Player player) {

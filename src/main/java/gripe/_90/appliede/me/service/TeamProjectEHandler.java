@@ -31,16 +31,23 @@ final class TeamProjectEHandler {
     }
 
     private boolean isPlayerInTrackedTeam(UUID uuid) {
-        return providersPerTeam.keySet().stream()
-                .anyMatch(team -> team.getMembers().contains(uuid));
+        for (var team : providersPerTeam.keySet()) {
+            if (team.getMembers().contains(uuid)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
-        return providersPerTeam.keySet().stream()
-                .filter(team -> team.getMembers().contains(uuid))
-                .findFirst()
-                .map(providersPerTeam::get)
-                .orElse(null);
+        for (var entry : providersPerTeam.entrySet()) {
+            if (entry.getKey().getMembers().contains(uuid)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 
     private void clear() {
