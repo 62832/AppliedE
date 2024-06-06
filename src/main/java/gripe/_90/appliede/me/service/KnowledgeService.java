@@ -51,6 +51,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     private final IGrid grid;
     private Set<AEItemKey> knownItemCache;
+    private boolean needsSync;
     private int ticksSinceLastSync;
 
     public KnowledgeService(IGrid grid) {
@@ -106,6 +107,24 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         if (ticksSinceLastSync < TICKS_PER_SYNC) {
             ticksSinceLastSync++;
         }
+
+        if (needsSync && ticksSinceLastSync == TICKS_PER_SYNC) {
+            var server = ServerLifecycleHooks.getCurrentServer();
+
+            if (server != null) {
+                providers.forEach((uuid, provider) -> {
+                    var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
+                    var player = IPlayerRegistry.getConnected(server, id);
+
+                    if (player != null) {
+                        provider.get().syncEmc(player);
+                    }
+                });
+            }
+
+            needsSync = false;
+            ticksSinceLastSync = 0;
+        }
     }
 
     private void addProvider(UUID playerUUID) {
@@ -119,13 +138,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     List<IKnowledgeProvider> getProviders() {
-        var list = new ArrayList<IKnowledgeProvider>(providers.size());
-
-        for (var provider : providers.values()) {
-            list.add(provider.get());
-        }
-
-        return list;
+        return providers.values().stream().map(Supplier::get).toList();
     }
 
     public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
@@ -230,21 +243,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     void syncEmc() {
-        if (ticksSinceLastSync == TICKS_PER_SYNC) {
-            var server = ServerLifecycleHooks.getCurrentServer();
-
-            if (server != null) {
-                providers.forEach((uuid, provider) -> {
-                    var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
-                    var player = IPlayerRegistry.getConnected(server, id);
-
-                    if (player != null) {
-                        provider.get().syncEmc(player);
-                    }
-                });
-            }
-
-            ticksSinceLastSync = 0;
-        }
+        needsSync = true;
     }
 }
