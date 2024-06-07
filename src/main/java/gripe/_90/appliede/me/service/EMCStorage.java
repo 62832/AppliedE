@@ -175,6 +175,12 @@ public final class EMCStorage implements MEStorage {
             var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
+            amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc);
+
+            if (amount == 0) {
+                return 0;
+            }
+
             var providers = new ArrayList<>(service.getProviders());
             Collections.shuffle(providers);
             distributeEmc(totalEmc, providers);
@@ -221,13 +227,20 @@ public final class EMCStorage implements MEStorage {
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
+        var providers = getProvidersForExtraction(source);
+        var availableEmc = totalEmc.min(
+                providers.equals(service.getProviders())
+                        ? service.getEmc()
+                        : providers.get(0).getEmc());
+
+        amount = availableEmc.divide(itemEmc).longValue();
+
+        if (amount == 0) {
+            return 0;
+        }
+
         if (mode == Actionable.MODULATE) {
-            var providers = getProvidersForExtraction(source);
-            var availableEmc = totalEmc.min(
-                    providers.equals(service.getProviders())
-                            ? service.getEmc()
-                            : providers.get(0).getEmc());
-            amount = availableEmc.divide(itemEmc).longValue();
+            amount = getAmountAfterPowerExpenditure(availableEmc, itemEmc);
 
             if (amount == 0) {
                 return 0;
@@ -292,7 +305,6 @@ public final class EMCStorage implements MEStorage {
         return providers;
     }
 
-    // FIXME
     private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
         var energyService = service.getGrid().getEnergyService();
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier);
