@@ -32,6 +32,7 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
+import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.mixin.misc.TransmutationOfflineAccessor;
 import gripe._90.appliede.part.EMCModulePart;
@@ -41,7 +42,7 @@ import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
-    private static final int TICKS_PER_SYNC = 20;
+    private static final int TICKS_PER_SYNC = AppliedEConfig.CONFIG.getSyncThrottleInterval();
 
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();

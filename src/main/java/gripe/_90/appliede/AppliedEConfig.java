@@ -15,6 +15,7 @@ public class AppliedEConfig {
     private final ForgeConfigSpec.DoubleValue moduleEnergyUsage;
     private final ForgeConfigSpec.IntValue emcPerByte;
     private final ForgeConfigSpec.BooleanValue terminalExtractFromOwnEmcOnly;
+    private final ForgeConfigSpec.IntValue syncThrottleInterval;
 
     private AppliedEConfig(ForgeConfigSpec.Builder builder) {
         moduleEnergyUsage = builder.comment("The amount of AE energy per tick used by the ME Transmutation Module.")
@@ -29,6 +30,9 @@ public class AppliedEConfig {
                         "from the player using the terminal rather than all players with modules attached.",
                         "This option does not cover re-insertion and conversion back into EMC.")
                 .define("terminalExtractFromOwnEmcOnly", false);
+        syncThrottleInterval = builder.comment(
+                        "How many ticks to wait before the next player EMC sync when manipulating stored EMC.")
+                .defineInRange("syncThrottleInterval", 20, 1, 200);
     }
 
     public double getModuleEnergyUsage() {
@@ -41,6 +45,10 @@ public class AppliedEConfig {
 
     public boolean terminalExtractFromOwnEmcOnly() {
         return terminalExtractFromOwnEmcOnly.get();
+    }
+
+    public int getSyncThrottleInterval() {
+        return syncThrottleInterval.get();
     }
 
     public static class Client {
