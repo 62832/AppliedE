@@ -29,8 +29,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import appeng.api.behaviors.ContainerItemStrategy;
-import appeng.api.behaviors.StackExportStrategy;
-import appeng.api.behaviors.StackImportStrategy;
 import appeng.api.client.AEKeyRendering;
 import appeng.api.networking.GridServices;
 import appeng.api.parts.IPart;
@@ -61,11 +59,9 @@ import gripe._90.appliede.integration.DummyIntegrationItem;
 import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
+import gripe._90.appliede.me.misc.EMCContainerItemStrategy;
 import gripe._90.appliede.me.misc.LearnAllItemsPacket;
 import gripe._90.appliede.me.service.KnowledgeService;
-import gripe._90.appliede.me.strategy.EMCContainerItemStrategy;
-import gripe._90.appliede.me.strategy.EMCExportStrategy;
-import gripe._90.appliede.me.strategy.EMCImportStrategy;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
@@ -95,12 +91,7 @@ public final class AppliedE {
     public static final RegistryObject<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
-
-        // external storage strategy not provided so as not to clash with service's mounted EMC storage
-        StackImportStrategy.register(EMCKeyType.TYPE, EMCImportStrategy::new);
-        StackExportStrategy.register(EMCKeyType.TYPE, EMCExportStrategy::new);
         ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, EMCContainerItemStrategy.INSTANCE);
-
         return part(EMCModulePart.class, EMCModulePart::new);
     });
 

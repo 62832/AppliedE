@@ -1,8 +1,6 @@
 package gripe._90.appliede.part;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.common.primitives.Ints;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
@@ -14,6 +12,7 @@ import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.storage.StorageHelper;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
@@ -25,7 +24,12 @@ import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.service.KnowledgeService;
+
+import moze_intel.projecte.api.capabilities.PECapabilities;
+import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
 public class EMCImportBusPart extends IOBusPart {
     public static final MenuType<IOBusMenu> MENU =
@@ -44,7 +48,7 @@ public class EMCImportBusPart extends IOBusPart {
             new PartModel(MODEL_BASE, AppEng.makeId("part/import_bus_has_channel"));
 
     public EMCImportBusPart(IPartItem<?> partItem) {
-        super(TickRates.ImportBus, AEItemKey.filter(), partItem);
+        super(TickRates.ImportBus, key -> AEItemKey.is(key) || key == EMCKey.BASE, partItem);
     }
 
     @Override
@@ -52,7 +56,6 @@ public class EMCImportBusPart extends IOBusPart {
         return MENU;
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     protected boolean doBusWork(IGrid grid) {
         var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
@@ -63,15 +66,35 @@ public class EMCImportBusPart extends IOBusPart {
             return false;
         }
 
-        var doneWork = new AtomicBoolean(false);
+        var emcStorage = blockEntity.getCapability(PECapabilities.EMC_STORAGE_CAPABILITY, facing);
+        var itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing);
+        var doneWork = false;
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing).ifPresent(itemHandler -> {
-            var emcStorage = grid.getService(KnowledgeService.class).getStorage();
-            var adjacentStorage = ExternalStorageFacade.of(itemHandler);
-            var remaining = getOperationsPerTick();
+        var networkEmc = grid.getService(KnowledgeService.class).getStorage();
+        var remaining = new AtomicInteger(getOperationsPerTick());
 
-            for (var slot = 0; slot < itemHandler.getSlots() && remaining > 0; slot++) {
-                var item = AEItemKey.of(itemHandler.getStackInSlot(slot));
+        emcStorage.ifPresent(handler -> {
+            if (!getFilter().isEmpty() && getFilter().isListed(EMCKey.BASE) == isUpgradedWith(AEItems.INVERTER_CARD)) {
+                return;
+            }
+
+            var emcRemaining = remaining.get() * EMCKeyType.TYPE.getAmountPerOperation();
+            var inserted = StorageHelper.poweredInsert(
+                    grid.getEnergyService(),
+                    grid.getStorageService().getInventory(),
+                    EMCKey.BASE,
+                    Math.min(emcRemaining, handler.getStoredEmc()),
+                    source,
+                    Actionable.MODULATE);
+            handler.extractEmc(inserted, IEmcStorage.EmcAction.EXECUTE);
+            remaining.addAndGet((int) -Math.max(1, inserted / EMCKeyType.TYPE.getAmountPerOperation()));
+        });
+
+        itemHandler.ifPresent(handler -> {
+            var adjacentStorage = ExternalStorageFacade.of(handler);
+
+            for (var slot = 0; slot < handler.getSlots() && remaining.get() > 0; slot++) {
+                var item = AEItemKey.of(handler.getStackInSlot(slot));
 
                 if (item == null) {
                     continue;
@@ -81,22 +104,22 @@ public class EMCImportBusPart extends IOBusPart {
                     continue;
                 }
 
-                var amount = adjacentStorage.extract(item, remaining, Actionable.SIMULATE, source);
+                var amount = adjacentStorage.extract(item, remaining.get(), Actionable.SIMULATE, source);
 
                 if (amount > 0) {
                     var mayLearn = isUpgradedWith(AppliedE.LEARNING_CARD.get());
-                    amount = emcStorage.insertItem(item, amount, Actionable.MODULATE, source, mayLearn);
+                    amount = networkEmc.insertItem(item, amount, Actionable.MODULATE, source, mayLearn);
                     adjacentStorage.extract(item, amount, Actionable.MODULATE, source);
-                    remaining -= Ints.saturatedCast(amount);
+                    remaining.addAndGet(-(int) amount);
                 }
-            }
-
-            if (remaining < getOperationsPerTick()) {
-                doneWork.set(true);
             }
         });
 
-        return doneWork.get();
+        if (remaining.get() < getOperationsPerTick()) {
+            doneWork = true;
+        }
+
+        return doneWork;
     }
 
     @Override

@@ -13,10 +13,9 @@ import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
-    private static final Item TERMINAL;
+    private static final Item TERMINAL = new WTTItem();
 
     static {
-        TERMINAL = new WTTItem();
         GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
     }
 

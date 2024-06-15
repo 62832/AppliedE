@@ -1,8 +1,6 @@
 package gripe._90.appliede.part;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.common.primitives.Ints;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +19,7 @@ import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.storage.StorageHelper;
 import appeng.core.AppEng;
 import appeng.core.settings.TickRates;
 import appeng.items.parts.PartModels;
@@ -30,7 +29,12 @@ import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.service.KnowledgeService;
+
+import moze_intel.projecte.api.capabilities.PECapabilities;
+import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
 public class EMCExportBusPart extends IOBusPart {
     public static final MenuType<IOBusMenu> MENU =
@@ -53,7 +57,7 @@ public class EMCExportBusPart extends IOBusPart {
     private int nextSlot = 0;
 
     public EMCExportBusPart(IPartItem<?> partItem) {
-        super(TickRates.ExportBus, AEItemKey.filter(), partItem);
+        super(TickRates.ExportBus, key -> AEItemKey.is(key) || key == EMCKey.BASE, partItem);
         getConfigManager().registerSetting(Settings.SCHEDULING_MODE, SchedulingMode.DEFAULT);
     }
 
@@ -69,7 +73,6 @@ public class EMCExportBusPart extends IOBusPart {
         extra.putInt("nextSlot", nextSlot);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     protected boolean doBusWork(IGrid grid) {
         var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
@@ -80,65 +83,83 @@ public class EMCExportBusPart extends IOBusPart {
             return false;
         }
 
-        var doneWork = new AtomicBoolean(false);
+        var doneWork = false;
+        var emcStorage = blockEntity.getCapability(PECapabilities.EMC_STORAGE_CAPABILITY, facing);
+        var itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing);
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing).ifPresent(itemHandler -> {
-            var emcStorage = grid.getService(KnowledgeService.class).getStorage();
-            var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
-            var remaining = getOperationsPerTick();
-            var slot = 0;
+        var networkEmc = grid.getService(KnowledgeService.class).getStorage();
+        var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
+        var remaining = new AtomicInteger(getOperationsPerTick());
+        var slot = 0;
 
-            for (slot = 0; slot < availableSlots() && remaining > 0; slot++) {
-                var startingSlot =
-                        switch (schedulingMode) {
-                            case RANDOM -> getLevel().getRandom().nextInt(availableSlots());
-                            case ROUNDROBIN -> (nextSlot + slot) % availableSlots();
-                            default -> slot;
-                        };
-                var what = getConfig().getKey(startingSlot);
+        for (slot = 0; slot < availableSlots() && remaining.get() > 0; slot++) {
+            var startingSlot =
+                    switch (schedulingMode) {
+                        case RANDOM -> getLevel().getRandom().nextInt(availableSlots());
+                        case ROUNDROBIN -> (nextSlot + slot) % availableSlots();
+                        default -> slot;
+                    };
+            var what = getConfig().getKey(startingSlot);
 
-                if (!(what instanceof AEItemKey item)) {
-                    continue;
-                }
+            if (what == EMCKey.BASE) {
+                emcStorage.ifPresent(handler -> {
+                    var rem = remaining.get() * EMCKeyType.TYPE.getAmountPerOperation();
+                    var insertable = handler.insertEmc(rem, IEmcStorage.EmcAction.SIMULATE);
+                    var extracted = StorageHelper.poweredExtraction(
+                            grid.getEnergyService(),
+                            grid.getStorageService().getInventory(),
+                            EMCKey.BASE,
+                            insertable,
+                            source,
+                            Actionable.MODULATE);
 
-                var stack = item.toStack(remaining);
-                var extracted = emcStorage.extractItem(item, remaining, Actionable.SIMULATE, source, true);
-                var remainder = ItemHandlerHelper.insertItem(itemHandler, stack, true);
-                var wasInserted = extracted - remainder.getCount();
+                    if (extracted > 0) {
+                        handler.insertEmc(extracted, IEmcStorage.EmcAction.EXECUTE);
+                        remaining.addAndGet((int) -Math.max(1, extracted / EMCKeyType.TYPE.getAmountPerOperation()));
+                    }
+                });
+            } else if (what instanceof AEItemKey item) {
+                itemHandler.ifPresent(handler -> {
+                    var rem = remaining.get();
+                    var stack = item.toStack(rem);
+                    var extracted = networkEmc.extractItem(item, rem, Actionable.SIMULATE, source, true);
+                    var remainder = ItemHandlerHelper.insertItem(handler, stack, true);
+                    var wasInserted = extracted - remainder.getCount();
 
-                if (wasInserted > 0) {
-                    extracted = emcStorage.extractItem(item, remaining, Actionable.MODULATE, source, true);
-                    remainder = ItemHandlerHelper.insertItem(itemHandler, stack, false);
-                    wasInserted = extracted - remainder.getCount();
+                    if (wasInserted > 0) {
+                        extracted = networkEmc.extractItem(item, rem, Actionable.MODULATE, source, true);
+                        remainder = ItemHandlerHelper.insertItem(handler, stack, false);
+                        wasInserted = extracted - remainder.getCount();
 
-                    if (wasInserted < extracted) {
-                        var leftover = extracted - wasInserted;
-                        emcStorage.insertItem(item, leftover, Actionable.MODULATE, source, false);
+                        if (wasInserted < extracted) {
+                            var leftover = extracted - wasInserted;
+                            networkEmc.insertItem(item, leftover, Actionable.MODULATE, source, false);
 
-                        if (leftover > 0) {
-                            LOGGER.error(
-                                    "Storage export: adjacent block unexpectedly refused insert, voided {}x{}",
-                                    leftover,
-                                    item);
+                            if (leftover > 0) {
+                                LOGGER.error(
+                                        "Storage export: adjacent block unexpectedly refused insert, voided {}x{}",
+                                        leftover,
+                                        item);
+                            }
                         }
                     }
-                }
 
-                if (wasInserted > 0) {
-                    remaining -= Ints.saturatedCast(wasInserted);
-                }
+                    if (wasInserted > 0) {
+                        remaining.addAndGet(-(int) wasInserted);
+                    }
+                });
+            }
+        }
+
+        if (remaining.get() < getOperationsPerTick()) {
+            if (schedulingMode == SchedulingMode.ROUNDROBIN) {
+                nextSlot = (nextSlot + slot) % availableSlots();
             }
 
-            if (remaining < getOperationsPerTick()) {
-                if (schedulingMode == SchedulingMode.ROUNDROBIN) {
-                    nextSlot = (nextSlot + slot) % availableSlots();
-                }
+            doneWork = true;
+        }
 
-                doneWork.set(true);
-            }
-        });
-
-        return doneWork.get();
+        return doneWork;
     }
 
     @Override

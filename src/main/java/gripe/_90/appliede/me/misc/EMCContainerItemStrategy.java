@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.strategy;
+package gripe._90.appliede.me.misc;
 
 import org.jetbrains.annotations.Nullable;
 
