@@ -14,9 +14,9 @@ import appeng.menu.ISubMenu;
 
 import de.mari_023.ae2wtlib.terminal.WTMenuHost;
 
-import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
+import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 
-public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, ITransmutationTerminalHost {
+public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, TransmutationTerminalHost {
     private final IGrid targetGrid;
     private boolean shiftToTransmute;
 

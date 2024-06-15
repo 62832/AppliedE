@@ -19,19 +19,19 @@ import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.FakeSlot;
 
-import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
+import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
 
 public class TransmutationTerminalMenu extends MEStorageMenu {
     public static final MenuType<TransmutationTerminalMenu> TYPE = MenuTypeBuilder.create(
-                    TransmutationTerminalMenu::new, ITransmutationTerminalHost.class)
+                    TransmutationTerminalMenu::new, TransmutationTerminalHost.class)
             .build("transmutation_terminal");
     protected static final SlotSemantic TRANSMUTE = SlotSemantics.register("APPLIEDE_TRANSMUTE", false);
 
     private static final String ACTION_SET_SHIFT = "setShiftDestination";
     private static final String ACTION_HIDE_LEARNED = "hideLearnedText";
 
-    private final ITransmutationTerminalHost host;
+    private final TransmutationTerminalHost host;
     private final Slot transmuteSlot = new FakeSlot(InternalInventory.empty(), 0);
 
     @GuiSync(1)
@@ -40,12 +40,12 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
     @GuiSync(2)
     public int learnedLabelTicks;
 
-    public TransmutationTerminalMenu(int id, Inventory ip, ITransmutationTerminalHost host) {
+    public TransmutationTerminalMenu(int id, Inventory ip, TransmutationTerminalHost host) {
         this(TYPE, id, ip, host, true);
     }
 
     public TransmutationTerminalMenu(
-            MenuType<?> menuType, int id, Inventory ip, ITransmutationTerminalHost host, boolean bindInventory) {
+            MenuType<?> menuType, int id, Inventory ip, TransmutationTerminalHost host, boolean bindInventory) {
         super(menuType, id, ip, host, bindInventory);
         this.host = host;
         registerClientAction(ACTION_SET_SHIFT, Boolean.class, host::setShiftToTransmute);
@@ -139,7 +139,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
     }
 
     @Override
-    public ITransmutationTerminalHost getHost() {
+    public TransmutationTerminalHost getHost() {
         return host;
     }
 }

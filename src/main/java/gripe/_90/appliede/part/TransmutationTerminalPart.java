@@ -15,10 +15,10 @@ import appeng.parts.PartModel;
 import appeng.parts.reporting.AbstractTerminalPart;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.misc.ITransmutationTerminalHost;
+import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
-public class TransmutationTerminalPart extends AbstractTerminalPart implements ITransmutationTerminalHost {
+public class TransmutationTerminalPart extends AbstractTerminalPart implements TransmutationTerminalHost {
     @PartModels
     public static final ResourceLocation MODEL_OFF = AppliedE.id("part/transmutation_terminal_off");
 
