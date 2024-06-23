@@ -50,6 +50,15 @@ final class TeamProjectEHandler {
         return null;
     }
 
+    private void syncTeamProviders(UUID uuid) {
+        for (var team : providersPerTeam.keySet()) {
+            if (team.getMembers().contains(uuid)) {
+                team.sync();
+                break;
+            }
+        }
+    }
+
     private void clear() {
         providersPerTeam.clear();
     }
@@ -67,6 +76,12 @@ final class TeamProjectEHandler {
 
         Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
             return handler != null ? ((TeamProjectEHandler) handler).getProviderFor(uuid) : null;
+        }
+
+        void syncTeamProviders(UUID uuid) {
+            if (handler != null) {
+                ((TeamProjectEHandler) handler).syncTeamProviders(uuid);
+            }
         }
 
         void clear() {

@@ -120,6 +120,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
                     if (player != null) {
                         provider.get().syncEmc(player);
                     }
+
+                    tpeHandler.syncTeamProviders(uuid);
                 });
             }
 
