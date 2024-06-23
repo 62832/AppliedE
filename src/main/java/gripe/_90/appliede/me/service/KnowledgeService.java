@@ -16,10 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import appeng.api.crafting.IPatternDetails;
-import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
@@ -110,34 +108,24 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         if (needsSync && ticksSinceLastSync == TICKS_PER_SYNC) {
-            var server = ServerLifecycleHooks.getCurrentServer();
-
-            if (server != null) {
-                providers.forEach((uuid, provider) -> {
-                    var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
-                    var player = IPlayerRegistry.getConnected(server, id);
-
-                    if (player != null) {
-                        provider.get().syncEmc(player);
-                    }
-
-                    tpeHandler.syncTeamProviders(uuid);
-                });
-            }
-
+            tpeHandler.syncTeamProviders(providers);
             needsSync = false;
             ticksSinceLastSync = 0;
         }
     }
 
     private void addProvider(UUID playerUUID) {
-        providers.putIfAbsent(playerUUID, () -> {
+        providers.putIfAbsent(playerUUID, retrieveProvider(playerUUID));
+    }
+
+    static Supplier<IKnowledgeProvider> retrieveProvider(UUID playerUUID) {
+        return () -> {
             try {
                 return ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
             } catch (Throwable e) {
                 return TransmutationOfflineAccessor.invokeForPlayer(playerUUID);
             }
-        });
+        };
     }
 
     List<IKnowledgeProvider> getProviders() {
