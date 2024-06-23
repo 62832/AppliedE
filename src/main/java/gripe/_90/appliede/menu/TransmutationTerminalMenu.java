@@ -66,7 +66,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         }
     }
 
-    private int transmuteItem(ItemStack stack, boolean singleItem, ServerPlayer player) {
+    private int transmuteItem(ItemStack stack, boolean singleItem, Player player) {
         if (!stack.isEmpty()) {
             var grid = host.getGrid();
 
@@ -116,11 +116,11 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int idx) {
-        if (player instanceof ServerPlayer serverPlayer && shiftToTransmute) {
+        if (shiftToTransmute) {
             var stack = slots.get(idx).getItem();
 
             var remaining = stack.copy();
-            remaining.setCount(remaining.getCount() - transmuteItem(stack, false, serverPlayer));
+            remaining.setCount(remaining.getCount() - transmuteItem(stack, false, player));
             slots.get(idx).set(remaining.getCount() <= 0 ? ItemStack.EMPTY : remaining);
 
             return ItemStack.EMPTY;
