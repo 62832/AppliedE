@@ -147,7 +147,13 @@ public final class EMCStorage implements MEStorage {
     }
 
     public long insertItem(
-            AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn, Runnable onLearn) {
+            AEItemKey what,
+            long amount,
+            Actionable mode,
+            IActionSource source,
+            boolean mayLearn,
+            boolean consumePower,
+            Runnable onLearn) {
         if (amount <= 0 || service.getProviders().isEmpty()) {
             return 0;
         }
@@ -175,7 +181,9 @@ public final class EMCStorage implements MEStorage {
             var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
-            amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc);
+            if (consumePower) {
+                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc);
+            }
 
             if (amount == 0) {
                 return 0;
@@ -205,7 +213,7 @@ public final class EMCStorage implements MEStorage {
     }
 
     public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
-        return insertItem(what, amount, mode, source, mayLearn, () -> {});
+        return insertItem(what, amount, mode, source, mayLearn, true, () -> {});
     }
 
     public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean skipStored) {

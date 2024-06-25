@@ -43,6 +43,7 @@ public class LearnAllItemsPacket {
                                             Actionable.MODULATE,
                                             IActionSource.ofPlayer(sender),
                                             true,
+                                            true,
                                             menu::showLearned);
 
                             var me = storage.getInventory();

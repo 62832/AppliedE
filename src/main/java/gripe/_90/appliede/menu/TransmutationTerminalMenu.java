@@ -88,6 +88,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                             Actionable.MODULATE,
                             IActionSource.ofPlayer(player),
                             true,
+                            true,
                             this::showLearned);
         }
 

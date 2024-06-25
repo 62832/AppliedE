@@ -133,7 +133,8 @@ public class EMCExportBusPart extends IOBusPart {
 
                         if (wasInserted < extracted) {
                             var leftover = extracted - wasInserted;
-                            leftover -= networkEmc.insertItem(item, leftover, Actionable.MODULATE, source, false);
+                            leftover -= networkEmc.insertItem(
+                                    item, leftover, Actionable.MODULATE, source, false, false, () -> {});
 
                             if (leftover > 0) {
                                 LOGGER.error(
