@@ -32,7 +32,7 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class EMCStorage implements MEStorage {
     private final KnowledgeService service;
-    private int highestTier;
+    private int highestTier = 1;
 
     EMCStorage(KnowledgeService service) {
         this.service = service;
@@ -342,10 +342,6 @@ public final class EMCStorage implements MEStorage {
     }
 
     int getHighestTier() {
-        if (highestTier == 0) {
-            getAvailableStacks(new KeyCounter());
-        }
-
         return highestTier;
     }
 
