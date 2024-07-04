@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.IGrid;
@@ -37,6 +38,7 @@ import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
+import moze_intel.projecte.api.proxy.IEMCProxy;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider {
@@ -58,6 +60,12 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
             knownItemCache = null;
             updatePatterns();
+        });
+        MinecraftForge.EVENT_BUS.addListener((OnDatapackSyncEvent event) -> {
+            if (event.getPlayer() == null) {
+                knownItemCache = null;
+                updatePatterns();
+            }
         });
     }
 
@@ -167,6 +175,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
             for (var provider : getProviders()) {
                 for (var item : provider.getKnowledge()) {
+                    if (!IEMCProxy.INSTANCE.hasValue(item)) {
+                        continue;
+                    }
+
                     var key = AEItemKey.of(item.createStack());
 
                     if (key != null) {

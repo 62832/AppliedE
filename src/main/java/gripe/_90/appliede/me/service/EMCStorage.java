@@ -235,6 +235,11 @@ public final class EMCStorage implements MEStorage {
         }
 
         var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
+
+        if (itemEmc.signum() <= 0) {
+            return 0;
+        }
+
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
         var providers = getProvidersForExtraction(source);
