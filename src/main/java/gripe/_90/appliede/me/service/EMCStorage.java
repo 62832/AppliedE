@@ -59,7 +59,9 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0 || !(what instanceof EMCKey emc)) {
+        if (amount <= 0
+                || !(what instanceof EMCKey emc)
+                || service.getProviders().isEmpty()) {
             return 0;
         }
 
@@ -89,7 +91,7 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0) {
+        if (amount <= 0 || service.getProviders().isEmpty()) {
             return 0;
         }
 
