@@ -33,17 +33,14 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
 
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics guiGraphics, int x, int y, EMCKey stack) {
+        var hueIntervals = AppliedEConfig.Client.CONFIG.getEmcTierColours().get();
+        var hue = ((stack.getTier() - 1) * 360F / hueIntervals) / 360;
+
         Blitter.sprite(sprite.get())
                 .blending(false)
                 .dest(x, y, 16, 16)
-                .colorRgb(hueShift(stack.getTier()))
+                .colorRgb(Color.HSBtoRGB(hue, stack.getTier() == 1 ? 0 : 0.6F, 1))
                 .blit(guiGraphics);
-    }
-
-    private int hueShift(int tier) {
-        var intervals = AppliedEConfig.Client.CONFIG.getEmcTierColours().get();
-        var hue = ((tier - 1) * 360F / intervals) / 360;
-        return Color.HSBtoRGB(hue, tier == 1 ? 0 : 0.6F, 1);
     }
 
     @Override

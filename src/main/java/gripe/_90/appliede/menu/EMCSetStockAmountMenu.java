@@ -91,13 +91,7 @@ public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
         }
 
         amount = (int) Math.min(amount, config.getMaxAmount(whatToStock));
-
-        if (amount <= 0) {
-            config.setStack(slot, null);
-        } else {
-            config.setStack(slot, new GenericStack(whatToStock, amount));
-        }
-
+        config.setStack(slot, amount <= 0 ? null : new GenericStack(whatToStock, amount));
         host.returnToMainMenu(getPlayer(), this);
     }
 
