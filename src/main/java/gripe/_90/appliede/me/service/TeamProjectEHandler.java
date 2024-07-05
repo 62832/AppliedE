@@ -45,6 +45,10 @@ final class TeamProjectEHandler {
     }
 
     private Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
+
         for (var entry : providersPerTeam.entrySet()) {
             if (entry.getKey().getMembers().contains(uuid)) {
                 return entry.getValue();

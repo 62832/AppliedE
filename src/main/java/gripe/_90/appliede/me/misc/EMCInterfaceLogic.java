@@ -2,7 +2,6 @@ package gripe._90.appliede.me.misc;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +61,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private WrappedEMCStorage emcStorage;
 
     private boolean hasConfig;
-    private UUID ownerUUID;
 
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
         this(node, host, is, 9);
@@ -118,21 +116,11 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
             return true;
         }
 
-        if (ownerUUID == null) {
-            var uuid = node.getOwningPlayerProfileId();
-
-            if (uuid == null) {
-                return false;
-            }
-
-            ownerUUID = uuid;
-        }
-
         var knowledge = grid.getService(KnowledgeService.class);
         return knowledge.getKnownItems().contains(item)
                 || (isUpgradedWith(AppliedE.LEARNING_CARD.get())
                         && IEMCProxy.INSTANCE.hasValue(item.toStack())
-                        && knowledge.getProviderFor(ownerUUID) != null);
+                        && knowledge.getProviderFor(node.getOwningPlayerProfileId()) != null);
     }
 
     public void readFromNBT(CompoundTag tag) {
