@@ -120,7 +120,11 @@ public final class AppliedE {
     public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> Addons.AE2WTLIB.isLoaded()
             ? AE2WTIntegration.getWirelessTerminalItem()
             : new DummyIntegrationItem(new Item.Properties().stacksTo(1), Addons.AE2WTLIB));
-
+    
+    private static final String PROTOCOL_VERSION = Integer.toString(1);
+    public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(
+            id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+    
     static {
         MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
         MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
@@ -150,13 +154,7 @@ public final class AppliedE {
                     }
                 })
                 .build());
-    }
-
-    private static final String PROTOCOL_VERSION = Integer.toString(1);
-    public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(
-            id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-
-    static {
+        
         PACKET_HANDLER.messageBuilder(LearnAllItemsPacket.class, 0)
                 .encoder((packet, buffer) -> {})
                 .decoder(buffer -> new LearnAllItemsPacket())

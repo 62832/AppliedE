@@ -17,23 +17,6 @@ import appeng.menu.locator.MenuLocator;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 
 public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUpgradeableObject {
-    IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {
-        @Override
-        public void onSaveChanges(EMCInterfaceLogicHost host, IGridNode node) {
-            host.saveChanges();
-        }
-
-        @Override
-        public void onStateChanged(EMCInterfaceLogicHost host, IGridNode node, State state) {
-            host.onMainNodeStateChanged(state);
-        }
-
-        @Override
-        public void onGridChanged(EMCInterfaceLogicHost host, IGridNode node) {
-            host.getInterfaceLogic().gridChanged();
-        }
-    };
-
     BlockEntity getBlockEntity();
 
     void saveChanges();
@@ -64,4 +47,21 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUp
     default void returnToMainMenu(Player player, ISubMenu subMenu) {
         MenuOpener.returnTo(EMCInterfaceMenu.TYPE, player, subMenu.getLocator());
     }
+
+    IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {
+        @Override
+        public void onSaveChanges(EMCInterfaceLogicHost host, IGridNode node) {
+            host.saveChanges();
+        }
+
+        @Override
+        public void onStateChanged(EMCInterfaceLogicHost host, IGridNode node, State state) {
+            host.onMainNodeStateChanged(state);
+        }
+
+        @Override
+        public void onGridChanged(EMCInterfaceLogicHost host, IGridNode node) {
+            host.getInterfaceLogic().gridChanged();
+        }
+    };
 }

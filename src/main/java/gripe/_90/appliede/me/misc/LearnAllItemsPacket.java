@@ -1,5 +1,6 @@
 package gripe._90.appliede.me.misc;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import net.minecraftforge.network.NetworkEvent;
@@ -20,20 +21,9 @@ public class LearnAllItemsPacket {
                 return;
             }
 
-            var node = menu.getHost().getActionableNode();
-
-            if (node == null) {
-                return;
-            }
-
-            var grid = node.getGrid();
-
-            if (grid == null) {
-                return;
-            }
-
-            var storage = grid.getStorageService();
-            var knowledge = grid.getService(KnowledgeService.class);
+            var node = Objects.requireNonNull(menu.getHost().getActionableNode());
+            var storage = node.getGrid().getStorageService();
+            var knowledge = node.getGrid().getService(KnowledgeService.class);
 
             if (knowledge.isTrackingPlayer(sender)) {
                 storage.getCachedInventory().keySet().stream()
