@@ -372,7 +372,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         @Override
         public Component getDescription() {
-            return storage.getDescription();
+            return AppliedE.EMC_INTERFACE.get().getName();
         }
     }
 }
