@@ -14,15 +14,14 @@ import appeng.menu.me.common.MEStorageMenu;
 
 import gripe._90.appliede.me.key.EMCKey;
 
-@Mixin(MEStorageMenu.class)
+@Mixin(value = MEStorageMenu.class, remap = false)
 public abstract class MEStorageMenuMixin {
     // spotless:off
     @Redirect(
             method = "lambda$tryFillContainerItem$2",
             at = @At(
                     value = "INVOKE",
-                    target = "Lappeng/api/storage/StorageHelper;poweredExtraction(Lappeng/api/networking/energy/IEnergySource;Lappeng/api/storage/MEStorage;Lappeng/api/stacks/AEKey;JLappeng/api/networking/security/IActionSource;Lappeng/api/config/Actionable;)J",
-                    remap = false))
+                    target = "Lappeng/api/storage/StorageHelper;poweredExtraction(Lappeng/api/networking/energy/IEnergySource;Lappeng/api/storage/MEStorage;Lappeng/api/stacks/AEKey;JLappeng/api/networking/security/IActionSource;Lappeng/api/config/Actionable;)J"))
     // spotless:on
     private long emcExtraction(
             IEnergySource powerSource,
