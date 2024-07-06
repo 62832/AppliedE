@@ -68,7 +68,13 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
     private int transmuteItem(ItemStack stack, boolean singleItem, Player player) {
         if (!stack.isEmpty()) {
-            var grid = host.getGrid();
+            var node = host.getActionableNode();
+
+            if (node == null) {
+                return 0;
+            }
+
+            var grid = node.getGrid();
 
             if (grid == null) {
                 return 0;

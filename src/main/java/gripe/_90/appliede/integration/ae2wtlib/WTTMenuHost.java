@@ -8,8 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import appeng.api.implementations.blockentities.IViewCellStorage;
-import appeng.api.networking.IGrid;
-import appeng.items.tools.powered.WirelessTerminalItem;
 import appeng.menu.ISubMenu;
 
 import de.mari_023.ae2wtlib.terminal.WTMenuHost;
@@ -17,7 +15,6 @@ import de.mari_023.ae2wtlib.terminal.WTMenuHost;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 
 public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, TransmutationTerminalHost {
-    private final IGrid targetGrid;
     private boolean shiftToTransmute;
 
     public WTTMenuHost(
@@ -26,7 +23,6 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, Transmu
             ItemStack is,
             BiConsumer<Player, ISubMenu> returnToMainMenu) {
         super(player, inventorySlot, is, returnToMainMenu);
-        targetGrid = ((WirelessTerminalItem) is.getItem()).getLinkedGrid(is, player.level(), null);
         readFromNbt();
     }
 
@@ -53,14 +49,8 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, Transmu
     }
 
     @Override
-    public void setShiftToTransmute(boolean toggle) {
-        shiftToTransmute = toggle;
+    public void setShiftToTransmute(boolean shift) {
+        shiftToTransmute = shift;
         saveChanges();
-    }
-
-    @Nullable
-    @Override
-    public IGrid getGrid() {
-        return targetGrid;
     }
 }

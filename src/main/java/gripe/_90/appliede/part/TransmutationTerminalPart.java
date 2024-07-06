@@ -1,13 +1,10 @@
 package gripe._90.appliede.part;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 
-import appeng.api.networking.IGrid;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.items.parts.PartModels;
@@ -41,15 +38,9 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements T
     }
 
     @Override
-    public void setShiftToTransmute(boolean toggle) {
-        shiftToTransmute = toggle;
+    public void setShiftToTransmute(boolean shift) {
+        shiftToTransmute = shift;
         saveChanges();
-    }
-
-    @Nullable
-    @Override
-    public IGrid getGrid() {
-        return getMainNode().getGrid();
     }
 
     @Override

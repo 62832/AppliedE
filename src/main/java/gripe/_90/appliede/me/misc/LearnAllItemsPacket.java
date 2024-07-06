@@ -20,8 +20,13 @@ public class LearnAllItemsPacket {
                 return;
             }
 
-            var host = menu.getHost();
-            var grid = host.getGrid();
+            var node = menu.getHost().getActionableNode();
+
+            if (node == null) {
+                return;
+            }
+
+            var grid = node.getGrid();
 
             if (grid == null) {
                 return;
@@ -47,7 +52,7 @@ public class LearnAllItemsPacket {
                                             menu::showLearned);
 
                             var me = storage.getInventory();
-                            me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(host));
+                            me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(menu.getHost()));
                         });
             }
         });
