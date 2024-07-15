@@ -1,5 +1,6 @@
 package gripe._90.appliede.menu;
 
+import moze_intel.projecte.api.ItemInfo;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -27,18 +28,24 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                     TransmutationTerminalMenu::new, TransmutationTerminalHost.class)
             .build("transmutation_terminal");
     protected static final SlotSemantic TRANSMUTE = SlotSemantics.register("APPLIEDE_TRANSMUTE", false);
+    protected static final SlotSemantic UNLEARN = SlotSemantics.register("APPLIEDE_UNLEARN", false);
 
     private static final String ACTION_SET_SHIFT = "setShiftDestination";
     private static final String ACTION_HIDE_LEARNED = "hideLearnedText";
+    private static final String ACTION_HIDE_UNLEARNED = "hideUnlearnedText";
 
     private final TransmutationTerminalHost host;
     private final Slot transmuteSlot = new FakeSlot(InternalInventory.empty(), 0);
+    private final Slot unlearnSlot = new FakeSlot(InternalInventory.empty(), 0);
 
     @GuiSync(1)
     public boolean shiftToTransmute;
 
     @GuiSync(2)
     public int learnedLabelTicks;
+
+    @GuiSync(3)
+    public int unlearnedLabelTicks;
 
     public TransmutationTerminalMenu(int id, Inventory ip, TransmutationTerminalHost host) {
         this(TYPE, id, ip, host, true);
@@ -50,7 +57,9 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         this.host = host;
         registerClientAction(ACTION_SET_SHIFT, Boolean.class, host::setShiftToTransmute);
         registerClientAction(ACTION_HIDE_LEARNED, () -> learnedLabelTicks--);
+        registerClientAction(ACTION_HIDE_UNLEARNED, () -> unlearnedLabelTicks--);
         addSlot(transmuteSlot, TRANSMUTE);
+        addSlot(unlearnSlot, UNLEARN);
     }
 
     @Override
@@ -64,6 +73,23 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
             reduced.setCount(reduced.getCount() - transmuted);
             setCarried(reduced.getCount() <= 0 ? ItemStack.EMPTY : reduced);
         }
+
+        if (s.equals(unlearnSlot) && !getCarried().isEmpty()) {
+            var node = host.getActionableNode();
+
+            if (node != null) {
+                var knowledge = node.getGrid().getService(KnowledgeService.class);
+
+                if (knowledge.isTrackingPlayer(player)) {
+                    var provider = knowledge.getProviderFor(player.getUUID()).get();
+                    provider.removeKnowledge(getCarried());
+                    provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
+                    unlearnedLabelTicks = 300;
+                    learnedLabelTicks = 0;
+                    broadcastChanges();
+                }
+            }
+        }
     }
 
     private int transmuteItem(ItemStack stack, boolean singleItem, Player player) {
@@ -74,13 +100,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
                 return 0;
             }
 
-            var grid = node.getGrid();
-
-            if (grid == null) {
-                return 0;
-            }
-
-            var knowledge = grid.getService(KnowledgeService.class);
+            var knowledge = node.getGrid().getService(KnowledgeService.class);
 
             if (!knowledge.isTrackingPlayer(player)) {
                 return 0;
@@ -112,12 +132,19 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
     public void showLearned() {
         learnedLabelTicks = 300;
+        unlearnedLabelTicks = 0;
         broadcastChanges();
     }
 
     public void decrementLearnedTicks() {
         if (isClientSide()) {
             sendClientAction(ACTION_HIDE_LEARNED);
+        }
+    }
+
+    public void decrementUnlearnedTicks() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_HIDE_UNLEARNED);
         }
     }
 

@@ -17,6 +17,7 @@
   "gui.appliede.shift_transmuting": "Shift-Click set to Transmute.",
   "gui.appliede.toggle_storage": "Click to switch to Storage mode.",
   "gui.appliede.toggle_transmutation": "Click to switch to Transmutation mode.",
+  "gui.appliede.unlearned": "Unlearned!",
   "key.appliede.emc": "EMC",
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "Transmutable from EMC (Shift+Click/Scroll)",

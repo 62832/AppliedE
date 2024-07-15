@@ -1,8 +1,12 @@
 {
   "includes": ["../terminals/terminal.json"],
   "slots": {
+    "APPLIEDE_UNLEARN": {
+      "left": 71,
+      "bottom": 118
+    },
     "APPLIEDE_TRANSMUTE": {
-      "left": 80,
+      "left": 89,
       "bottom": 118
     }
   },
@@ -31,7 +35,17 @@
       },
       "color": "MUTED_TEXT_COLOR",
       "position": {
-        "left": 18,
+        "left": 8,
+        "bottom": 114
+      }
+    },
+    "unlearned": {
+      "text": {
+        "translate": "gui.appliede.unlearned"
+      },
+      "color": "MUTED_TEXT_COLOR",
+      "position": {
+        "left": 8,
         "bottom": 114
       }
     }

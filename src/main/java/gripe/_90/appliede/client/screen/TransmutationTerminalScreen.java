@@ -52,9 +52,14 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
         toggleShiftButton.setState(menu.shiftToTransmute);
         learnAllButton.setState(attemptingToLearn);
         setTextHidden("learned", menu.learnedLabelTicks <= 0);
+        setTextHidden("unlearned", menu.unlearnedLabelTicks <= 0);
 
         if (menu.learnedLabelTicks > 0) {
             menu.decrementLearnedTicks();
+        }
+
+        if (menu.unlearnedLabelTicks > 0) {
+            menu.decrementUnlearnedTicks();
         }
     }
 
