@@ -83,11 +83,14 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
                 if (knowledge.isTrackingPlayer(player)) {
                     var provider = knowledge.getProviderFor(player.getUUID()).get();
-                    provider.removeKnowledge(getCarried());
-                    provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
-                    unlearnedLabelTicks = 300;
-                    learnedLabelTicks = 0;
-                    broadcastChanges();
+
+                    if (provider.hasKnowledge(getCarried())) {
+                        provider.removeKnowledge(getCarried());
+                        provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
+                        unlearnedLabelTicks = 300;
+                        learnedLabelTicks = 0;
+                        broadcastChanges();
+                    }
                 }
             }
         }
