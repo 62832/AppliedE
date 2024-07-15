@@ -29,6 +29,10 @@ public class LearnAllItemsPacket {
                 storage.getCachedInventory().keySet().stream()
                         .filter(key -> key instanceof AEItemKey)
                         .map(AEItemKey.class::cast)
+                        .filter(item -> !knowledge
+                                .getProviderFor(sender.getUUID())
+                                .get()
+                                .hasKnowledge(item.toStack()))
                         .forEach(item -> {
                             var learned = knowledge
                                     .getStorage()

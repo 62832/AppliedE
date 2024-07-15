@@ -1,6 +1,5 @@
 package gripe._90.appliede.menu;
 
-import moze_intel.projecte.api.ItemInfo;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +21,8 @@ import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
+
+import moze_intel.projecte.api.ItemInfo;
 
 public class TransmutationTerminalMenu extends MEStorageMenu {
     public static final MenuType<TransmutationTerminalMenu> TYPE = MenuTypeBuilder.create(
