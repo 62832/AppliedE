@@ -13,6 +13,7 @@ public class AppliedEConfig {
     }
 
     private final ForgeConfigSpec.DoubleValue moduleEnergyUsage;
+    private final ForgeConfigSpec.DoubleValue transmutationPowerMultiplier;
     private final ForgeConfigSpec.IntValue emcPerByte;
     private final ForgeConfigSpec.BooleanValue terminalExtractFromOwnEmcOnly;
     private final ForgeConfigSpec.IntValue syncThrottleInterval;
@@ -20,6 +21,9 @@ public class AppliedEConfig {
     private AppliedEConfig(ForgeConfigSpec.Builder builder) {
         moduleEnergyUsage = builder.comment("The amount of AE energy per tick used by the ME Transmutation Module.")
                 .defineInRange("moduleEnergyUsage", 25.0, 0, Double.MAX_VALUE);
+        transmutationPowerMultiplier = builder.comment(
+                        "The amount of AE energy used to transmute 1 EMC through the ME Transmutation Module.")
+                .defineInRange("transmutationPowerMultiplier", 1.0, 0, Double.MAX_VALUE);
         emcPerByte = builder.comment(
                         "The number of EMC units (of any tier) per byte as used in AE2 auto-crafting.",
                         "It is not recommended to set this very low as this will require unreasonably large",
@@ -37,6 +41,10 @@ public class AppliedEConfig {
 
     public double getModuleEnergyUsage() {
         return moduleEnergyUsage.get();
+    }
+
+    public double getTransmutationPowerMultiplier() {
+        return transmutationPowerMultiplier.get();
     }
 
     public int getEmcPerByte() {
