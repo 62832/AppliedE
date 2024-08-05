@@ -322,7 +322,8 @@ public final class EMCStorage implements MEStorage {
 
     private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
         var energyService = service.getGrid().getEnergyService();
-        var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier);
+        var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
+                .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()));
         var toExpend = new BigDecimal(maxEmc).multiply(multiplier).min(BigDecimal.valueOf(Double.MAX_VALUE));
 
         var available = energyService.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
