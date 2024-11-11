@@ -24,6 +24,7 @@ import appeng.api.storage.MEStorage;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 import moze_intel.projecte.api.ItemInfo;
@@ -323,7 +324,8 @@ public final class EMCStorage implements MEStorage {
     private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
         var energyService = service.getGrid().getEnergyService();
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
-                .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()));
+                .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()))
+                .divide(BigDecimal.valueOf(EMCKeyType.TYPE.getAmountPerOperation()), 4, RoundingMode.HALF_UP);
         var toExpend = new BigDecimal(maxEmc).multiply(multiplier).min(BigDecimal.valueOf(Double.MAX_VALUE));
 
         var available = energyService.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);

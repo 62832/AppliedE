@@ -21,8 +21,7 @@ public class AppliedEConfig {
     private AppliedEConfig(ForgeConfigSpec.Builder builder) {
         moduleEnergyUsage = builder.comment("The amount of AE energy per tick used by the ME Transmutation Module.")
                 .defineInRange("moduleEnergyUsage", 25.0, 0, Double.MAX_VALUE);
-        transmutationPowerMultiplier = builder.comment(
-                        "The amount of AE energy used to transmute 1 EMC through the ME Transmutation Module.")
+        transmutationPowerMultiplier = builder.comment("The amount of AE energy used to transmute items, per 2000 EMC.")
                 .defineInRange("transmutationPowerMultiplier", 1.0, 0, Double.MAX_VALUE);
         emcPerByte = builder.comment(
                         "The number of EMC units (of any tier) per byte as used in AE2 auto-crafting.",
