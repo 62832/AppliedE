@@ -34,7 +34,7 @@ public abstract class CraftingCPULogicMixin {
     @Inject(
             method = "executeCrafting",
             at = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+            locals = LocalCapture.CAPTURE_FAILHARD)
     private void removeOnFinishStep(
             int maxPatterns,
             CraftingService craftingService,
@@ -51,7 +51,7 @@ public abstract class CraftingCPULogicMixin {
     @Inject(
             method = "finishJob",
             at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+            locals = LocalCapture.CAPTURE_FAILHARD)
     private void removeOnCancel(boolean success, CallbackInfo ci, Iterator<?> it, Map.Entry<IPatternDetails, ?> entry) {
         appliede$removeTemporaryPattern(entry.getKey());
     }

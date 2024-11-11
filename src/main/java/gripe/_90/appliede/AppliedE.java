@@ -133,7 +133,7 @@ public final class AppliedE {
         MENU_TYPES.register("transmutation_terminal", () -> TransmutationTerminalMenu.TYPE);
 
         if (Addons.AE2WTLIB.isLoaded()) {
-            MENU_TYPES.register("wireless_transmutation_terminal", AE2WTIntegration::getWirelessTerminalMenu);
+            MENU_TYPES.register("wireless_transmutation_terminal", () -> AE2WTIntegration.MENU);
         }
 
         TABS.register(MODID, () -> CreativeModeTab.builder()

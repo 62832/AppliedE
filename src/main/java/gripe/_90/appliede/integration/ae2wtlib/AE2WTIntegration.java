@@ -14,6 +14,7 @@ import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
     private static final Item TERMINAL = new WTTItem();
+    public static final MenuType<?> MENU = WTTMenu.TYPE;
 
     static {
         GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
@@ -21,10 +22,6 @@ public class AE2WTIntegration {
 
     public static Item getWirelessTerminalItem() {
         return TERMINAL;
-    }
-
-    public static MenuType<?> getWirelessTerminalMenu() {
-        return WTTMenu.TYPE;
     }
 
     public static ItemStack getChargedTerminal() {

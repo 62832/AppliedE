@@ -49,7 +49,7 @@ public abstract class CraftingTreeNodeMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true)
     // spotless:on
     private void recalculatePattern(

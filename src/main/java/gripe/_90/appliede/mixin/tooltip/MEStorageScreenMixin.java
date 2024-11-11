@@ -35,7 +35,7 @@ public abstract class MEStorageScreenMixin<C extends MEStorageMenu> extends AEBa
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/Minecraft;getInstance()Lnet/minecraft/client/Minecraft;"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            locals = LocalCapture.CAPTURE_FAILHARD,
             remap = false)
     // spotless:on
     private void addTransmutable(

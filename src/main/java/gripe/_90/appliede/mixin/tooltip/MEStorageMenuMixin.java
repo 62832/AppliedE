@@ -95,7 +95,7 @@ public abstract class MEStorageMenuMixin extends AEBaseMenu {
                     target = "Lappeng/menu/me/common/IncrementalUpdateHelper;hasChanges()Z",
                     remap = false),
             cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            locals = LocalCapture.CAPTURE_FAILHARD,
             remap = true)
     // spotless:on
     private void replacePacket(CallbackInfo ci, Set<AEKey> craftable, KeyCounter availableStacks) {

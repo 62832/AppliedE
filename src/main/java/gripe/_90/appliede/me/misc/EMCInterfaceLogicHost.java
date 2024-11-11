@@ -30,10 +30,6 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUp
         return getInterfaceLogic().getConfig();
     }
 
-    default GenericStackInv getStorage() {
-        return getInterfaceLogic().getStorage();
-    }
-
     @Override
     default IUpgradeInventory getUpgrades() {
         return getInterfaceLogic().getUpgrades();

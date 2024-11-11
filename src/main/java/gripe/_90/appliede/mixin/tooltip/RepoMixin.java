@@ -30,7 +30,7 @@ public abstract class RepoMixin {
                     target = "Lappeng/menu/me/common/GridInventoryEntry;<init>(JLappeng/api/stacks/AEKey;JJZ)V",
                     shift = At.Shift.AFTER),
             cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+            locals = LocalCapture.CAPTURE_FAILHARD)
     // spotless:on
     private void setServerEntryTransmutable(
             GridInventoryEntry serverEntry, CallbackInfo ci, GridInventoryEntry localEntry) {
