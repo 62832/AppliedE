@@ -26,28 +26,29 @@ public class LearnAllItemsPacket {
             var knowledge = node.getGrid().getService(KnowledgeService.class);
 
             if (knowledge.isTrackingPlayer(sender)) {
-                storage.getCachedInventory().keySet().stream()
-                        .filter(key -> key instanceof AEItemKey)
-                        .map(AEItemKey.class::cast)
-                        .filter(item -> !knowledge
-                                .getProviderFor(sender.getUUID())
-                                .get()
-                                .hasKnowledge(item.toStack()))
-                        .forEach(item -> {
-                            var learned = knowledge
-                                    .getStorage()
-                                    .insertItem(
-                                            item,
-                                            1,
-                                            Actionable.MODULATE,
-                                            IActionSource.ofPlayer(sender),
-                                            true,
-                                            true,
-                                            menu::showLearned);
+                for (var key : storage.getCachedInventory().keySet()) {
+                    if (!(key instanceof AEItemKey item)) {
+                        return;
+                    }
 
-                            var me = storage.getInventory();
-                            me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(menu.getHost()));
-                        });
+                    if (!knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
+                        return;
+                    }
+
+                    var learned = knowledge
+                            .getStorage()
+                            .insertItem(
+                                    item,
+                                    1,
+                                    Actionable.MODULATE,
+                                    IActionSource.ofPlayer(sender),
+                                    true,
+                                    true,
+                                    menu::showLearned);
+
+                    var me = storage.getInventory();
+                    me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(menu.getHost()));
+                }
             }
         });
         context.get().setPacketHandled(true);
