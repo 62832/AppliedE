@@ -328,16 +328,18 @@ public final class EMCStorage implements MEStorage {
 
         var available = energyService.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
         var expended = Math.min(available, toExpend.doubleValue());
-        energyService.extractAEPower(expended, Actionable.MODULATE, PowerMultiplier.ONE);
+        var amount = BigDecimal.valueOf(available)
+                .min(toExpend)
+                .divide(multiplier, RoundingMode.HALF_UP)
+                .toBigInteger()
+                .divide(itemEmc)
+                .longValue();
 
-        return expended == available
-                ? maxEmc.divide(itemEmc).longValue()
-                : BigDecimal.valueOf(available)
-                        .min(toExpend)
-                        .divide(multiplier, RoundingMode.HALF_UP)
-                        .toBigInteger()
-                        .divide(itemEmc)
-                        .longValue();
+        if (amount > 0) {
+            energyService.extractAEPower(expended, Actionable.MODULATE, PowerMultiplier.ONE);
+        }
+
+        return amount;
     }
 
     private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
