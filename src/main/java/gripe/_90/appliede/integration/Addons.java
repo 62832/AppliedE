@@ -5,7 +5,6 @@ import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 
 public enum Addons {
-    TEAMPE("teamprojecte"),
     AE2WTLIB("ae2wtlib"),
     AECAPFIX("aecapfix");
 

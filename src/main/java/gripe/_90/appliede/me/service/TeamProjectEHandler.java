@@ -8,11 +8,10 @@ import java.util.function.Supplier;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import appeng.api.features.IPlayerRegistry;
-
-import gripe._90.appliede.integration.Addons;
 
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
@@ -83,7 +82,7 @@ final class TeamProjectEHandler {
     }
 
     static class Proxy {
-        private final Object handler = Addons.TEAMPE.isLoaded() ? new TeamProjectEHandler() : null;
+        private final Object handler = ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
 
         boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
             return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);
