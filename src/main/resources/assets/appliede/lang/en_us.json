@@ -22,5 +22,5 @@
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "Transmutable from EMC (Shift+Click/Scroll)",
   "tooltip.appliede.owner": "Owner: %s",
-  "tooltip.appliede.not_installed.ae2wtlib": "AE2WTLib not installed."
+  "tooltip.appliede.not_installed": "%s not installed."
 }

@@ -7,15 +7,27 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import gripe._90.appliede.integration.Addons;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.LoadingModList;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 public class Plugin implements IMixinConfigPlugin {
+    private static boolean isModLoaded(String modId) {
+        return ModList.get() != null
+                ? ModList.get().isLoaded(modId)
+                : LoadingModList.get().getMods().stream()
+                        .map(IModInfo::getModId)
+                        .anyMatch(modId::equals);
+    }
+
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        for (var addon : Addons.values()) {
-            if (mixinClassName.contains(addon.getModId())) {
-                return addon.isLoaded();
-            }
+        if (mixinClassName.contains("aecapfix")) {
+            return isModLoaded("aecapfix");
+        }
+
+        if (mixinClassName.contains("ae2wtlib")) {
+            return isModLoaded("ae2wtlib");
         }
 
         return true;

@@ -21,5 +21,5 @@
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "转化为EMC (Shift+点击/滚动)",
   "tooltip.appliede.owner": "所有者: %s",
-  "tooltip.appliede.not_installed.ae2wtlib": "AE2WTLib未安装。"
+  "tooltip.appliede.not_installed": "%s未安装。"
 }

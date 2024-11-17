@@ -13,8 +13,6 @@ import appeng.core.AppEng;
 import appeng.init.client.InitScreens;
 import appeng.items.tools.powered.WirelessTerminalItem;
 
-import gripe._90.appliede.integration.Addons;
-
 public class AE2WTIntegration {
     private static final Item TERMINAL = new WTTItem();
 
@@ -40,7 +38,7 @@ public class AE2WTIntegration {
     }
 
     public static void addTerminalToAE2WTLibTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().location().getNamespace().equals(Addons.AE2WTLIB.getModId())) {
+        if (event.getTabKey().location().getNamespace().equals("ae2wtlib")) {
             event.accept(TERMINAL);
             event.accept(AE2WTIntegration.getChargedTerminal());
         }

@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -57,7 +58,6 @@ import gripe._90.appliede.client.EMCRenderer;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
-import gripe._90.appliede.integration.Addons;
 import gripe._90.appliede.integration.DummyIntegrationItem;
 import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
 import gripe._90.appliede.me.key.EMCKey;
@@ -128,9 +128,9 @@ public final class AppliedE {
 
     public static final RegistryObject<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> Addons.AE2WTLIB.isLoaded()
+    public static final RegistryObject<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> ModList.get().isLoaded("ae2wtlib")
             ? AE2WTIntegration.getWirelessTerminalItem()
-            : new DummyIntegrationItem(new Item.Properties().stacksTo(1), Addons.AE2WTLIB));
+            : new DummyIntegrationItem(new Item.Properties().stacksTo(1), "AE2WTLib"));
     
     private static final String PROTOCOL_VERSION = Integer.toString(1);
     public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(
@@ -150,7 +150,7 @@ public final class AppliedE {
                     output.accept(LEARNING_CARD.get());
                     output.accept(WIRELESS_TRANSMUTATION_TERMINAL.get());
 
-                    if (Addons.AE2WTLIB.isLoaded()) {
+                    if (ModList.get().isLoaded("ae2wtlib")) {
                         output.accept(AE2WTIntegration.getChargedTerminal());
                     }
                 })
@@ -196,7 +196,7 @@ public final class AppliedE {
             registerEMC(AEParts.CABLE_ANCHOR, 32);
         });
 
-        if (Addons.AE2WTLIB.isLoaded()) {
+        if (ModList.get().isLoaded("ae2wtlib")) {
             bus.addListener(AE2WTIntegration::registerTerminalMenu);
             bus.addListener(AE2WTIntegration::addTerminalToAE2WTLibTab);
         }
@@ -255,7 +255,7 @@ public final class AppliedE {
                         TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
                         "/screens/appliede/transmutation_terminal.json");
 
-                if (Addons.AE2WTLIB.isLoaded()) {
+                if (ModList.get().isLoaded("ae2wtlib")) {
                     AE2WTIntegration.Client.initScreen();
                 }
             }));

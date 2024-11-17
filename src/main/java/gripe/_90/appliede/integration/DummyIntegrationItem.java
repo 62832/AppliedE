@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
 import gripe._90.appliede.AppliedE;
 
 public class DummyIntegrationItem extends Item {
-    private final Addons addon;
+    private final String addon;
 
-    public DummyIntegrationItem(Properties props, Addons addon) {
+    public DummyIntegrationItem(Properties props, String addon) {
         super(props);
         this.addon = addon;
     }
@@ -25,7 +25,7 @@ public class DummyIntegrationItem extends Item {
     @ParametersAreNonnullByDefault
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
-        lines.add(Component.translatable("tooltip." + AppliedE.MODID + ".not_installed." + addon.getModId())
+        lines.add(Component.translatable("tooltip." + AppliedE.MODID + ".not_installed", addon)
                 .withStyle(ChatFormatting.GRAY));
     }
 }
