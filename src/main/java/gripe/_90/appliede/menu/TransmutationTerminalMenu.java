@@ -1,5 +1,7 @@
 package gripe._90.appliede.menu;
 
+import org.jetbrains.annotations.NotNull;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -149,6 +151,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         }
     }
 
+    @NotNull
     @Override
     public ItemStack quickMoveStack(Player player, int idx) {
         if (shiftToTransmute) {

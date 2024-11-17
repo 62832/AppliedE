@@ -1,12 +1,15 @@
 package gripe._90.appliede.integration.ae2wtlib;
 
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
 import appeng.api.config.Actionable;
 import appeng.api.features.GridLinkables;
+import appeng.core.AppEng;
 import appeng.init.client.InitScreens;
 import appeng.items.tools.powered.WirelessTerminalItem;
 
@@ -14,7 +17,6 @@ import gripe._90.appliede.integration.Addons;
 
 public class AE2WTIntegration {
     private static final Item TERMINAL = new WTTItem();
-    public static final MenuType<?> MENU = WTTMenu.TYPE;
 
     static {
         GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);
@@ -29,6 +31,12 @@ public class AE2WTIntegration {
         var terminal = (WTTItem) TERMINAL;
         terminal.injectAEPower(stack, terminal.getAEMaxPower(stack), Actionable.MODULATE);
         return stack;
+    }
+
+    public static void registerTerminalMenu(RegisterEvent event) {
+        if (event.getRegistryKey().equals(Registries.MENU)) {
+            ForgeRegistries.MENU_TYPES.register(AppEng.makeId("wireless_transmutation_terminal"), WTTMenu.TYPE);
+        }
     }
 
     public static void addTerminalToAE2WTLibTab(BuildCreativeModeTabContentsEvent event) {

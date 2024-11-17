@@ -137,10 +137,6 @@ public final class AppliedE {
             id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
     
     static {
-        if (Addons.AE2WTLIB.isLoaded()) {
-            MENU_TYPES.register("wireless_transmutation_terminal", () -> AE2WTIntegration.MENU);
-        }
-
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
                 .icon(() -> EMC_INTERFACE.get().asItem().getDefaultInstance())
@@ -201,6 +197,7 @@ public final class AppliedE {
         });
 
         if (Addons.AE2WTLIB.isLoaded()) {
+            bus.addListener(AE2WTIntegration::registerTerminalMenu);
             bus.addListener(AE2WTIntegration::addTerminalToAE2WTLibTab);
         }
 
