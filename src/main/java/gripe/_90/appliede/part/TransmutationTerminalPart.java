@@ -13,7 +13,6 @@ import appeng.parts.reporting.AbstractTerminalPart;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
-import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class TransmutationTerminalPart extends AbstractTerminalPart implements TransmutationTerminalHost {
     @PartModels
@@ -57,7 +56,7 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements T
 
     @Override
     public MenuType<?> getMenuType(Player player) {
-        return TransmutationTerminalMenu.TYPE;
+        return AppliedE.TRANSMUTATION_TERMINAL_MENU.get();
     }
 
     @Override

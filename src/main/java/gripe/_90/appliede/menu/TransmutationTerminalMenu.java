@@ -15,19 +15,16 @@ import appeng.helpers.InventoryAction;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.guisync.GuiSync;
-import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.FakeSlot;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
 
 import moze_intel.projecte.api.ItemInfo;
 
 public class TransmutationTerminalMenu extends MEStorageMenu {
-    public static final MenuType<TransmutationTerminalMenu> TYPE = MenuTypeBuilder.create(
-                    TransmutationTerminalMenu::new, TransmutationTerminalHost.class)
-            .build("transmutation_terminal");
     protected static final SlotSemantic TRANSMUTE = SlotSemantics.register("APPLIEDE_TRANSMUTE", false);
     protected static final SlotSemantic UNLEARN = SlotSemantics.register("APPLIEDE_UNLEARN", false);
 
@@ -49,7 +46,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
     public int unlearnedLabelTicks;
 
     public TransmutationTerminalMenu(int id, Inventory ip, TransmutationTerminalHost host) {
-        this(TYPE, id, ip, host, true);
+        this(AppliedE.TRANSMUTATION_TERMINAL_MENU.get(), id, ip, host, true);
     }
 
     public TransmutationTerminalMenu(

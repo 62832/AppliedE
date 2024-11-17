@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 
 import appeng.api.stacks.AEItemKey;
@@ -18,19 +17,15 @@ import appeng.menu.ISubMenu;
 import appeng.menu.MenuOpener;
 import appeng.menu.SlotSemantics;
 import appeng.menu.guisync.GuiSync;
-import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.implementations.SetStockAmountMenu;
 import appeng.menu.locator.MenuLocator;
 import appeng.menu.slot.InaccessibleSlot;
 import appeng.util.inv.AppEngInternalInventory;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
-    public static final MenuType<EMCSetStockAmountMenu> TYPE = MenuTypeBuilder.create(
-                    EMCSetStockAmountMenu::new, EMCInterfaceLogicHost.class)
-            .build("emc_set_stock_amount");
-
     private final EMCInterfaceLogicHost host;
     private final Slot stockedItem;
     private AEItemKey whatToStock;
@@ -44,7 +39,7 @@ public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
     private int slot;
 
     public EMCSetStockAmountMenu(int id, Inventory playerInventory, EMCInterfaceLogicHost host) {
-        super(TYPE, id, playerInventory, host);
+        super(AppliedE.EMC_SET_STOCK_AMOUNT_MENU.get(), id, playerInventory, host);
         registerClientAction(SetStockAmountMenu.ACTION_SET_STOCK_AMOUNT, Integer.class, this::confirm);
         this.host = host;
         stockedItem = new InaccessibleSlot(new AppEngInternalInventory(1), 0);
@@ -57,7 +52,7 @@ public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
     }
 
     public static void open(ServerPlayer player, MenuLocator locator, int slot, AEItemKey toStock, int initialAmount) {
-        MenuOpener.open(TYPE, player, locator);
+        MenuOpener.open(AppliedE.EMC_SET_STOCK_AMOUNT_MENU.get(), player, locator);
 
         if (player.containerMenu instanceof EMCSetStockAmountMenu stockMenu) {
             stockMenu.setWhatToStock(slot, toStock, initialAmount);

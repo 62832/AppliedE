@@ -7,7 +7,6 @@ import net.minecraft.world.inventory.MenuType;
 import appeng.api.stacks.AEItemKey;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.InterfaceMenu;
-import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.FakeSlot;
@@ -16,10 +15,6 @@ import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 
 public class EMCInterfaceMenu extends UpgradeableMenu<EMCInterfaceLogicHost> {
     private static final String ACTION_OPEN_SET_AMOUNT = InterfaceMenu.ACTION_OPEN_SET_AMOUNT;
-
-    public static final MenuType<EMCInterfaceMenu> TYPE = MenuTypeBuilder.create(
-                    EMCInterfaceMenu::new, EMCInterfaceLogicHost.class)
-            .build("emc_interface");
 
     public EMCInterfaceMenu(MenuType<?> menuType, int id, Inventory playerInventory, EMCInterfaceLogicHost host) {
         super(menuType, id, playerInventory, host);

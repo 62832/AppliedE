@@ -14,7 +14,7 @@ import appeng.menu.ISubMenu;
 import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocator;
 
-import gripe._90.appliede.menu.EMCInterfaceMenu;
+import gripe._90.appliede.AppliedE;
 
 public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUpgradeableObject {
     BlockEntity getBlockEntity();
@@ -36,12 +36,12 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUp
     }
 
     default void openMenu(Player player, MenuLocator locator) {
-        MenuOpener.open(EMCInterfaceMenu.TYPE, player, locator);
+        MenuOpener.open(AppliedE.EMC_INTERFACE_MENU.get(), player, locator);
     }
 
     @Override
     default void returnToMainMenu(Player player, ISubMenu subMenu) {
-        MenuOpener.returnTo(EMCInterfaceMenu.TYPE, player, subMenu.getLocator());
+        MenuOpener.returnTo(AppliedE.EMC_INTERFACE_MENU.get(), player, subMenu.getLocator());
     }
 
     IGridNodeListener<EMCInterfaceLogicHost> NODE_LISTENER = new IGridNodeListener<>() {

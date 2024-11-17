@@ -47,6 +47,9 @@ import appeng.core.localization.GuiText;
 import appeng.init.client.InitScreens;
 import appeng.items.parts.PartItem;
 import appeng.items.parts.PartModelsHelper;
+import appeng.menu.AEBaseMenu;
+import appeng.menu.implementations.IOBusMenu;
+import appeng.menu.implementations.MenuTypeBuilder;
 
 import gripe._90.appliede.block.EMCInterfaceBlock;
 import gripe._90.appliede.block.EMCInterfaceBlockEntity;
@@ -60,7 +63,9 @@ import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.misc.EMCContainerItemStrategy;
+import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 import gripe._90.appliede.me.misc.LearnAllItemsPacket;
+import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
@@ -109,10 +114,16 @@ public final class AppliedE {
         return type;
     });
 
+    public static final RegistryObject<MenuType<EMCInterfaceMenu>> EMC_INTERFACE_MENU = menu("emc_interface", EMCInterfaceMenu::new, EMCInterfaceLogicHost.class);
+    public static final RegistryObject<MenuType<EMCSetStockAmountMenu>> EMC_SET_STOCK_AMOUNT_MENU = menu("emc_set_stock_amount", EMCSetStockAmountMenu::new, EMCInterfaceLogicHost.class);
+
     public static final RegistryObject<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
     public static final RegistryObject<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
+    public static final RegistryObject<MenuType<IOBusMenu>> EMC_EXPORT_BUS_MENU = menu("emc_export_bus", IOBusMenu::new, EMCExportBusPart.class);
+    public static final RegistryObject<MenuType<IOBusMenu>> EMC_IMPORT_BUS_MENU = menu("emc_import_bus", IOBusMenu::new, EMCImportBusPart.class);
 
     public static final RegistryObject<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
+    public static final RegistryObject<MenuType<TransmutationTerminalMenu>> TRANSMUTATION_TERMINAL_MENU = menu("transmutation_terminal", TransmutationTerminalMenu::new, TransmutationTerminalHost.class);
     public static final RegistryObject<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
     public static final RegistryObject<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
@@ -126,12 +137,6 @@ public final class AppliedE {
             id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
     
     static {
-        MENU_TYPES.register("emc_interface", () -> EMCInterfaceMenu.TYPE);
-        MENU_TYPES.register("emc_set_stock_amount", () -> EMCSetStockAmountMenu.TYPE);
-        MENU_TYPES.register("emc_export_bus", () -> EMCExportBusPart.MENU);
-        MENU_TYPES.register("emc_import_bus", () -> EMCImportBusPart.MENU);
-        MENU_TYPES.register("transmutation_terminal", () -> TransmutationTerminalMenu.TYPE);
-
         if (Addons.AE2WTLIB.isLoaded()) {
             MENU_TYPES.register("wireless_transmutation_terminal", () -> AE2WTIntegration.MENU);
         }
@@ -217,6 +222,14 @@ public final class AppliedE {
         return new PartItem<>(new Item.Properties(), partClass, factory);
     }
 
+    private static <M extends AEBaseMenu, H> RegistryObject<MenuType<M>> menu(String id, MenuTypeBuilder.MenuFactory<M, H> factory, Class<H> host) {
+        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).build(id));
+    }
+
+    private static <M extends AEBaseMenu, H> RegistryObject<MenuType<M>> menu(String id, MenuTypeBuilder.TypedMenuFactory<M, H> factory, Class<H> host) {
+        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).build(id));
+    }
+
     private static class Client {
         private static void setup(IEventBus bus) {
             ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AppliedEConfig.Client.SPEC);
@@ -225,23 +238,23 @@ public final class AppliedE {
                 AEKeyRendering.register(EMCKeyType.TYPE, EMCKey.class, EMCRenderer.INSTANCE);
 
                 InitScreens.register(
-                        EMCInterfaceMenu.TYPE,
+                        AppliedE.EMC_INTERFACE_MENU.get(),
                         EMCInterfaceScreen<EMCInterfaceMenu>::new,
                         "/screens/appliede/emc_interface.json");
                 InitScreens.register(
-                        EMCSetStockAmountMenu.TYPE,
+                        AppliedE.EMC_SET_STOCK_AMOUNT_MENU.get(),
                         EMCSetStockAmountScreen::new,
                         "/screens/set_stock_amount.json");
                 InitScreens.register(
-                        EMCExportBusPart.MENU,
+                        AppliedE.EMC_EXPORT_BUS_MENU.get(),
                         IOBusScreen::new,
                         "/screens/export_bus.json");
                 InitScreens.register(
-                        EMCImportBusPart.MENU,
+                        AppliedE.EMC_IMPORT_BUS_MENU.get(),
                         IOBusScreen::new,
                         "/screens/import_bus.json");
                 InitScreens.register(
-                        TransmutationTerminalMenu.TYPE,
+                        AppliedE.TRANSMUTATION_TERMINAL_MENU.get(),
                         TransmutationTerminalScreen<TransmutationTerminalMenu>::new,
                         "/screens/appliede/transmutation_terminal.json");
 

@@ -18,8 +18,6 @@ import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
 import appeng.items.parts.PartModels;
 import appeng.me.storage.ExternalStorageFacade;
-import appeng.menu.implementations.IOBusMenu;
-import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
 
@@ -32,9 +30,6 @@ import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
 public class EMCImportBusPart extends IOBusPart {
-    public static final MenuType<IOBusMenu> MENU =
-            MenuTypeBuilder.create(IOBusMenu::new, EMCImportBusPart.class).build("emc_import_bus");
-
     private static final ResourceLocation MODEL_BASE = AppliedE.id("part/emc_import_bus");
 
     @PartModels
@@ -53,7 +48,7 @@ public class EMCImportBusPart extends IOBusPart {
 
     @Override
     protected MenuType<?> getMenuType() {
-        return MENU;
+        return AppliedE.EMC_IMPORT_BUS_MENU.get();
     }
 
     @Override
