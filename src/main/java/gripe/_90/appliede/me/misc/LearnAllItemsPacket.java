@@ -28,11 +28,11 @@ public class LearnAllItemsPacket {
             if (knowledge.isTrackingPlayer(sender)) {
                 for (var key : storage.getCachedInventory().keySet()) {
                     if (!(key instanceof AEItemKey item)) {
-                        return;
+                        continue;
                     }
 
-                    if (!knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
-                        return;
+                    if (knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
+                        continue;
                     }
 
                     var learned = knowledge
@@ -51,6 +51,5 @@ public class LearnAllItemsPacket {
                 }
             }
         });
-        context.get().setPacketHandled(true);
     }
 }
