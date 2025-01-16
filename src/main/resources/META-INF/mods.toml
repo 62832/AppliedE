@@ -7,6 +7,7 @@ license = "LGPLv3.0"
 
 issueTrackerURL = "https://github.com/62832/AppliedE/issues"
 displayURL = "https://github.com/62832/AppliedE"
+updateJSONURL = "https://mod-manifest.jarva.dev/manifest/curseforge/1009940/forge"
 
 [[mods]]
 modId = "appliede"
