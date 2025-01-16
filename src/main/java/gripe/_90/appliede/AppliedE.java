@@ -10,7 +10,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
@@ -41,9 +40,7 @@ import appeng.api.util.AEColor;
 import appeng.client.gui.implementations.IOBusScreen;
 import appeng.client.render.StaticItemColor;
 import appeng.core.AppEng;
-import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
-import appeng.core.definitions.AEParts;
 import appeng.core.localization.GuiText;
 import appeng.init.client.InitScreens;
 import appeng.items.parts.PartItem;
@@ -75,10 +72,6 @@ import gripe._90.appliede.part.EMCImportBusPart;
 import gripe._90.appliede.part.EMCInterfacePart;
 import gripe._90.appliede.part.EMCModulePart;
 import gripe._90.appliede.part.TransmutationTerminalPart;
-
-import moze_intel.projecte.api.imc.CustomEMCRegistration;
-import moze_intel.projecte.api.nss.NSSItem;
-import moze_intel.projecte.emc.mappers.APICustomEMCMapper;
 
 // spotless:off
 @Mod(AppliedE.MODID)
@@ -187,13 +180,6 @@ public final class AppliedE {
             Upgrades.add(LEARNING_CARD.get(), EMC_INTERFACE.get(), 1, emcInterfaceGroup);
             Upgrades.add(LEARNING_CARD.get(), CABLE_EMC_INTERFACE.get(), 1, emcInterfaceGroup);
             Upgrades.add(LEARNING_CARD.get(), EMC_IMPORT_BUS.get(), 1);
-
-            registerEMC(AEItems.CERTUS_QUARTZ_CRYSTAL, 256);
-            registerEMC(AEBlocks.SKY_STONE_BLOCK, 256);
-            registerEMC(AEItems.CALCULATION_PROCESSOR_PRESS, 2048);
-            registerEMC(AEItems.ENGINEERING_PROCESSOR_PRESS, 2048);
-            registerEMC(AEItems.LOGIC_PROCESSOR_PRESS, 2048);
-            registerEMC(AEParts.CABLE_ANCHOR, 32);
         });
 
         if (ModList.get().isLoaded("ae2wtlib")) {
@@ -208,10 +194,6 @@ public final class AppliedE {
 
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MODID, path);
-    }
-
-    private static void registerEMC(ItemLike item, int emc) {
-        APICustomEMCMapper.INSTANCE.registerCustomEMC(MODID, new CustomEMCRegistration(NSSItem.createItem(item), emc));
     }
 
     private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
