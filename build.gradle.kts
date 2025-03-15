@@ -21,9 +21,7 @@ dependencies {
     jarJar(libs.ae2wtlibapi)
     runtimeOnly(libs.ae2wtlib)
 
-    compileOnly(libs.teampe)
-
-    runtimeOnly(libs.jade)
+    implementation(libs.teampe)
 }
 
 neoForge {

@@ -54,7 +54,6 @@ run {
                 library("ae2wtlibapi", "de.mari_023", "ae2wtlib_api").versionRef("ae2wtlib")
 
                 library("teampe", "curse.maven", "team-projecte-689273").version("5402805")
-                library("jade", "curse.maven", "jade-324717").version("5884231")
             }
         }
     }
