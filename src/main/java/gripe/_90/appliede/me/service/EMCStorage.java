@@ -229,7 +229,7 @@ public final class EMCStorage implements MEStorage {
             return 0;
         }
 
-        var existingStored = service.getGrid().getStorageService().getCachedInventory();
+        var existingStored = service.grid.getStorageService().getCachedInventory();
 
         if (!skipStored && existingStored.get(what) > 0) {
             return 0;
@@ -322,7 +322,7 @@ public final class EMCStorage implements MEStorage {
     }
 
     private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
-        var energyService = service.getGrid().getEnergyService();
+        var energyService = service.grid.getEnergyService();
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
                 .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()))
                 .divide(BigDecimal.valueOf(EMCKeyType.TYPE.getAmountPerOperation()), 4, RoundingMode.HALF_UP);

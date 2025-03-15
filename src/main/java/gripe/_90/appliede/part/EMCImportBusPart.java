@@ -48,17 +48,11 @@ public class EMCImportBusPart extends IOBusPart {
     private static final PartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, AppEng.makeId("part/import_bus_has_channel"));
 
-    private final BlockCapabilityCache<IItemHandler, Direction> itemCache;
-    private final BlockCapabilityCache<IEmcStorage, Direction> emcCache;
+    private BlockCapabilityCache<IItemHandler, Direction> itemCache;
+    private BlockCapabilityCache<IEmcStorage, Direction> emcCache;
 
     public EMCImportBusPart(IPartItem<?> partItem) {
         super(TickRates.ImportBus, Set.of(AEKeyType.items(), EMCKeyType.TYPE), partItem);
-
-        var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
-        var facing = getSide().getOpposite();
-        var level = (ServerLevel) getLevel();
-        itemCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, level, adjacentPos, facing);
-        emcCache = BlockCapabilityCache.create(PECapabilities.EMC_STORAGE_CAPABILITY, level, adjacentPos, facing);
     }
 
     @Override
@@ -68,6 +62,14 @@ public class EMCImportBusPart extends IOBusPart {
 
     @Override
     protected boolean doBusWork(IGrid grid) {
+        if (itemCache == null && emcCache == null) {
+            var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+            var facing = getSide().getOpposite();
+            var level = (ServerLevel) getLevel();
+            itemCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, level, adjacentPos, facing);
+            emcCache = BlockCapabilityCache.create(PECapabilities.EMC_STORAGE_CAPABILITY, level, adjacentPos, facing);
+        }
+
         var doneWork = false;
 
         var networkEmc = grid.getService(KnowledgeService.class).getStorage();

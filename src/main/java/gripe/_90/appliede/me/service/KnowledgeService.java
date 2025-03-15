@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.IGrid;
@@ -36,6 +35,7 @@ import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.event.EMCRemapEvent;
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
@@ -49,23 +49,15 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final List<IPatternDetails> temporaryPatterns = new ArrayList<>();
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
-    private final IGrid grid;
+    final IGrid grid;
     private Set<AEItemKey> knownItemCache;
     private boolean needsSync;
     private int ticksSinceLastSync;
 
     public KnowledgeService(IGrid grid) {
         this.grid = grid;
-        NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> {
-            knownItemCache = null;
-            updatePatterns();
-        });
-        NeoForge.EVENT_BUS.addListener(OnDatapackSyncEvent.class, event -> {
-            if (event.getPlayer() == null) {
-                knownItemCache = null;
-                updatePatterns();
-            }
-        });
+        NeoForge.EVENT_BUS.addListener(EMCRemapEvent.class, event -> updateKnownItems());
+        NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> updateKnownItems());
     }
 
     @Override
@@ -184,6 +176,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         return knownItemCache;
     }
 
+    private void updateKnownItems() {
+        knownItemCache = null;
+        updatePatterns();
+    }
+
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
         if (!moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()) {
             var patterns = new ArrayList<IPatternDetails>();
@@ -215,10 +212,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     void updatePatterns() {
         moduleNodes.forEach(ICraftingProvider::requestUpdate);
-    }
-
-    IGrid getGrid() {
-        return grid;
     }
 
     BigInteger getEmc() {

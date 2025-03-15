@@ -63,7 +63,11 @@ public class AppliedEClient {
             }
         });
 
-        bus.addListener((RegisterColorHandlersEvent.Item event) ->
-                event.register(new StaticItemColor(AEColor.TRANSPARENT), AppliedE.TRANSMUTATION_TERMINAL.get()));
+        bus.addListener(
+                RegisterColorHandlersEvent.Item.class,
+                event -> event.register(
+                        (stack, tintIndex) ->
+                                new StaticItemColor(AEColor.TRANSPARENT).getColor(stack, tintIndex) | 0xFF000000,
+                        AppliedE.TRANSMUTATION_TERMINAL.get()));
     }
 }
