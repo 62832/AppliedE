@@ -6,23 +6,22 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import appeng.api.features.IPlayerRegistry;
 
 import cn.leomc.teamprojecte.TPTeam;
-import cn.leomc.teamprojecte.TeamChangeEvent;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 
 final class TeamProjectEHandler {
     private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersPerTeam = new HashMap<>();
 
     private TeamProjectEHandler() {
-        MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> clear());
-        MinecraftForge.EVENT_BUS.addListener((TeamChangeEvent event) -> clear());
+        NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, event -> clear());
+        // NeoForge.EVENT_BUS.addListener(TeamChangeEvent.class, event -> clear());
     }
 
     private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> entry) {
@@ -82,7 +81,10 @@ final class TeamProjectEHandler {
     }
 
     static class Proxy {
-        private final Object handler = ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
+        private static final boolean DISABLE = true;
+
+        private final Object handler =
+                !DISABLE && ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
 
         boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
             return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);

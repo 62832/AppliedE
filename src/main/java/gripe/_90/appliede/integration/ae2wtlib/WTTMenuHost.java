@@ -2,45 +2,30 @@ package gripe._90.appliede.integration.ae2wtlib;
 
 import java.util.function.BiConsumer;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import appeng.api.implementations.blockentities.IViewCellStorage;
 import appeng.menu.ISubMenu;
+import appeng.menu.locator.ItemMenuHostLocator;
 
-import de.mari_023.ae2wtlib.terminal.WTMenuHost;
+import de.mari_023.ae2wtlib.api.terminal.ItemWT;
+import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 
 public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, TransmutationTerminalHost {
-    private boolean shiftToTransmute;
+    private boolean shiftToTransmute = getItemStack().getOrDefault(AppliedE.SHIFT_TO_TRANSMUTE.get(), false);
 
     public WTTMenuHost(
-            Player player,
-            @Nullable Integer inventorySlot,
-            ItemStack is,
-            BiConsumer<Player, ISubMenu> returnToMainMenu) {
-        super(player, inventorySlot, is, returnToMainMenu);
-        readFromNbt();
+            ItemWT item, Player player, ItemMenuHostLocator locator, BiConsumer<Player, ISubMenu> returnToMainMenu) {
+        super(item, player, locator, returnToMainMenu);
     }
 
     @Override
     public ItemStack getMainMenuIcon() {
-        return AE2WTIntegration.getWirelessTerminalItem().getDefaultInstance();
-    }
-
-    @Override
-    protected void readFromNbt() {
-        super.readFromNbt();
-        shiftToTransmute = getItemStack().getOrCreateTag().getBoolean("shiftToTransmute");
-    }
-
-    @Override
-    public void saveChanges() {
-        super.saveChanges();
-        getItemStack().getOrCreateTag().putBoolean("shiftToTransmute", shiftToTransmute);
+        return AE2WTIntegration.TERMINAL.getDefaultInstance();
     }
 
     @Override
@@ -51,6 +36,6 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, Transmu
     @Override
     public void setShiftToTransmute(boolean shift) {
         shiftToTransmute = shift;
-        saveChanges();
+        getItemStack().set(AppliedE.SHIFT_TO_TRANSMUTE.get(), shiftToTransmute);
     }
 }

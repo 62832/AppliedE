@@ -45,12 +45,12 @@ public final class EMCStorage implements MEStorage {
         var currentTier = 1;
 
         while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
-            out.add(EMCKey.tier(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
+            out.add(EMCKey.of(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
             emc = emc.divide(AppliedE.TIER_LIMIT);
             currentTier++;
         }
 
-        out.add(EMCKey.tier(currentTier), emc.longValue());
+        out.add(EMCKey.of(currentTier), emc.longValue());
 
         if (highestTier != currentTier) {
             highestTier = currentTier;
@@ -247,7 +247,7 @@ public final class EMCStorage implements MEStorage {
         var availableEmc = totalEmc.min(
                 providers.equals(service.getProviders())
                         ? service.getEmc()
-                        : providers.get(0).getEmc());
+                        : providers.getFirst().getEmc());
 
         amount = availableEmc.divide(itemEmc).longValue();
 

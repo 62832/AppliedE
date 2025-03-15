@@ -1,23 +1,32 @@
 package gripe._90.appliede.me.misc;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
-import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.NotNull;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
-public class LearnAllItemsPacket {
-    public void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            var sender = context.get().getSender();
+public class LearnAllItemsPacket implements CustomPacketPayload {
+    public static final Type<LearnAllItemsPacket> TYPE = new CustomPacketPayload.Type<>(AppliedE.id("learn_all"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, LearnAllItemsPacket> STREAM_CODEC =
+            StreamCodec.unit(new LearnAllItemsPacket());
 
-            if (sender == null || !(sender.containerMenu instanceof TransmutationTerminalMenu menu)) {
+    public void handle(IPayloadContext context) {
+        context.enqueueWork(() -> {
+            var sender = context.player();
+
+            if (!(sender.containerMenu instanceof TransmutationTerminalMenu menu)) {
                 return;
             }
 
@@ -31,7 +40,7 @@ public class LearnAllItemsPacket {
                         continue;
                     }
 
-                    if (knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
+                    if (!knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
                         continue;
                     }
 
@@ -51,5 +60,11 @@ public class LearnAllItemsPacket {
                 }
             }
         });
+    }
+
+    @NotNull
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

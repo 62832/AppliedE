@@ -1,24 +1,25 @@
 package gripe._90.appliede;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.fml.config.IConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class AppliedEConfig {
     public static final AppliedEConfig CONFIG;
-    public static final ForgeConfigSpec SPEC;
+    public static final IConfigSpec SPEC;
 
     static {
-        var configured = new ForgeConfigSpec.Builder().configure(AppliedEConfig::new);
+        var configured = new ModConfigSpec.Builder().configure(AppliedEConfig::new);
         CONFIG = configured.getKey();
         SPEC = configured.getValue();
     }
 
-    private final ForgeConfigSpec.DoubleValue moduleEnergyUsage;
-    private final ForgeConfigSpec.DoubleValue transmutationPowerMultiplier;
-    private final ForgeConfigSpec.IntValue emcPerByte;
-    private final ForgeConfigSpec.BooleanValue terminalExtractFromOwnEmcOnly;
-    private final ForgeConfigSpec.IntValue syncThrottleInterval;
+    private final ModConfigSpec.DoubleValue moduleEnergyUsage;
+    private final ModConfigSpec.DoubleValue transmutationPowerMultiplier;
+    private final ModConfigSpec.IntValue emcPerByte;
+    private final ModConfigSpec.BooleanValue terminalExtractFromOwnEmcOnly;
+    private final ModConfigSpec.IntValue syncThrottleInterval;
 
-    private AppliedEConfig(ForgeConfigSpec.Builder builder) {
+    private AppliedEConfig(ModConfigSpec.Builder builder) {
         moduleEnergyUsage = builder.comment("The amount of AE energy per tick used by the ME Transmutation Module.")
                 .defineInRange("moduleEnergyUsage", 25.0, 0, Double.MAX_VALUE);
         transmutationPowerMultiplier = builder.comment("The amount of AE energy used to transmute items, per 2000 EMC.")
@@ -60,24 +61,24 @@ public class AppliedEConfig {
 
     public static class Client {
         public static final Client CONFIG;
-        public static final ForgeConfigSpec SPEC;
+        public static final IConfigSpec SPEC;
 
         static {
-            var configured = new ForgeConfigSpec.Builder().configure(Client::new);
+            var configured = new ModConfigSpec.Builder().configure(Client::new);
             CONFIG = configured.getKey();
             SPEC = configured.getValue();
         }
 
-        private final ForgeConfigSpec.IntValue emcTierColours;
+        private final ModConfigSpec.IntValue emcTierColours;
 
-        private Client(ForgeConfigSpec.Builder builder) {
+        private Client(ModConfigSpec.Builder builder) {
             emcTierColours = builder.comment(
                             "How many different colours should be used to represent higher tiers of EMC in storage")
                     .defineInRange("emcTierColours", 10, 1, Integer.MAX_VALUE);
         }
 
-        public ForgeConfigSpec.IntValue getEmcTierColours() {
-            return emcTierColours;
+        public int getEmcTierColours() {
+            return emcTierColours.getAsInt();
         }
     }
 }

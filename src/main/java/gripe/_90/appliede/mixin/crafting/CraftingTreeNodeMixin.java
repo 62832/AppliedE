@@ -1,7 +1,8 @@
 package gripe._90.appliede.mixin.crafting;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+
+import com.llamalad7.mixinextras.sugar.Local;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,7 +11,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.IGridNode;
@@ -25,7 +25,7 @@ import appeng.crafting.inv.CraftingSimulationState;
 import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
 
-@Mixin(value = CraftingTreeNode.class, remap = false)
+@Mixin(CraftingTreeNode.class)
 public abstract class CraftingTreeNodeMixin {
     @Shadow
     private ArrayList<CraftingTreeProcess> nodes;
@@ -49,17 +49,15 @@ public abstract class CraftingTreeNodeMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"),
-            locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true)
     // spotless:on
     private void recalculatePattern(
             CallbackInfo ci,
-            IGridNode gridNode,
-            ICraftingService craftingService,
-            Iterator<IPatternDetails> iterator,
-            IPatternDetails details) {
+            @Local IPatternDetails details,
+            @Local IGridNode gridNode,
+            @Local ICraftingService craftingService) {
         if (details instanceof TransmutationPattern) {
-            if (details.getOutputs()[0].what() instanceof AEItemKey item) {
+            if (details.getOutputs().getFirst().what() instanceof AEItemKey item) {
                 ci.cancel();
                 details = new TransmutationPattern(item, appliede$requestedAmount);
                 nodes.add(new CraftingTreeProcess(craftingService, job, details, (CraftingTreeNode) (Object) this));

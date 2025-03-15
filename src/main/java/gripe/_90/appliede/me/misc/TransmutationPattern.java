@@ -2,8 +2,16 @@ package gripe._90.appliede.me.misc;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import appeng.api.crafting.IPatternDetails;
@@ -17,10 +25,6 @@ import gripe._90.appliede.me.key.EMCKey;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class TransmutationPattern implements IPatternDetails {
-    private static final String NBT_ITEM = "item";
-    private static final String NBT_AMOUNT = "amount";
-    private static final String NBT_TIER = "tier";
-
     private final AEItemKey item;
     private final long amount;
     private final int tier;
@@ -30,19 +34,21 @@ public final class TransmutationPattern implements IPatternDetails {
     public TransmutationPattern(AEItemKey item, long amount) {
         tier = 1;
 
-        var tag = new CompoundTag();
-        tag.put(NBT_ITEM, (this.item = item).toTag());
-        tag.putLong(NBT_AMOUNT, this.amount = amount);
-        definition = AEItemKey.of(AppliedE.DUMMY_EMC_ITEM.get(), tag);
+        var definition = new ItemStack(AppliedE.DUMMY_EMC_ITEM.get());
+        definition.set(
+                AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(),
+                new Encoded((this.item = item).toStack(), this.amount = amount, tier));
+        this.definition = AEItemKey.of(definition);
     }
 
     public TransmutationPattern(int tier) {
         item = null;
         amount = 1;
 
-        var tag = new CompoundTag();
-        tag.putInt(NBT_TIER, this.tier = tier);
-        definition = AEItemKey.of(AppliedE.DUMMY_EMC_ITEM.get(), tag);
+        var definition = new ItemStack(AppliedE.DUMMY_EMC_ITEM.get());
+        definition.set(
+                AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(ItemStack.EMPTY, amount, this.tier = tier));
+        this.definition = AEItemKey.of(definition);
     }
 
     @Override
@@ -73,12 +79,11 @@ public final class TransmutationPattern implements IPatternDetails {
     }
 
     @Override
-    public GenericStack[] getOutputs() {
-        return new GenericStack[] {
-            item != null
-                    ? new GenericStack(item, amount)
-                    : new GenericStack(EMCKey.tier(tier - 1), AppliedE.TIER_LIMIT.longValue())
-        };
+    public List<GenericStack> getOutputs() {
+        return Collections.singletonList(
+                item != null
+                        ? new GenericStack(item, amount)
+                        : new GenericStack(EMCKey.of(tier - 1), AppliedE.TIER_LIMIT.longValue()));
     }
 
     @Override
@@ -94,7 +99,7 @@ public final class TransmutationPattern implements IPatternDetails {
     private record Input(long amount, int tier) implements IInput {
         @Override
         public GenericStack[] getPossibleInputs() {
-            return new GenericStack[] {new GenericStack(EMCKey.tier(tier), amount)};
+            return new GenericStack[] {new GenericStack(EMCKey.of(tier), amount)};
         }
 
         @Override
@@ -111,5 +116,22 @@ public final class TransmutationPattern implements IPatternDetails {
         public AEKey getRemainingKey(AEKey template) {
             return null;
         }
+    }
+
+    public record Encoded(ItemStack item, long amount, int tier) {
+        public static final Codec<Encoded> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                        ItemStack.CODEC.fieldOf("item").forGetter(Encoded::item),
+                        Codec.LONG.fieldOf("amount").forGetter(Encoded::amount),
+                        Codec.INT.fieldOf("tier").forGetter(Encoded::tier))
+                .apply(builder, Encoded::new));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, Encoded> STREAM_CODEC = StreamCodec.composite(
+                ItemStack.STREAM_CODEC,
+                Encoded::item,
+                ByteBufCodecs.VAR_LONG,
+                Encoded::amount,
+                ByteBufCodecs.VAR_INT,
+                Encoded::tier,
+                Encoded::new);
     }
 }

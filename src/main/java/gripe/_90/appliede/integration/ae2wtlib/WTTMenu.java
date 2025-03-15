@@ -9,8 +9,8 @@ import appeng.api.networking.IGridNode;
 import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.slot.RestrictedInputSlot;
 
-import de.mari_023.ae2wtlib.AE2wtlibSlotSemantics;
-import de.mari_023.ae2wtlib.wut.ItemWUT;
+import de.mari_023.ae2wtlib.api.gui.AE2wtlibSlotSemantics;
+import de.mari_023.ae2wtlib.api.terminal.ItemWUT;
 
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
@@ -30,7 +30,7 @@ public class WTTMenu extends TransmutationTerminalMenu {
 
     @Nullable
     @Override
-    public IGridNode getNetworkNode() {
+    public IGridNode getGridNode() {
         return getHost().getActionableNode();
     }
 

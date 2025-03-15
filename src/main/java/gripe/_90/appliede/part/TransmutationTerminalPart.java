@@ -1,5 +1,6 @@
 package gripe._90.appliede.part;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -43,14 +44,14 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements T
     }
 
     @Override
-    public void readFromNBT(CompoundTag data) {
-        super.readFromNBT(data);
+    public void readFromNBT(CompoundTag data, HolderLookup.Provider registries) {
+        super.readFromNBT(data, registries);
         shiftToTransmute = data.getBoolean("shiftToTransmute");
     }
 
     @Override
-    public void writeToNBT(CompoundTag data) {
-        super.writeToNBT(data);
+    public void writeToNBT(CompoundTag data, HolderLookup.Provider registries) {
+        super.writeToNBT(data, registries);
         data.putBoolean("shiftToTransmute", shiftToTransmute);
     }
 

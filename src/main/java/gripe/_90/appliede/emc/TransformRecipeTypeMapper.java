@@ -9,8 +9,11 @@ import net.minecraft.world.item.crafting.RecipeType;
 
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
+import appeng.recipes.AERecipeTypes;
 import appeng.recipes.transform.TransformCircumstance;
 import appeng.recipes.transform.TransformRecipe;
+
+import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.mapper.recipe.RecipeTypeMapper;
 import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
@@ -19,8 +22,13 @@ import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
 @RecipeTypeMapper
 public class TransformRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.transform";
+    }
+
+    @Override
     public String getName() {
-        return "AE2Transform";
+        return "In-World Transformation Mapper";
     }
 
     @Override
@@ -30,7 +38,7 @@ public class TransformRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public boolean canHandle(RecipeType<?> recipeType) {
-        return TransformRecipe.TYPE.equals(recipeType);
+        return AERecipeTypes.TRANSFORM.equals(recipeType);
     }
 
     @Override

@@ -1,10 +1,15 @@
 package gripe._90.appliede.part;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.IGrid;
@@ -12,6 +17,7 @@ import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKeyType;
 import appeng.api.storage.StorageHelper;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
@@ -42,8 +48,17 @@ public class EMCImportBusPart extends IOBusPart {
     private static final PartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, AppEng.makeId("part/import_bus_has_channel"));
 
+    private final BlockCapabilityCache<IItemHandler, Direction> itemCache;
+    private final BlockCapabilityCache<IEmcStorage, Direction> emcCache;
+
     public EMCImportBusPart(IPartItem<?> partItem) {
-        super(TickRates.ImportBus, key -> AEItemKey.is(key) || key == EMCKey.BASE, partItem);
+        super(TickRates.ImportBus, Set.of(AEKeyType.items(), EMCKeyType.TYPE), partItem);
+
+        var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+        var facing = getSide().getOpposite();
+        var level = (ServerLevel) getLevel();
+        itemCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, level, adjacentPos, facing);
+        emcCache = BlockCapabilityCache.create(PECapabilities.EMC_STORAGE_CAPABILITY, level, adjacentPos, facing);
     }
 
     @Override
@@ -53,39 +68,27 @@ public class EMCImportBusPart extends IOBusPart {
 
     @Override
     protected boolean doBusWork(IGrid grid) {
-        var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
-        var facing = getSide().getOpposite();
-        var blockEntity = getLevel().getBlockEntity(adjacentPos);
-
-        if (blockEntity == null) {
-            return false;
-        }
-
-        var emcStorage = blockEntity.getCapability(PECapabilities.EMC_STORAGE_CAPABILITY, facing);
-        var itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, facing);
         var doneWork = false;
 
         var networkEmc = grid.getService(KnowledgeService.class).getStorage();
         var remaining = new AtomicInteger(getOperationsPerTick());
 
-        emcStorage.ifPresent(handler -> {
-            if (!getFilter().isEmpty() && getFilter().isListed(EMCKey.BASE) == isUpgradedWith(AEItems.INVERTER_CARD)) {
-                return;
+        if (emcCache.getCapability() instanceof IEmcStorage handler) {
+            if (getFilter().isEmpty() || getFilter().isListed(EMCKey.BASE) != isUpgradedWith(AEItems.INVERTER_CARD)) {
+                var emcRemaining = remaining.get() * EMCKeyType.TYPE.getAmountPerOperation();
+                var inserted = StorageHelper.poweredInsert(
+                        grid.getEnergyService(),
+                        grid.getStorageService().getInventory(),
+                        EMCKey.BASE,
+                        Math.min(emcRemaining, handler.getStoredEmc()),
+                        source,
+                        Actionable.MODULATE);
+                handler.extractEmc(inserted, IEmcStorage.EmcAction.EXECUTE);
+                remaining.addAndGet((int) -Math.max(1, inserted / EMCKeyType.TYPE.getAmountPerOperation()));
             }
+        }
 
-            var emcRemaining = remaining.get() * EMCKeyType.TYPE.getAmountPerOperation();
-            var inserted = StorageHelper.poweredInsert(
-                    grid.getEnergyService(),
-                    grid.getStorageService().getInventory(),
-                    EMCKey.BASE,
-                    Math.min(emcRemaining, handler.getStoredEmc()),
-                    source,
-                    Actionable.MODULATE);
-            handler.extractEmc(inserted, IEmcStorage.EmcAction.EXECUTE);
-            remaining.addAndGet((int) -Math.max(1, inserted / EMCKeyType.TYPE.getAmountPerOperation()));
-        });
-
-        itemHandler.ifPresent(handler -> {
+        if (itemCache.getCapability() instanceof IItemHandler handler) {
             var adjacentStorage = ExternalStorageFacade.of(handler);
 
             for (var slot = 0; slot < handler.getSlots() && remaining.get() > 0; slot++) {
@@ -108,7 +111,7 @@ public class EMCImportBusPart extends IOBusPart {
                     remaining.addAndGet(-(int) amount);
                 }
             }
-        });
+        }
 
         if (remaining.get() < getOperationsPerTick()) {
             doneWork = true;

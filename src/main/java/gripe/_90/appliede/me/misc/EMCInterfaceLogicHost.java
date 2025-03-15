@@ -12,7 +12,7 @@ import appeng.helpers.IConfigInvHost;
 import appeng.helpers.externalstorage.GenericStackInv;
 import appeng.menu.ISubMenu;
 import appeng.menu.MenuOpener;
-import appeng.menu.locator.MenuLocator;
+import appeng.menu.locator.MenuHostLocator;
 
 import gripe._90.appliede.AppliedE;
 
@@ -35,7 +35,7 @@ public interface EMCInterfaceLogicHost extends IConfigInvHost, ISubMenuHost, IUp
         return getInterfaceLogic().getUpgrades();
     }
 
-    default void openMenu(Player player, MenuLocator locator) {
+    default void openMenu(Player player, MenuHostLocator locator) {
         MenuOpener.open(AppliedE.EMC_INTERFACE_MENU.get(), player, locator);
     }
 

@@ -16,6 +16,7 @@ import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
+import moze_intel.projecte.api.capabilities.item.IItemEmcHolder;
 import moze_intel.projecte.gameObjs.registries.PESoundEvents;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -28,10 +29,10 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
     @Override
     public GenericStack getContainedStack(ItemStack stack) {
         return stack.isEmpty()
+                        || !(stack.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
+                                instanceof IItemEmcHolder handler)
                 ? null
-                : stack.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
-                        .map(handler -> new GenericStack(EMCKey.BASE, handler.getStoredEmc(stack)))
-                        .orElse(null);
+                : new GenericStack(EMCKey.BASE, handler.getStoredEmc(stack));
     }
 
     @Nullable
@@ -42,23 +43,23 @@ public class EMCContainerItemStrategy implements ContainerItemStrategy<EMCKey, I
         }
 
         var carried = menu.getCarried();
-        return carried.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY).isPresent() ? carried : null;
+        return carried.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY) != null ? carried : null;
     }
 
     @Override
     public long extract(ItemStack context, EMCKey what, long amount, Actionable mode) {
         var action = mode.isSimulate() ? IEmcStorage.EmcAction.SIMULATE : IEmcStorage.EmcAction.EXECUTE;
-        return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
-                .map(handler -> handler.extractEmc(context, amount, action))
-                .orElse(0L);
+        return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY) instanceof IItemEmcHolder handler
+                ? handler.extractEmc(context, amount, action)
+                : 0;
     }
 
     @Override
     public long insert(ItemStack context, EMCKey what, long amount, Actionable mode) {
         var action = mode.isSimulate() ? IEmcStorage.EmcAction.SIMULATE : IEmcStorage.EmcAction.EXECUTE;
-        return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY)
-                .map(handler -> handler.insertEmc(context, amount, action))
-                .orElse(0L);
+        return context.getCapability(PECapabilities.EMC_HOLDER_ITEM_CAPABILITY) instanceof IItemEmcHolder handler
+                ? handler.insertEmc(context, amount, action)
+                : 0;
     }
 
     @Override

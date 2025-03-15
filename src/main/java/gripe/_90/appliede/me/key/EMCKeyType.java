@@ -1,7 +1,8 @@
 package gripe._90.appliede.me.key;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.serialization.MapCodec;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 import appeng.api.stacks.AEKey;
@@ -19,13 +20,13 @@ public final class EMCKeyType extends AEKeyType {
     }
 
     @Override
-    public AEKey readFromPacket(FriendlyByteBuf input) {
-        return EMCKey.tier(input.readVarInt());
+    public MapCodec<? extends AEKey> codec() {
+        return EMCKey.MAP_CODEC;
     }
 
     @Override
-    public AEKey loadKeyFromTag(CompoundTag tag) {
-        return EMCKey.tier(tag.getInt("tier"));
+    public AEKey readFromPacket(RegistryFriendlyByteBuf input) {
+        return EMCKey.of(input.readVarInt());
     }
 
     @Override

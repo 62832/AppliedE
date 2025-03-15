@@ -1,10 +1,8 @@
 plugins {
-    eclipse
     idea
-    alias(libs.plugins.neogradle)
-    alias(libs.plugins.mixin)
-    alias(libs.plugins.parchment)
-    alias(libs.plugins.spotless)
+    eclipse
+    id("net.neoforged.moddev")
+    id("com.diffplug.spotless")
 }
 
 val modId = "appliede"
@@ -13,92 +11,50 @@ base.archivesName = modId
 version = System.getenv("APPE_VERSION") ?: "0.0.0"
 group = "gripe.90"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-repositories {
-    mavenLocal()
-    mavenCentral()
+dependencies {
+    implementation(libs.ae2)
+    implementation(libs.projecte)
 
-    maven {
-        name = "ModMaven (K4U-NL)"
-        url = uri("https://modmaven.dev/")
-        content {
-            includeGroup("appeng")
-            includeGroup("mezz.jei")
-        }
-    }
+    compileOnly(libs.ae2wtlibapi)
+    jarJar(libs.ae2wtlibapi)
+    runtimeOnly(libs.ae2wtlib)
 
-    maven {
-        name = "Curse Maven"
-        url = uri("https://cursemaven.com")
-        content {
-            includeGroup("curse.maven")
-        }
-    }
+    compileOnly(libs.teampe)
 
-    maven {
-        name = "Shedaniel"
-        url = uri("https://maven.shedaniel.me/")
-        content {
-            includeGroup("me.shedaniel.cloth")
-            includeGroup("dev.architectury")
-        }
-    }
-
-    maven {
-        name = "TheIllusiveC4"
-        url = uri("https://maven.theillusivec4.top/")
-        content {
-            includeGroup("top.theillusivec4.curios")
-        }
-    }
+    runtimeOnly(libs.jade)
 }
 
-minecraft {
-    mappings("parchment", "2023.09.03-1.20.1")
-    copyIdeResources.set(true)
+neoForge {
+    version = libs.versions.neoforge.get()
+
+    parchment {
+        // minecraftVersion = libs.versions.minecraft.get()
+        minecraftVersion = "1.21"
+        mappingsVersion = libs.versions.parchment.get()
+    }
+
+    mods {
+        create(modId) {
+            sourceSet(sourceSets.main.get())
+        }
+    }
 
     runs {
         configureEach {
-            workingDirectory(file("run"))
-            property("forge.logging.console.level", "debug")
-
-            mods {
-                create(modId) {
-                    source(sourceSets.main.get())
-                }
-            }
+            gameDirectory = file("run")
         }
 
-        create("client")
-        create("server") { workingDirectory(file("run/server")) }
+        create("client") {
+            client()
+        }
+
+        create("server") {
+            server()
+            gameDirectory = file("run/server")
+        }
     }
-}
-
-mixin {
-    add(sourceSets.main.get(), "$modId.refmap.json")
-    config("$modId.mixins.json")
-}
-
-dependencies {
-    minecraft(libs.forge)
-    annotationProcessor(variantOf(libs.mixin) { classifier("processor") })
-
-    implementation(fg.deobf(libs.ae2.get()))
-    implementation(fg.deobf(libs.projecte.get()))
-
-    implementation(fg.deobf(libs.teampe.get()))
-    implementation(fg.deobf(libs.ae2wtlib.get()))
-    implementation(fg.deobf(libs.aecapfix.get()))
-
-    runtimeOnly(fg.deobf(libs.curios.get()))
-    runtimeOnly(fg.deobf(libs.architectury.get()))
-    runtimeOnly(fg.deobf(libs.cloth.get()))
-
-    runtimeOnly(fg.deobf(libs.projectex.get()))
-    runtimeOnly(fg.deobf(libs.jei.get()))
-    runtimeOnly(fg.deobf(libs.jade.get()))
-    runtimeOnly(fg.deobf(libs.spark.get()))
 }
 
 tasks {
@@ -116,9 +72,16 @@ tasks {
         val props = mapOf("version" to version)
         inputs.properties(props)
 
-        filesMatching("META-INF/mods.toml") {
+        filesMatching("META-INF/neoforge.mods.toml") {
             expand(props)
         }
+    }
+}
+
+idea {
+    module {
+        isDownloadSources = true
+        isDownloadJavadoc = true
     }
 }
 

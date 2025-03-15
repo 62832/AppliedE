@@ -16,7 +16,7 @@ import appeng.menu.me.crafting.CraftConfirmMenu;
 import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
 
-@Mixin(value = CraftConfirmMenu.class, remap = false)
+@Mixin(CraftConfirmMenu.class)
 public abstract class CraftConfirmMenuMixin {
     @Shadow
     private ICraftingPlan result;
@@ -38,7 +38,7 @@ public abstract class CraftConfirmMenuMixin {
         appliede$submitted = true;
     }
 
-    @Inject(method = "removed", at = @At("TAIL"), remap = true)
+    @Inject(method = "removed", at = @At("TAIL"))
     private void clearTemporaryPatterns(Player player, CallbackInfo ci) {
         if (getGrid() != null && result != null && !appliede$submitted) {
             for (var pattern : result.patternTimes().keySet()) {

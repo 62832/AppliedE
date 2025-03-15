@@ -1,41 +1,61 @@
 pluginManagement {
-    repositories {
-        maven { url = uri("https://maven.neoforged.net/") }
-        maven { url = uri("https://maven.parchmentmc.org") }
-        gradlePluginPortal()
+    plugins {
+        id("net.neoforged.moddev") version "2.0.49-beta"
+        id("net.neoforged.moddev.repositories") version "2.0.49-beta"
+        id("com.diffplug.spotless") version "6.25.0"
     }
 }
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            plugin("neogradle", "net.neoforged.gradle").version("6.0.21")
-            plugin("mixin", "org.spongepowered.mixin").version("0.7.+")
-            plugin("parchment", "org.parchmentmc.librarian.forgegradle").version("1.+")
-            plugin("spotless", "com.diffplug.spotless").version("6.23.3")
+plugins {
+    id("net.neoforged.moddev.repositories")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
 
-            val minecraftVersion = "1.20.1"
+run {
+    @Suppress("UnstableApiUsage")
+    dependencyResolutionManagement {
+        repositoriesMode = RepositoriesMode.PREFER_SETTINGS
+        rulesMode = RulesMode.PREFER_SETTINGS
 
-            library("forge", "net.neoforged", "forge").version("$minecraftVersion-47.1.54")
-            library("mixin", "org.spongepowered", "mixin").version("0.8.5")
+        repositories {
+            mavenCentral()
 
-            library("ae2", "appeng", "appliedenergistics2-forge").version("15.1.0")
-            library("projecte", "curse.maven", "projecte-226410").version("4901949-api-4901951")
+            maven {
+                name = "ModMaven (K4U-NL)"
+                url = uri("https://modmaven.dev/")
+                content {
+                    includeGroup("de.mari_023")
+                }
+            }
 
-            library("teampe", "curse.maven", "team-projecte-689273").version("5402805")
-            library("ae2wtlib", "curse.maven", "applied-energistics-2-wireless-terminals-459929").version("5217955")
-            library("aecapfix", "curse.maven", "aecapfix-914685").version("5017517")
+            maven {
+                name = "Curse Maven"
+                url = uri("https://cursemaven.com")
+                content {
+                    includeGroup("curse.maven")
+                }
+            }
+        }
 
-            library("curios", "top.theillusivec4.curios", "curios-forge").version("5.9.0+$minecraftVersion")
-            library("cloth", "me.shedaniel.cloth", "cloth-config-forge").version("11.1.106")
-            library("architectury", "dev.architectury", "architectury-forge").version("9.1.12")
+        versionCatalogs {
+            create("libs") {
+                val mc = "1.21.1"
+                version("minecraft", mc)
 
-            library("projectex", "curse.maven", "project-expansion-579177").version("5232445")
-            library("jade", "curse.maven", "jade-324717").version("5072729")
-            library("spark", "curse.maven", "spark-361579").version("4738952")
-            library("jei", "mezz.jei", "jei-1.20.1-forge").version("15.3.0.4")
+                val nf = mc.substringAfter('.')
+                version("neoforge", "${nf + (if (!nf.contains('.')) ".0" else "")}.119")
+                version("parchment", "2024.07.28")
+
+                library("ae2", "org.appliedenergistics", "appliedenergistics2").version("19.2.5-beta")
+                library("projecte", "curse.maven", "projecte-226410").version("6301953-api-6301954")
+
+                version("ae2wtlib", "19.2.2")
+                library("ae2wtlib", "de.mari_023", "ae2wtlib").versionRef("ae2wtlib")
+                library("ae2wtlibapi", "de.mari_023", "ae2wtlib_api").versionRef("ae2wtlib")
+
+                library("teampe", "curse.maven", "team-projecte-689273").version("5402805")
+                library("jade", "curse.maven", "jade-324717").version("5884231")
+            }
         }
     }
 }
-
-rootProject.name = "AppliedE"

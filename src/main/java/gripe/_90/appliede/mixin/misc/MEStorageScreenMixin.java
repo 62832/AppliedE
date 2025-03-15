@@ -18,8 +18,7 @@ public abstract class MEStorageScreenMixin {
             method = "renderTooltip",
             at = @At(
                     value = "INVOKE",
-                    target = "Lappeng/menu/me/common/MEStorageMenu;isKeyVisible(Lappeng/api/stacks/AEKey;)Z",
-                    remap = false))
+                    target = "Lappeng/menu/me/common/MEStorageMenu;isKeyVisible(Lappeng/api/stacks/AEKey;)Z"))
     // spotless:on
     private boolean hideEmcKey(MEStorageMenu menu, AEKey what) {
         return menu.isKeyVisible(what) && (!(what instanceof EMCKey) || menu instanceof TransmutationTerminalMenu);

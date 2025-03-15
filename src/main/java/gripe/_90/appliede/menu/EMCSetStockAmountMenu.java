@@ -18,7 +18,7 @@ import appeng.menu.MenuOpener;
 import appeng.menu.SlotSemantics;
 import appeng.menu.guisync.GuiSync;
 import appeng.menu.implementations.SetStockAmountMenu;
-import appeng.menu.locator.MenuLocator;
+import appeng.menu.locator.MenuHostLocator;
 import appeng.menu.slot.InaccessibleSlot;
 import appeng.util.inv.AppEngInternalInventory;
 
@@ -51,7 +51,8 @@ public class EMCSetStockAmountMenu extends AEBaseMenu implements ISubMenu {
         return host;
     }
 
-    public static void open(ServerPlayer player, MenuLocator locator, int slot, AEItemKey toStock, int initialAmount) {
+    public static void open(
+            ServerPlayer player, MenuHostLocator locator, int slot, AEItemKey toStock, int initialAmount) {
         MenuOpener.open(AppliedE.EMC_SET_STOCK_AMOUNT_MENU.get(), player, locator);
 
         if (player.containerMenu instanceof EMCSetStockAmountMenu stockMenu) {

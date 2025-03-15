@@ -7,8 +7,11 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 
+import appeng.recipes.AERecipeTypes;
 import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
+
+import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.mapper.recipe.RecipeTypeMapper;
 import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
@@ -17,8 +20,13 @@ import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
 @RecipeTypeMapper
 public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.inscriber";
+    }
+
+    @Override
     public String getName() {
-        return "AE2Inscriber";
+        return "Inscriber Mapper";
     }
 
     @Override
@@ -28,7 +36,7 @@ public class InscriberRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public boolean canHandle(RecipeType<?> recipeType) {
-        return InscriberRecipe.TYPE.equals(recipeType);
+        return AERecipeTypes.INSCRIBER.equals(recipeType);
     }
 
     // spotless:off

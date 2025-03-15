@@ -2,14 +2,12 @@ package gripe._90.appliede.part;
 
 import java.util.List;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
 import appeng.api.networking.GridHelper;
 import appeng.api.networking.IGridNodeListener;
@@ -71,15 +69,15 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     }
 
     @Override
-    public void readFromNBT(CompoundTag data) {
-        super.readFromNBT(data);
-        logic.readFromNBT(data);
+    public void readFromNBT(CompoundTag data, HolderLookup.Provider registries) {
+        super.readFromNBT(data, registries);
+        logic.readFromNBT(data, registries);
     }
 
     @Override
-    public void writeToNBT(CompoundTag data) {
-        super.writeToNBT(data);
-        logic.writeToNBT(data);
+    public void writeToNBT(CompoundTag data, HolderLookup.Provider registries) {
+        super.writeToNBT(data, registries);
+        logic.writeToNBT(data, registries);
     }
 
     @Override
@@ -100,7 +98,7 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     }
 
     @Override
-    public boolean onPartActivate(Player player, InteractionHand hand, Vec3 pos) {
+    public boolean onUseWithoutItem(Player player, Vec3 pos) {
         if (!player.getCommandSenderWorld().isClientSide()) {
             openMenu(player, MenuLocators.forPart(this));
         }
@@ -127,10 +125,5 @@ public class EMCInterfacePart extends AEBasePart implements EMCInterfaceLogicHos
     @Override
     public ItemStack getMainMenuIcon() {
         return new ItemStack(getPartItem());
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap) {
-        return logic.getCapability(cap);
     }
 }

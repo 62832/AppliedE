@@ -8,18 +8,26 @@ import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.IUpgradeableItem;
 import appeng.items.contents.NetworkToolMenuHost;
 import appeng.items.tools.NetworkToolItem;
+import appeng.menu.locator.MenuLocators;
+
+import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.ItemInfo;
-import moze_intel.projecte.api.nbt.INBTProcessor;
-import moze_intel.projecte.api.nbt.NBTProcessor;
+import moze_intel.projecte.api.components.DataComponentProcessor;
+import moze_intel.projecte.api.components.IDataComponentProcessor;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 @SuppressWarnings("unused")
-@NBTProcessor
-public class InventoryItemProcessor implements INBTProcessor {
+@DataComponentProcessor
+public class InventoryItemProcessor implements IDataComponentProcessor {
+    @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.inventory";
+    }
+
     @Override
     public String getName() {
-        return "AE2InventoryItemProcessor";
+        return "Inventory Item Processor";
     }
 
     @Override
@@ -32,7 +40,7 @@ public class InventoryItemProcessor implements INBTProcessor {
         var stack = itemInfo.createStack();
 
         if (stack.getItem() instanceof NetworkToolItem) {
-            var inventory = new NetworkToolMenuHost(null, -1, stack, null).getInventory();
+            var inventory = new NetworkToolMenuHost<>(null, null, MenuLocators.forStack(stack), null).getInventory();
 
             for (var item : inventory) {
                 currentEmc = addEmc(currentEmc, item);

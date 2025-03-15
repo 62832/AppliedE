@@ -5,14 +5,11 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.GridFlags;
@@ -31,8 +28,6 @@ import appeng.api.storage.MEStorage;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
-import appeng.capabilities.Capabilities;
-import appeng.helpers.externalstorage.GenericStackItemStorage;
 import appeng.me.storage.DelegatingMEInventory;
 import appeng.util.ConfigInventory;
 import appeng.util.Platform;
@@ -55,8 +50,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final GenericStack[] plannedWork;
     private final IActionSource source = IActionSource.ofMachine(this);
 
-    private final LazyOptional<IItemHandler> storageHolder;
-
     @Nullable
     private WrappedEMCStorage emcStorage;
 
@@ -66,15 +59,20 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         this(node, host, is, 9);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is, int slots) {
         this.host = host;
         mainNode = node.setFlags(GridFlags.REQUIRE_CHANNEL)
                 .addService(IGridTickable.class, this)
                 .setIdlePowerUsage(10);
 
-        config = ConfigInventory.configStacks(AEItemKey.filter(), slots, this::onConfigRowChanged, false);
-        storage = ConfigInventory.storage(this::storageFilter, slots, this::onStorageChanged);
+        config = ConfigInventory.configStacks(slots)
+                .slotFilter(what -> AEItemKey.is(what))
+                .changeListener(this::onConfigRowChanged)
+                .build();
+        storage = ConfigInventory.storage(slots)
+                .slotFilter(this::storageFilter)
+                .changeListener(this::onStorageChanged)
+                .build();
         upgrades = UpgradeInventories.forMachine(is, 1, host::saveChanges);
 
         localInvHandler = new DelegatingMEInventory(storage);
@@ -82,8 +80,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         config.useRegisteredCapacities();
         storage.useRegisteredCapacities();
-
-        storageHolder = LazyOptional.of(() -> storage).lazyMap(GenericStackItemStorage::new);
     }
 
     public ConfigInventory getConfig() {
@@ -123,17 +119,17 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
                         && knowledge.getProviderFor(node.getOwningPlayerProfileId()) != null);
     }
 
-    public void readFromNBT(CompoundTag tag) {
-        config.readFromChildTag(tag, "config");
-        storage.readFromChildTag(tag, "storage");
-        upgrades.readFromNBT(tag, "upgrades");
+    public void readFromNBT(CompoundTag tag, HolderLookup.Provider registries) {
+        config.readFromChildTag(tag, "config", registries);
+        storage.readFromChildTag(tag, "storage", registries);
+        upgrades.readFromNBT(tag, "upgrades", registries);
         readConfig();
     }
 
-    public void writeToNBT(CompoundTag tag) {
-        config.writeToChildTag(tag, "config");
-        storage.writeToChildTag(tag, "storage");
-        upgrades.writeToNBT(tag, "upgrades");
+    public void writeToNBT(CompoundTag tag, HolderLookup.Provider registries) {
+        config.writeToChildTag(tag, "config", registries);
+        storage.writeToChildTag(tag, "storage", registries);
+        upgrades.writeToNBT(tag, "upgrades", registries);
     }
 
     @Nullable
@@ -144,7 +140,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        return new TickingRequest(5, 120, !hasWorkToDo(), true);
+        return new TickingRequest(5, 120, !hasWorkToDo());
     }
 
     @Override
@@ -340,20 +336,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     public void clearContent() {
         storage.clear();
         upgrades.clear();
-    }
-
-    public <T> LazyOptional<T> getCapability(Capability<T> cap) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return storageHolder.cast();
-        } else if (cap == Capabilities.STORAGE) {
-            return LazyOptional.of(this::getInventory).cast();
-        } else {
-            return LazyOptional.empty();
-        }
-    }
-
-    public void invalidateCaps() {
-        storageHolder.invalidate();
     }
 
     private class WrappedEMCStorage implements MEStorage {

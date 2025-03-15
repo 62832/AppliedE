@@ -12,7 +12,7 @@ import appeng.api.features.P2PTunnelAttunement;
 
 @Mixin(P2PTunnelAttunement.class)
 public interface P2PTunnelAttunementAccessor {
-    @Accessor(remap = false)
+    @Accessor
     static Map<TagKey<Item>, Item> getTagTunnels() {
         throw new AssertionError();
     }

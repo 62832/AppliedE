@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.networking.IGrid;
@@ -33,7 +33,6 @@ import appeng.me.storage.NullInventory;
 
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.misc.TransmutationPattern;
-import gripe._90.appliede.mixin.misc.TransmutationOfflineAccessor;
 import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
@@ -57,11 +56,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     public KnowledgeService(IGrid grid) {
         this.grid = grid;
-        MinecraftForge.EVENT_BUS.addListener((PlayerKnowledgeChangeEvent event) -> {
+        NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> {
             knownItemCache = null;
             updatePatterns();
         });
-        MinecraftForge.EVENT_BUS.addListener((OnDatapackSyncEvent event) -> {
+        NeoForge.EVENT_BUS.addListener(OnDatapackSyncEvent.class, event -> {
             if (event.getPlayer() == null) {
                 knownItemCache = null;
                 updatePatterns();
@@ -127,13 +126,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     static Supplier<IKnowledgeProvider> retrieveProvider(UUID playerUUID) {
-        return () -> {
-            try {
-                return ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
-            } catch (Throwable e) {
-                return TransmutationOfflineAccessor.invokeForPlayer(playerUUID);
-            }
-        };
+        return () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
     }
 
     List<IKnowledgeProvider> getProviders() {
@@ -164,7 +157,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public MEStorage getStorage(IManagedGridNode node) {
-        return !moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) && node.isActive()
+        return !moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()
                 ? storage
                 : NullInventory.of();
     }
@@ -192,7 +185,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
-        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.get(0)) && node.isActive()) {
+        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()) {
             var patterns = new ArrayList<IPatternDetails>();
 
             for (var tier = storage.getHighestTier(); tier > 1; tier--) {

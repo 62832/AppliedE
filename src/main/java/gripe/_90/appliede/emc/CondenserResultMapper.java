@@ -2,13 +2,13 @@ package gripe._90.appliede.emc;
 
 import java.util.Collections;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import appeng.core.definitions.AEItems;
+
+import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.mapper.EMCMapper;
 import moze_intel.projecte.api.mapper.IEMCMapper;
@@ -20,8 +20,13 @@ import moze_intel.projecte.api.nss.NormalizedSimpleStack;
 @EMCMapper
 public class CondenserResultMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
     @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.condenser";
+    }
+
+    @Override
     public String getName() {
-        return "AE2MatterCondenser";
+        return "Condenser Mapper";
     }
 
     @Override
@@ -32,7 +37,6 @@ public class CondenserResultMapper implements IEMCMapper<NormalizedSimpleStack, 
     @Override
     public void addMappings(
             IMappingCollector<NormalizedSimpleStack, Long> collector,
-            CommentedFileConfig config,
             ReloadableServerResources resources,
             RegistryAccess access,
             ResourceManager resourceManager) {

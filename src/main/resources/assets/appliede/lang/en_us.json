@@ -22,5 +22,12 @@
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "Transmutable from EMC (Shift+Click/Scroll)",
   "tooltip.appliede.owner": "Owner: %s",
-  "tooltip.appliede.not_installed": "%s not installed."
+  "tooltip.appliede.not_installed": "%s not installed.",
+  "config.appliede.mapper.charger": "Charging Mapper",
+  "config.appliede.mapper.inscriber": "Inscriber Mapper",
+  "config.appliede.mapper.transform": "In-World Transformation Mapper",
+  "config.appliede.mapper.condenser": "Condenser Mapper",
+  "config.appliede.mapper.facade": "Facade Mapper",
+  "config.appliede.mapper.p2p_tunnel": "P2P Tunnel Mapper",
+  "config.appliede.mapper.inventory": "Inventory Item Processor"
 }

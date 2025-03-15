@@ -33,7 +33,7 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
 
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics guiGraphics, int x, int y, EMCKey stack) {
-        var hueIntervals = AppliedEConfig.Client.CONFIG.getEmcTierColours().get();
+        var hueIntervals = AppliedEConfig.Client.CONFIG.getEmcTierColours();
         var hue = ((stack.getTier() - 1) * 360F / hueIntervals) / 360;
 
         Blitter.sprite(sprite.get())
@@ -60,34 +60,30 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
         var y1 = -scale / 2;
 
         var transform = poseStack.last().pose();
-        buffer.vertex(transform, x0, y1, 0)
-                .color(-1)
-                .uv(s.getU0(), s.getV1())
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(combinedLight)
-                .normal(0, 0, 1)
-                .endVertex();
-        buffer.vertex(transform, x1, y1, 0)
-                .color(-1)
-                .uv(s.getU1(), s.getV1())
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(combinedLight)
-                .normal(0, 0, 1)
-                .endVertex();
-        buffer.vertex(transform, x1, y0, 0)
-                .color(-1)
-                .uv(s.getU1(), s.getV0())
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(combinedLight)
-                .normal(0, 0, 1)
-                .endVertex();
-        buffer.vertex(transform, x0, y0, 0)
-                .color(-1)
-                .uv(s.getU0(), s.getV0())
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(combinedLight)
-                .normal(0, 0, 1)
-                .endVertex();
+        buffer.addVertex(transform, x0, y1, 0)
+                .setColor(-1)
+                .setUv(s.getU0(), s.getV1())
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(combinedLight)
+                .setNormal(0, 0, 1);
+        buffer.addVertex(transform, x1, y1, 0)
+                .setColor(-1)
+                .setUv(s.getU1(), s.getV1())
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(combinedLight)
+                .setNormal(0, 0, 1);
+        buffer.addVertex(transform, x1, y0, 0)
+                .setColor(-1)
+                .setUv(s.getU1(), s.getV0())
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(combinedLight)
+                .setNormal(0, 0, 1);
+        buffer.addVertex(transform, x0, y0, 0)
+                .setColor(-1)
+                .setUv(s.getU0(), s.getV0())
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(combinedLight)
+                .setNormal(0, 0, 1);
 
         poseStack.popPose();
     }

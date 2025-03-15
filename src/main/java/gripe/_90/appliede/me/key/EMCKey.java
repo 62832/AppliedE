@@ -3,9 +3,15 @@ package gripe._90.appliede.me.key;
 import java.util.List;
 import java.util.Objects;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +23,10 @@ import appeng.api.stacks.AEKeyType;
 import gripe._90.appliede.AppliedE;
 
 public final class EMCKey extends AEKey {
+    static final MapCodec<EMCKey> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(Codec.INT.fieldOf("tier").forGetter(key -> key.tier)).apply(instance, EMCKey::of));
+    static final Codec<EMCKey> CODEC = MAP_CODEC.codec();
+
     public static final EMCKey BASE = new EMCKey(1);
 
     private final int tier;
@@ -29,7 +39,7 @@ public final class EMCKey extends AEKey {
         this.tier = tier;
     }
 
-    public static EMCKey tier(int tier) {
+    public static EMCKey of(int tier) {
         return tier == 1 ? BASE : new EMCKey(tier);
     }
 
@@ -48,10 +58,9 @@ public final class EMCKey extends AEKey {
     }
 
     @Override
-    public CompoundTag toTag() {
-        var tag = new CompoundTag();
-        tag.putInt("tier", tier);
-        return tag;
+    public CompoundTag toTag(HolderLookup.Provider registries) {
+        var ops = registries.createSerializationContext(NbtOps.INSTANCE);
+        return (CompoundTag) CODEC.encodeStart(ops, this).getOrThrow();
     }
 
     @Override
@@ -61,17 +70,22 @@ public final class EMCKey extends AEKey {
 
     @Override
     public ResourceLocation getId() {
-        return new ResourceLocation("projecte", "emc_" + tier);
+        return ResourceLocation.fromNamespaceAndPath("projecte", "emc_" + tier);
     }
 
     @Override
-    public void writeToPacket(FriendlyByteBuf data) {
+    public void writeToPacket(RegistryFriendlyByteBuf data) {
         data.writeVarInt(tier);
     }
 
     @Override
     protected Component computeDisplayName() {
         return Component.translatable("key." + AppliedE.MODID + ".emc" + (tier == 1 ? "" : "_tiered"), tier);
+    }
+
+    @Override
+    public boolean hasComponents() {
+        return true;
     }
 
     @Override

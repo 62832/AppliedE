@@ -2,14 +2,13 @@ package gripe._90.appliede.emc;
 
 import java.util.Collections;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import appeng.api.features.P2PTunnelAttunement;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.mixin.misc.P2PTunnelAttunementAccessor;
 
 import moze_intel.projecte.api.mapper.EMCMapper;
@@ -21,6 +20,11 @@ import moze_intel.projecte.api.nss.NormalizedSimpleStack;
 @SuppressWarnings("unused")
 @EMCMapper
 public class P2PTunnelMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
+    @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.p2p_tunnel";
+    }
+
     @Override
     public String getName() {
         return "AE2P2PTunnels";
@@ -34,7 +38,6 @@ public class P2PTunnelMapper implements IEMCMapper<NormalizedSimpleStack, Long> 
     @Override
     public void addMappings(
             IMappingCollector<NormalizedSimpleStack, Long> collector,
-            CommentedFileConfig config,
             ReloadableServerResources resources,
             RegistryAccess access,
             ResourceManager resourceManager) {

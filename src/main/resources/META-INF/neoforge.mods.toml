@@ -7,7 +7,7 @@ license = "LGPLv3.0"
 
 issueTrackerURL = "https://github.com/62832/AppliedE/issues"
 displayURL = "https://github.com/62832/AppliedE"
-updateJSONURL = "https://mod-manifest.jarva.dev/manifest/curseforge/1009940/forge"
+updateJSONURL = "https://mod-manifest.jarva.dev/manifest/curseforge/1009940/neoforge"
 
 [[mods]]
 modId = "appliede"
@@ -15,42 +15,24 @@ version = "$version"
 displayName = "AppliedE"
 description = "Direct EMC integration with Applied Energistics 2."
 
+[[mixins]]
+config = "appliede.mixins.json"
+
 [[dependencies]]
 modId = "ae2"
-mandatory = true
-# type = "required"
-versionRange = "[15.1.0,)"
-ordering = "AFTER"
-side = "BOTH"
+versionRange = "[19,)"
 
 [[dependencies]]
 modId = "projecte"
-mandatory = true
-# type = "required"
 versionRange = "[1.0.1,)"
-ordering = "AFTER"
-side = "BOTH"
 
 [[dependencies]]
 modId = "ae2wtlib"
-mandatory = false
-# type = "optional"
-versionRange = "[15,)"
-ordering = "AFTER"
-side = "BOTH"
+type = "optional"
+versionRange = "[19,)"
 
 [[dependencies]]
 modId = "teamprojecte"
-mandatory = false
-# type = "optional"
+type = "optional"
 versionRange = "[1.1.3,)"
-ordering = "AFTER"
-side = "SERVER"
-
-[[dependencies]]
-modId = "aecapfix"
-mandatory = false
-# type = "optional"
-versionRange = "[0.8,)"
-ordering = "AFTER"
 side = "SERVER"

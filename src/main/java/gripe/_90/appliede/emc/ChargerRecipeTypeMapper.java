@@ -2,7 +2,9 @@ package gripe._90.appliede.emc;
 
 import net.minecraft.world.item.crafting.RecipeType;
 
-import appeng.recipes.handlers.ChargerRecipe;
+import appeng.recipes.AERecipeTypes;
+
+import gripe._90.appliede.AppliedE;
 
 import moze_intel.projecte.api.mapper.recipe.RecipeTypeMapper;
 import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
@@ -11,8 +13,13 @@ import moze_intel.projecte.emc.mappers.recipe.BaseRecipeTypeMapper;
 @RecipeTypeMapper
 public class ChargerRecipeTypeMapper extends BaseRecipeTypeMapper {
     @Override
+    public String getTranslationKey() {
+        return "config." + AppliedE.MODID + ".mapper.charger";
+    }
+
+    @Override
     public String getName() {
-        return "AE2Charger";
+        return "Charging Mapper";
     }
 
     @Override
@@ -22,6 +29,6 @@ public class ChargerRecipeTypeMapper extends BaseRecipeTypeMapper {
 
     @Override
     public boolean canHandle(RecipeType<?> recipeType) {
-        return ChargerRecipe.TYPE.equals(recipeType);
+        return AERecipeTypes.CHARGER.equals(recipeType);
     }
 }

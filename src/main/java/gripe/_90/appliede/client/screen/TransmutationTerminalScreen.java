@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import appeng.client.gui.Icon;
 import appeng.client.gui.me.common.MEStorageScreen;
@@ -67,7 +68,7 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
         attemptingToLearn = learned;
 
         if (!learned) {
-            AppliedE.PACKET_HANDLER.sendToServer(new LearnAllItemsPacket());
+            PacketDistributor.sendToServer(new LearnAllItemsPacket());
         }
     }
 }
