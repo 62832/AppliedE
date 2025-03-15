@@ -7,9 +7,16 @@
     "crafting.CraftingCPULogicMixin",
     "crafting.CraftingTreeNodeMixin",
     "misc.MEStorageMenuMixin",
-    "misc.P2PTunnelAttunementAccessor"
+    "misc.P2PTunnelAttunementAccessor",
+    "tooltip.GridInventoryEntryMixin",
+    "tooltip.MEInventoryUpdatePacketMixin",
+    "tooltip.MEStorageMenuMixin"
   ],
-  "client": ["misc.MEStorageScreenMixin"],
+  "client": [
+    "misc.MEStorageScreenMixin",
+    "tooltip.MEStorageScreenMixin",
+    "tooltip.RepoMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
