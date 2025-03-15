@@ -3,11 +3,11 @@
   "slots": {
     "APPLIEDE_UNLEARN": {
       "left": 71,
-      "bottom": 118
+      "bottom": 120
     },
     "APPLIEDE_TRANSMUTE": {
       "left": 89,
-      "bottom": 118
+      "bottom": 120
     }
   },
   "text": {
@@ -69,17 +69,17 @@
     },
     "bottom": {
       "texture": "guis/appliede/terminal.png",
-      "srcRect": [0, 71, 195, 134]
+      "srcRect": [0, 71, 195, 136]
     }
   },
   "widgets": {
     "toggleShiftToTransmute": {
       "left": 116,
-      "bottom": 118
+      "bottom": 122
     },
     "learnAllItems": {
       "left": 134,
-      "bottom": 118
+      "bottom": 122
     }
   }
 }
