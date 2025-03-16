@@ -1,14 +1,34 @@
 {
   "comment": "Default values for Applied Energistics 2 items.",
   "values": {
-    "before": {
-      "ae2:certus_quartz_crystal": 256,
-      "ae2:sky_stone_block": 256,
-      "ae2:calculation_processor_press": 2048,
-      "ae2:engineering_processor_press": 2048,
-      "ae2:logic_processor_press": 2048,
-      "ae2:silicon_press": 2048,
-      "ae2:cable_anchor": 32
-    }
+    "before": [
+      {
+        "type": "projecte:item",
+        "emc_value": 256,
+        "id": "ae2:certus_quartz_crystal"
+      },
+      {
+        "type": "projecte:item",
+        "emc_value": 256,
+        "id": "ae2:sky_stone_block"
+      },
+      {
+        "type": "projecte:item",
+        "emc_value": 2048,
+        "id": "ae2:calculation_processor_press"
+      },
+      {
+        "type": "projecte:item",
+        "emc_value": 2048,
+        "id": "ae2:engineering_processor_press"
+      },
+      {
+        "type": "projecte:item",
+        "emc_value": 2048,
+        "id": "ae2:logic_processor_press"
+      },
+      { "type": "projecte:item", "emc_value": 2048, "id": "ae2:silicon_press" },
+      { "type": "projecte:item", "emc_value": 32, "id": "ae2:cable_anchor" }
+    ]
   }
 }
