@@ -20,7 +20,7 @@
   },
   "pattern": ["IFI", "DTD", " P "],
   "result": {
-    "item": "appliede:emc_export_bus"
+    "id": "appliede:emc_export_bus"
   },
   "show_notification": true
 }

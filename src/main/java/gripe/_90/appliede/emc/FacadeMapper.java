@@ -28,7 +28,7 @@ public class FacadeMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
 
     @Override
     public String getName() {
-        return "AE2FacadeMapper";
+        return "Facade Mapper";
     }
 
     @Override

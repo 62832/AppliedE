@@ -17,6 +17,6 @@
   },
   "pattern": ["DRD", "STS", "DRD"],
   "result": {
-    "item": "appliede:emc_module"
+    "id": "appliede:emc_module"
   }
 }

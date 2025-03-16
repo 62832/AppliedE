@@ -86,7 +86,7 @@ public class EMCExportBusPart extends IOBusPart {
 
     @Override
     protected boolean doBusWork(IGrid grid) {
-        if (itemCache == null && emcCache == null) {
+        if (itemCache == null || emcCache == null) {
             var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
             var facing = getSide().getOpposite();
             var level = (ServerLevel) getLevel();

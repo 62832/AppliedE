@@ -27,7 +27,7 @@ public class P2PTunnelMapper implements IEMCMapper<NormalizedSimpleStack, Long> 
 
     @Override
     public String getName() {
-        return "AE2P2PTunnels";
+        return "P2P Tunnel Mapper";
     }
 
     @Override

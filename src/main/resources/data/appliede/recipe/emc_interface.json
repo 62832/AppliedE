@@ -17,7 +17,7 @@
   },
   "pattern": ["ITI", "A F", "ITI"],
   "result": {
-    "item": "appliede:emc_interface"
+    "id": "appliede:emc_interface"
   },
   "show_notification": true
 }

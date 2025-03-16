@@ -20,7 +20,7 @@
   },
   "pattern": [" A ", "ITI", "DSD"],
   "result": {
-    "item": "appliede:emc_import_bus"
+    "id": "appliede:emc_import_bus"
   },
   "show_notification": true
 }

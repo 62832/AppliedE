@@ -1,20 +1,13 @@
 {
-  "type": "forge:conditional",
-  "recipes": [
+  "neoforge:conditions": [
     {
-      "conditions": [
-        {
-          "type": "forge:mod_loaded",
-          "modid": "ae2wtlib"
-        }
-      ],
-      "recipe": {
-        "type": "ae2wtlib:upgrade",
-        "terminal": {
-          "item": "appliede:wireless_transmutation_terminal"
-        },
-        "terminalName": "transmutation"
-      }
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2wtlib"
     }
-  ]
+  ],
+  "type": "ae2wtlib:upgrade",
+  "terminal": {
+    "item": "appliede:wireless_transmutation_terminal"
+  },
+  "terminalName": "transmutation"
 }
