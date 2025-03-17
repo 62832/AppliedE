@@ -18,6 +18,8 @@ import appeng.core.network.clientbound.MEInventoryUpdatePacket;
 import appeng.menu.me.common.GridInventoryEntry;
 import appeng.menu.me.common.IncrementalUpdateHelper;
 
+import gripe._90.appliede.me.key.EMCKey;
+
 import io.netty.buffer.Unpooled;
 
 public class MEInventoryUpdatePacketBuilder extends MEInventoryUpdatePacket.Builder {
@@ -76,7 +78,7 @@ public class MEInventoryUpdatePacketBuilder extends MEInventoryUpdatePacket.Buil
             // The queued changes are actual differences, but we need to send the real stored properties
             // to the client.
             var storedAmount = networkStorage.get(key);
-            var craftable = craftables.contains(key);
+            var craftable = craftables.contains(key) && !(key instanceof EMCKey);
             var requestable = requestables.get(key);
             var transmutable = key instanceof AEItemKey && transmutables.contains(key);
 
