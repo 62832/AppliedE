@@ -24,14 +24,7 @@ public abstract class MEInventoryUpdatePacketMixin {
         return original;
     }
 
-    // spotless:off
-    @Inject(
-            method = "writeEntry",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lappeng/menu/me/common/GridInventoryEntry;isCraftable()Z",
-                    shift = At.Shift.AFTER))
-    // spotless:on
+    @Inject(method = "writeEntry", at = @At(value = "RETURN"))
     private static void writeTransmutable(RegistryFriendlyByteBuf buffer, GridInventoryEntry entry, CallbackInfo ci) {
         buffer.writeBoolean(((GridInventoryEMCEntry) entry).appliede$isTransmutable());
     }
