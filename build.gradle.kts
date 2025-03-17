@@ -14,11 +14,10 @@ group = "gripe.90"
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 dependencies {
-    implementation(libs.ae2)
-    implementation(libs.projecte)
+    api(libs.ae2)
+    api(libs.projecte)
 
-    compileOnly(libs.ae2wtlibapi)
-    jarJar(libs.ae2wtlibapi)
+    compileOnlyApi(libs.ae2wtlibapi)
     runtimeOnly(libs.ae2wtlib)
 
     implementation(libs.teampe)
