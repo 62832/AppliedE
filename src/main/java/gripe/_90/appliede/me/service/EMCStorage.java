@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.features.IPlayerRegistry;
+import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
@@ -71,9 +72,8 @@ public final class EMCStorage implements MEStorage {
             Collections.shuffle(providers);
 
             if (emc.getTier() == 1) {
-                var divisor = service.getProviders().size();
-                var quotient = amount / divisor;
-                var remainder = amount % divisor;
+                var quotient = amount / providers.size();
+                var remainder = amount % providers.size();
 
                 for (var p = 0; p < providers.size(); p++) {
                     var provider = providers.get(p);
@@ -185,7 +185,7 @@ public final class EMCStorage implements MEStorage {
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
             if (consumePower) {
-                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc);
+                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc, service.grid.getEnergyService());
             }
 
             if (amount == 0) {
@@ -256,7 +256,7 @@ public final class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE) {
-            amount = getAmountAfterPowerExpenditure(availableEmc, itemEmc);
+            amount = getAmountAfterPowerExpenditure(availableEmc, itemEmc, service.grid.getEnergyService());
 
             if (amount == 0) {
                 return 0;
@@ -296,8 +296,8 @@ public final class EMCStorage implements MEStorage {
         return amount;
     }
 
-    private void distributeEmc(BigInteger totalEmc, ArrayList<IKnowledgeProvider> providers) {
-        var divisor = BigInteger.valueOf(service.getProviders().size());
+    private static void distributeEmc(BigInteger totalEmc, ArrayList<IKnowledgeProvider> providers) {
+        var divisor = BigInteger.valueOf(providers.size());
         var quotient = totalEmc.divide(divisor);
         var remainder = totalEmc.remainder(divisor).longValue();
 
@@ -321,14 +321,13 @@ public final class EMCStorage implements MEStorage {
         return providers;
     }
 
-    private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
-        var energyService = service.grid.getEnergyService();
+    private static long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc, IEnergyService energy) {
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
                 .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()))
                 .divide(BigDecimal.valueOf(EMCKeyType.TYPE.getAmountPerOperation()), 4, RoundingMode.HALF_UP);
         var toExpend = new BigDecimal(maxEmc).multiply(multiplier).min(BigDecimal.valueOf(Double.MAX_VALUE));
 
-        var available = energyService.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
+        var available = energy.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
         var expended = Math.min(available, toExpend.doubleValue());
         var amount = BigDecimal.valueOf(available)
                 .min(toExpend)
@@ -338,13 +337,13 @@ public final class EMCStorage implements MEStorage {
                 .longValue();
 
         if (amount > 0) {
-            energyService.extractAEPower(expended, Actionable.MODULATE, PowerMultiplier.ONE);
+            energy.extractAEPower(expended, Actionable.MODULATE, PowerMultiplier.ONE);
         }
 
         return amount;
     }
 
-    private void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
+    private static void addKnowledge(AEItemKey what, IKnowledgeProvider provider, Player player) {
         var stack = what.toStack();
         provider.addKnowledge(stack);
 
