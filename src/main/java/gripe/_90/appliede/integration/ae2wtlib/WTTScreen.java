@@ -4,9 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.BackgroundPanel;
+import appeng.init.client.InitScreens;
 
 import de.mari_023.ae2wtlib.api.terminal.IUniversalTerminalCapable;
 import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
@@ -22,6 +24,11 @@ public class WTTScreen extends TransmutationTerminalScreen<WTTMenu> implements I
         }
 
         widgets.add("singularityBackground", new BackgroundPanel(style.getImage("singularityBackground")));
+    }
+
+    public static void register(RegisterMenuScreensEvent event) {
+        InitScreens.register(
+                event, WTTMenu.TYPE, WTTScreen::new, "/screens/appliede/wireless_transmutation_terminal.json");
     }
 
     @NotNull

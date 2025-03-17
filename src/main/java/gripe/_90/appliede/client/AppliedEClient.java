@@ -21,7 +21,7 @@ import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
-import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
+import gripe._90.appliede.integration.ae2wtlib.WTTScreen;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
@@ -59,7 +59,7 @@ public class AppliedEClient {
                     "/screens/appliede/transmutation_terminal.json");
 
             if (ModList.get().isLoaded("ae2wtlib")) {
-                AE2WTIntegration.Client.initScreen(event);
+                WTTScreen.register(event);
             }
         });
 

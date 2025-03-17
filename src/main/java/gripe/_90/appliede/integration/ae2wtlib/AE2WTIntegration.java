@@ -3,13 +3,11 @@ package gripe._90.appliede.integration.ae2wtlib;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 import appeng.api.config.Actionable;
 import appeng.api.features.GridLinkables;
 import appeng.core.AppEng;
-import appeng.init.client.InitScreens;
 import appeng.items.tools.powered.WirelessTerminalItem;
 
 import de.mari_023.ae2wtlib.api.gui.Icon;
@@ -39,12 +37,5 @@ public class AE2WTIntegration {
 
     public static void registerTerminalMenu(RegisterEvent event) {
         event.register(Registries.MENU, AppEng.makeId("wireless_transmutation_terminal"), () -> WTTMenu.TYPE);
-    }
-
-    public static class Client {
-        public static void initScreen(RegisterMenuScreensEvent event) {
-            InitScreens.register(
-                    event, WTTMenu.TYPE, WTTScreen::new, "/screens/appliede/wireless_transmutation_terminal.json");
-        }
     }
 }
