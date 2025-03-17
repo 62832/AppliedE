@@ -18,9 +18,13 @@ import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class LearnAllItemsPacket implements CustomPacketPayload {
+    public static final LearnAllItemsPacket INSTANCE = new LearnAllItemsPacket();
+
     public static final Type<LearnAllItemsPacket> TYPE = new CustomPacketPayload.Type<>(AppliedE.id("learn_all"));
     public static final StreamCodec<RegistryFriendlyByteBuf, LearnAllItemsPacket> STREAM_CODEC =
-            StreamCodec.unit(new LearnAllItemsPacket());
+            StreamCodec.unit(INSTANCE);
+
+    private LearnAllItemsPacket() {}
 
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
@@ -40,7 +44,7 @@ public class LearnAllItemsPacket implements CustomPacketPayload {
                         continue;
                     }
 
-                    if (!knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
+                    if (knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
                         continue;
                     }
 

@@ -68,7 +68,7 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
         attemptingToLearn = learned;
 
         if (!learned) {
-            PacketDistributor.sendToServer(new LearnAllItemsPacket());
+            PacketDistributor.sendToServer(LearnAllItemsPacket.INSTANCE);
         }
     }
 }
