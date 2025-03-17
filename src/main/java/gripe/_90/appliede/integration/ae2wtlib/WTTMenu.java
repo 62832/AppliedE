@@ -12,11 +12,12 @@ import appeng.menu.slot.RestrictedInputSlot;
 import de.mari_023.ae2wtlib.api.gui.AE2wtlibSlotSemantics;
 import de.mari_023.ae2wtlib.api.terminal.ItemWUT;
 
+import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class WTTMenu extends TransmutationTerminalMenu {
-    public static final MenuType<WTTMenu> TYPE =
-            MenuTypeBuilder.create(WTTMenu::new, WTTMenuHost.class).build("wireless_transmutation_terminal");
+    public static final MenuType<WTTMenu> TYPE = MenuTypeBuilder.create(WTTMenu::new, WTTMenuHost.class)
+            .buildUnregistered(AppliedE.id("wireless_transmutation_terminal"));
 
     public WTTMenu(int id, Inventory ip, WTTMenuHost host) {
         super(TYPE, id, ip, host, true);

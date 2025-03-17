@@ -36,7 +36,6 @@ import appeng.api.parts.PartModels;
 import appeng.api.parts.RegisterPartCapabilitiesEvent;
 import appeng.api.stacks.AEKeyTypes;
 import appeng.api.upgrades.Upgrades;
-import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
 import appeng.core.localization.GuiText;
 import appeng.helpers.externalstorage.GenericStackItemStorage;
@@ -77,7 +76,7 @@ public final class AppliedE {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
 
     private static final DeferredRegister<BlockEntityType<?>> BE_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
-    private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, AppEng.MOD_ID);
+    private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, MODID);
     private static final DeferredRegister<DataComponentType<?>> COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
@@ -209,11 +208,11 @@ public final class AppliedE {
     }
 
     private static <M extends AEBaseMenu, H> Supplier<MenuType<M>> menu(String id, MenuTypeBuilder.MenuFactory<M, H> factory, Class<H> host) {
-        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).build(id));
+        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).buildUnregistered(id(id)));
     }
 
     private static <M extends AEBaseMenu, H> Supplier<MenuType<M>> menu(String id, MenuTypeBuilder.TypedMenuFactory<M, H> factory, Class<H> host) {
-        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).build(id));
+        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).buildUnregistered(id(id)));
     }
 }
 // spotless:on

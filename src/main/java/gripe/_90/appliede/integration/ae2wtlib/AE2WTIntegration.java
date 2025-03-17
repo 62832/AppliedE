@@ -7,7 +7,6 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 
 import appeng.api.config.Actionable;
 import appeng.api.features.GridLinkables;
-import appeng.core.AppEng;
 import appeng.items.tools.powered.WirelessTerminalItem;
 
 import de.mari_023.ae2wtlib.api.gui.Icon;
@@ -36,6 +35,6 @@ public class AE2WTIntegration {
     }
 
     public static void registerTerminalMenu(RegisterEvent event) {
-        event.register(Registries.MENU, AppEng.makeId("wireless_transmutation_terminal"), () -> WTTMenu.TYPE);
+        event.register(Registries.MENU, AppliedE.id("wireless_transmutation_terminal"), () -> WTTMenu.TYPE);
     }
 }
