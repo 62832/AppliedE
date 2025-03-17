@@ -1,5 +1,34 @@
 {
   "comment": "Default values for Applied Energistics 2 items.",
+  "groups": {
+    "condenser": {
+      "conversions": [
+        {
+          "ingredients": [
+            { "type": "projecte:item", "id": "ae2:cell_component_64k" }
+          ],
+          "output": {
+            "type": "projecte:item",
+            "id": "ae2:singularity"
+          }
+        }
+      ],
+      "values": {
+        "before": [
+          {
+            "type": "projecte:item",
+            "emc_value": 512,
+            "id": "ae2:matter_ball"
+          },
+          {
+            "type": "projecte:item",
+            "emc_value": "free",
+            "id": "ae2:quantum_entangled_singularity"
+          }
+        ]
+      }
+    }
+  },
   "values": {
     "before": [
       {

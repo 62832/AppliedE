@@ -45,7 +45,7 @@ public class FacadeMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
         var anchor = NSSItem.createItem(AEParts.CABLE_ANCHOR);
         var baseFacade = AEItems.FACADE.asItem();
 
-        BuiltInRegistries.BLOCK.forEach(block -> {
+        for (var block : BuiltInRegistries.BLOCK) {
             var blockStack = block.asItem().getDefaultInstance();
             var facade = baseFacade.createFacadeForItem(blockStack, false);
 
@@ -55,6 +55,6 @@ public class FacadeMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
                 ingredients.put(NSSItem.createItem(blockStack), 1);
                 collector.addConversion(4, NSSItem.createItem(facade), ingredients);
             }
-        });
+        }
     }
 }

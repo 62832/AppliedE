@@ -41,11 +41,11 @@ public class P2PTunnelMapper implements IEMCMapper<NormalizedSimpleStack, Long> 
             ReloadableServerResources resources,
             RegistryAccess access,
             ResourceManager resourceManager) {
-        P2PTunnelAttunementAccessor.getTagTunnels().forEach((tag, tunnel) -> {
+        for (var tunnel : P2PTunnelAttunementAccessor.getTagTunnels().values()) {
             var meTunnel = NSSItem.createItem(P2PTunnelAttunement.ME_TUNNEL);
             var otherTunnel = NSSItem.createItem(tunnel);
             collector.addConversion(1, meTunnel, Collections.singletonList(otherTunnel));
             collector.addConversion(1, otherTunnel, Collections.singletonList(meTunnel));
-        });
+        }
     }
 }
