@@ -44,7 +44,7 @@ run {
 
                 val nf = mc.substringAfter('.')
                 version("neoforge", "${nf + (if (!nf.contains('.')) ".0" else "")}.119")
-                version("parchment", "2024.07.28")
+                version("parchment", "2024.11.17")
 
                 library("ae2", "org.appliedenergistics", "appliedenergistics2").version("19.2.5-beta")
                 library("projecte", "curse.maven", "projecte-226410").version("6301953-api-6301954")
