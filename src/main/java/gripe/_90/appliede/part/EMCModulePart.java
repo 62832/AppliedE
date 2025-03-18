@@ -182,6 +182,6 @@ public final class EMCModulePart extends AEBasePart
 
     @Override
     public ItemStack getMainMenuIcon() {
-        return AppliedE.EMC_MODULE.get().getDefaultInstance();
+        return AppliedE.EMC_MODULE.asItem().getDefaultInstance();
     }
 }

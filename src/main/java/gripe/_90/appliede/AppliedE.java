@@ -25,6 +25,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import appeng.api.AECapabilities;
@@ -81,19 +83,19 @@ public final class AppliedE {
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     @SuppressWarnings("UnstableApiUsage")
-    public static final Supplier<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
+    public static final DeferredItem<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
         GridServices.register(KnowledgeService.class, KnowledgeService.class);
         ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, EMCContainerItemStrategy.INSTANCE);
         return part(EMCModulePart.class, EMCModulePart::new);
     });
 
-    public static final Supplier<EMCInterfaceBlock> EMC_INTERFACE = BLOCKS.register("emc_interface", () -> {
+    public static final DeferredBlock<EMCInterfaceBlock> EMC_INTERFACE = BLOCKS.register("emc_interface", () -> {
         var block = new EMCInterfaceBlock();
         ITEMS.register("emc_interface", () -> new BlockItem(block, new Item.Properties()));
         return block;
     });
-    public static final Supplier<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
+    public static final DeferredItem<Item> CABLE_EMC_INTERFACE = ITEMS.register("cable_emc_interface", () -> part(EMCInterfacePart.class, EMCInterfacePart::new));
 
     @SuppressWarnings("DataFlowIssue")
     public static final Supplier<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
@@ -105,16 +107,16 @@ public final class AppliedE {
     public static final Supplier<MenuType<EMCInterfaceMenu>> EMC_INTERFACE_MENU = menu("emc_interface", EMCInterfaceMenu::new, EMCInterfaceLogicHost.class);
     public static final Supplier<MenuType<EMCSetStockAmountMenu>> EMC_SET_STOCK_AMOUNT_MENU = menu("emc_set_stock_amount", EMCSetStockAmountMenu::new, EMCInterfaceLogicHost.class);
 
-    public static final Supplier<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
-    public static final Supplier<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
+    public static final DeferredItem<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
+    public static final DeferredItem<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
     public static final Supplier<MenuType<IOBusMenu>> EMC_EXPORT_BUS_MENU = menu("emc_export_bus", IOBusMenu::new, EMCExportBusPart.class);
     public static final Supplier<MenuType<IOBusMenu>> EMC_IMPORT_BUS_MENU = menu("emc_import_bus", IOBusMenu::new, EMCImportBusPart.class);
 
-    public static final Supplier<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
+    public static final DeferredItem<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
     public static final Supplier<MenuType<TransmutationTerminalMenu>> TRANSMUTATION_TERMINAL_MENU = menu("transmutation_terminal", TransmutationTerminalMenu::new, TransmutationTerminalHost.class);
-    public static final Supplier<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
+    public static final DeferredItem<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
-    public static final Supplier<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
     public static final Supplier<DataComponentType<TransmutationPattern.Encoded>> ENCODED_TRANSMUTATION_PATTERN = COMPONENT_TYPES.register(
             "encoded_transmutation_pattern",
             () -> DataComponentType.<TransmutationPattern.Encoded>builder()
@@ -122,7 +124,7 @@ public final class AppliedE {
                     .networkSynchronized(TransmutationPattern.Encoded.STREAM_CODEC)
                     .build());
 
-    public static final Supplier<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> ModList.get().isLoaded("ae2wtlib")
+    public static final DeferredItem<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> ModList.get().isLoaded("ae2wtlib")
             ? AE2WTIntegration.TERMINAL
             : new DummyIntegrationItem(new Item.Properties().stacksTo(1), "AE2WTLib"));
     public static final Supplier<DataComponentType<Boolean>> SHIFT_TO_TRANSMUTE = COMPONENT_TYPES.register(
@@ -135,16 +137,16 @@ public final class AppliedE {
     static {
         TABS.register(MODID, () -> CreativeModeTab.builder()
                 .title(Component.translatable("mod." + MODID))
-                .icon(() -> EMC_INTERFACE.get().asItem().getDefaultInstance())
+                .icon(() -> EMC_INTERFACE.asItem().getDefaultInstance())
                 .displayItems((params, output) -> {
-                    output.accept(EMC_MODULE.get());
-                    output.accept(EMC_INTERFACE.get());
-                    output.accept(CABLE_EMC_INTERFACE.get());
-                    output.accept(EMC_EXPORT_BUS.get());
-                    output.accept(EMC_IMPORT_BUS.get());
-                    output.accept(TRANSMUTATION_TERMINAL.get());
-                    output.accept(LEARNING_CARD.get());
-                    output.accept(WIRELESS_TRANSMUTATION_TERMINAL.get());
+                    output.accept(EMC_MODULE);
+                    output.accept(EMC_INTERFACE);
+                    output.accept(CABLE_EMC_INTERFACE);
+                    output.accept(EMC_EXPORT_BUS);
+                    output.accept(EMC_IMPORT_BUS);
+                    output.accept(TRANSMUTATION_TERMINAL);
+                    output.accept(LEARNING_CARD);
+                    output.accept(WIRELESS_TRANSMUTATION_TERMINAL);
 
                     if (ModList.get().isLoaded("ae2wtlib")) {
                         output.accept(AE2WTIntegration.getChargedTerminal());
@@ -166,23 +168,23 @@ public final class AppliedE {
 
         eventBus.addListener((FMLCommonSetupEvent event) -> {
             var busesGroup = GuiText.IOBuses.getTranslationKey();
-            Upgrades.add(AEItems.REDSTONE_CARD, EMC_EXPORT_BUS.get(), 1, busesGroup);
-            Upgrades.add(AEItems.CAPACITY_CARD, EMC_EXPORT_BUS.get(), 5, busesGroup);
-            Upgrades.add(AEItems.SPEED_CARD, EMC_EXPORT_BUS.get(), 4, busesGroup);
-            Upgrades.add(AEItems.REDSTONE_CARD, EMC_IMPORT_BUS.get(), 1, busesGroup);
-            Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS.get(), 5, busesGroup);
-            Upgrades.add(AEItems.SPEED_CARD, EMC_IMPORT_BUS.get(), 4, busesGroup);
-            Upgrades.add(AEItems.INVERTER_CARD, EMC_IMPORT_BUS.get(), 1, busesGroup);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_EXPORT_BUS, 1, busesGroup);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_EXPORT_BUS, 5, busesGroup);
+            Upgrades.add(AEItems.SPEED_CARD, EMC_EXPORT_BUS, 4, busesGroup);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_IMPORT_BUS, 1, busesGroup);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS, 5, busesGroup);
+            Upgrades.add(AEItems.SPEED_CARD, EMC_IMPORT_BUS, 4, busesGroup);
+            Upgrades.add(AEItems.INVERTER_CARD, EMC_IMPORT_BUS, 1, busesGroup);
 
             var emcInterfaceGroup = EMC_INTERFACE.get().getDescriptionId();
-            Upgrades.add(LEARNING_CARD.get(), EMC_INTERFACE.get(), 1, emcInterfaceGroup);
-            Upgrades.add(LEARNING_CARD.get(), CABLE_EMC_INTERFACE.get(), 1, emcInterfaceGroup);
-            Upgrades.add(LEARNING_CARD.get(), EMC_IMPORT_BUS.get(), 1);
+            Upgrades.add(LEARNING_CARD, EMC_INTERFACE, 1, emcInterfaceGroup);
+            Upgrades.add(LEARNING_CARD, CABLE_EMC_INTERFACE, 1, emcInterfaceGroup);
+            Upgrades.add(LEARNING_CARD, EMC_IMPORT_BUS, 1);
         });
 
         eventBus.addListener(RegisterCapabilitiesEvent.class, event -> {
             event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, EMC_INTERFACE_BE.get(), (be, $) -> be);
-            event.registerBlockEntity(AECapabilities.ME_STORAGE, EMC_INTERFACE_BE.get(),(be, $) -> be.getInterfaceLogic().getInventory());
+            event.registerBlockEntity(AECapabilities.ME_STORAGE, EMC_INTERFACE_BE.get(), (be, $) -> be.getInterfaceLogic().getInventory());
             event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, EMC_INTERFACE_BE.get(), (be, $) -> new GenericStackItemStorage(be.getInterfaceLogic().getStorage()));
         });
 

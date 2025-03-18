@@ -78,11 +78,11 @@ public class EMCInterfaceBlockEntity extends AENetworkedBlockEntity implements E
 
     @Override
     protected Item getItemFromBlockEntity() {
-        return AppliedE.EMC_INTERFACE.get().asItem();
+        return AppliedE.EMC_INTERFACE.asItem();
     }
 
     @Override
     public ItemStack getMainMenuIcon() {
-        return AppliedE.EMC_INTERFACE.get().asItem().getDefaultInstance();
+        return AppliedE.EMC_INTERFACE.asItem().getDefaultInstance();
     }
 }

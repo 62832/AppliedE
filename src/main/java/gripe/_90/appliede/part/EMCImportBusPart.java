@@ -107,7 +107,7 @@ public class EMCImportBusPart extends IOBusPart {
                 var amount = adjacentStorage.extract(item, remaining.get(), Actionable.SIMULATE, source);
 
                 if (amount > 0) {
-                    var mayLearn = isUpgradedWith(AppliedE.LEARNING_CARD.get());
+                    var mayLearn = isUpgradedWith(AppliedE.LEARNING_CARD);
                     amount = networkEmc.insertItem(item, amount, Actionable.MODULATE, source, mayLearn);
                     adjacentStorage.extract(item, amount, Actionable.MODULATE, source);
                     remaining.addAndGet(-(int) amount);

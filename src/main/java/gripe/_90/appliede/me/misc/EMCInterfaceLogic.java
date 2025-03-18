@@ -114,7 +114,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
         var knowledge = grid.getService(KnowledgeService.class);
         return knowledge.getKnownItems().contains(item)
-                || (isUpgradedWith(AppliedE.LEARNING_CARD.get())
+                || (isUpgradedWith(AppliedE.LEARNING_CARD)
                         && IEMCProxy.INSTANCE.hasValue(item.toStack())
                         && knowledge.getProviderFor(node.getOwningPlayerProfileId()) != null);
     }
@@ -240,8 +240,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
 
             var depositedItems = grid.getService(KnowledgeService.class)
                     .getStorage()
-                    .insertItem(
-                            item, amount, Actionable.MODULATE, source, isUpgradedWith(AppliedE.LEARNING_CARD.get()));
+                    .insertItem(item, amount, Actionable.MODULATE, source, isUpgradedWith(AppliedE.LEARNING_CARD));
 
             if (depositedItems > 0) {
                 storage.extract(slot, what, depositedItems, Actionable.MODULATE);
@@ -348,7 +347,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         @Override
         public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
             return what instanceof AEItemKey item && mainNode.isActive()
-                    ? storage.insertItem(item, amount, mode, source, isUpgradedWith(AppliedE.LEARNING_CARD.get()))
+                    ? storage.insertItem(item, amount, mode, source, isUpgradedWith(AppliedE.LEARNING_CARD))
                     : 0;
         }
 

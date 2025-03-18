@@ -68,6 +68,6 @@ public class AppliedEClient {
                 event -> event.register(
                         (stack, tintIndex) ->
                                 new StaticItemColor(AEColor.TRANSPARENT).getColor(stack, tintIndex) | 0xFF000000,
-                        AppliedE.TRANSMUTATION_TERMINAL.get()));
+                        AppliedE.TRANSMUTATION_TERMINAL));
     }
 }
