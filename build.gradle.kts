@@ -55,6 +55,8 @@ neoForge {
 
 tasks {
     jar {
+        exclude("cn/**")
+
         from(rootProject.file("LICENSE")) {
             rename { "${it}_$modId" }
         }
