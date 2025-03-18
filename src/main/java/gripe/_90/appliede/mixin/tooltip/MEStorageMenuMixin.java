@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.injector.ModifyReceiver;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -22,27 +22,24 @@ import net.minecraft.world.inventory.MenuType;
 
 import appeng.api.networking.IGridNode;
 import appeng.api.stacks.AEItemKey;
-import appeng.api.stacks.AEKey;
-import appeng.api.stacks.KeyCounter;
+import appeng.api.storage.AEKeyFilter;
 import appeng.api.storage.ITerminalHost;
+import appeng.core.network.clientbound.MEInventoryUpdatePacket;
 import appeng.menu.AEBaseMenu;
 import appeng.menu.me.common.IncrementalUpdateHelper;
 import appeng.menu.me.common.MEStorageMenu;
 
-import gripe._90.appliede.me.reporting.MEInventoryUpdatePacketBuilder;
+import gripe._90.appliede.me.reporting.TransmutablePacketBuilder;
 import gripe._90.appliede.me.service.KnowledgeService;
 
 @Mixin(MEStorageMenu.class)
 public abstract class MEStorageMenuMixin extends AEBaseMenu {
     @Shadow
-    private Set<AEKey> previousCraftables;
-
-    @Shadow
-    private KeyCounter previousAvailableStacks;
-
-    @Shadow
     @Final
     private IncrementalUpdateHelper updateHelper;
+
+    @Unique
+    private Set<AEItemKey> appliede$transmutables = new HashSet<>();
 
     @Unique
     private Set<AEItemKey> appliede$previousTransmutables = new HashSet<>();
@@ -53,9 +50,6 @@ public abstract class MEStorageMenuMixin extends AEBaseMenu {
 
     @Shadow
     protected abstract boolean showsCraftables();
-
-    @Shadow
-    public abstract boolean isKeyVisible(AEKey key);
 
     @Shadow
     public abstract @Nullable IGridNode getGridNode();
@@ -71,36 +65,32 @@ public abstract class MEStorageMenuMixin extends AEBaseMenu {
                 : Collections.emptySet();
     }
 
-    // spotless:off
-    @SuppressWarnings("Convert2MethodRef")
     @Inject(
+            method = "broadcastChanges",
+            at = @At(value = "INVOKE", target = "Lappeng/menu/me/common/IncrementalUpdateHelper;hasChanges()Z"))
+    private void addTransmutables(CallbackInfo ci) {
+        appliede$transmutables = appliede$getTransmutablesFromGrid();
+        Sets.difference(appliede$previousTransmutables, appliede$transmutables).forEach(updateHelper::addChange);
+        Sets.difference(appliede$transmutables, appliede$previousTransmutables).forEach(updateHelper::addChange);
+    }
+
+    // spotless:off
+    @ModifyReceiver(
             method = "broadcastChanges",
             at = @At(
                     value = "INVOKE",
-                    target = "Lappeng/menu/me/common/IncrementalUpdateHelper;hasChanges()Z"),
-            cancellable = true)
+                    target = "Lappeng/core/network/clientbound/MEInventoryUpdatePacket$Builder;setFilter(Lappeng/api/storage/AEKeyFilter;)V"))
     // spotless:on
-    private void replacePacket(
-            CallbackInfo ci, @Local Set<AEKey> craftable, @Local(name = "availableStacks") KeyCounter availableStacks) {
-        ci.cancel();
+    private MEInventoryUpdatePacket.Builder addTransmutables(
+            MEInventoryUpdatePacket.Builder builder, AEKeyFilter filter) {
+        ((TransmutablePacketBuilder) builder).appliede$addTransmutables(appliede$transmutables);
+        return builder;
+    }
 
-        var transmutable = appliede$getTransmutablesFromGrid();
-        Sets.difference(appliede$previousTransmutables, transmutable).forEach(updateHelper::addChange);
-        Sets.difference(transmutable, appliede$previousTransmutables).forEach(updateHelper::addChange);
-
-        if (updateHelper.hasChanges()) {
-            var builder = new MEInventoryUpdatePacketBuilder(
-                    containerId, updateHelper.isFullUpdate(), getPlayer().registryAccess());
-            builder.setFilter(key -> isKeyVisible(key));
-            builder.addChanges(updateHelper, availableStacks, craftable, new KeyCounter(), transmutable);
-            builder.buildAndSend(packet -> sendPacketToClient(packet));
-            updateHelper.commitChanges();
-        }
-
-        previousCraftables = ImmutableSet.copyOf(craftable);
-        previousAvailableStacks = availableStacks;
-        appliede$previousTransmutables = ImmutableSet.copyOf(transmutable);
-
-        super.broadcastChanges();
+    @Inject(
+            method = "broadcastChanges",
+            at = @At(value = "INVOKE", target = "Lappeng/menu/AEBaseMenu;broadcastChanges()V"))
+    private void addPreviousTransmutables(CallbackInfo ci) {
+        appliede$previousTransmutables = ImmutableSet.copyOf(appliede$transmutables);
     }
 }

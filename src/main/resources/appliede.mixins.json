@@ -10,6 +10,7 @@
     "misc.P2PTunnelAttunementAccessor",
     "tooltip.GridInventoryEntryMixin",
     "tooltip.MEInventoryUpdatePacketMixin",
+    "tooltip.MEInventoryUpdatePacketMixin$BuilderMixin",
     "tooltip.MEStorageMenuMixin"
   ],
   "client": [

@@ -35,7 +35,7 @@ public abstract class RepoMixin {
             K serial,
             V entry,
             Operation<V> original,
-            @Local(name = "serverEntry") GridInventoryEntry serverEntry) {
+            @Local(argsOnly = true) GridInventoryEntry serverEntry) {
         if (entry instanceof GridInventoryEMCEntry transmutable) {
             transmutable.appliede$setTransmutable(((GridInventoryEMCEntry) serverEntry).appliede$isTransmutable());
         }
