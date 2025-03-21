@@ -35,6 +35,8 @@ public class AE2WTIntegration {
     }
 
     public static void registerTerminalMenu(RegisterEvent event) {
-        event.register(Registries.MENU, AppliedE.id("wireless_transmutation_terminal"), () -> WTTMenu.TYPE);
+        if (event.getRegistryKey().equals(Registries.MENU)) {
+            event.register(Registries.MENU, AppliedE.id("wireless_transmutation_terminal"), () -> WTTMenu.TYPE);
+        }
     }
 }
