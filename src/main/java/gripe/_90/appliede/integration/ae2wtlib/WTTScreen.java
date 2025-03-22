@@ -7,15 +7,17 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 import appeng.client.gui.style.ScreenStyle;
-import appeng.client.gui.widgets.BackgroundPanel;
 import appeng.init.client.InitScreens;
 
+import de.mari_023.ae2wtlib.api.gui.ScrollingUpgradesPanel;
 import de.mari_023.ae2wtlib.api.terminal.IUniversalTerminalCapable;
 import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
 
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
 
 public class WTTScreen extends TransmutationTerminalScreen<WTTMenu> implements IUniversalTerminalCapable {
+    private final ScrollingUpgradesPanel upgradesPanel;
+
     public WTTScreen(WTTMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
         super(menu, playerInventory, title, style);
 
@@ -23,7 +25,13 @@ public class WTTScreen extends TransmutationTerminalScreen<WTTMenu> implements I
             addToLeftToolbar(cycleTerminalButton());
         }
 
-        widgets.add("singularityBackground", new BackgroundPanel(style.getImage("singularityBackground")));
+        upgradesPanel = addUpgradePanel(widgets, getMenu());
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        upgradesPanel.setMaxRows(Math.max(2, getVisibleRows()));
     }
 
     public static void register(RegisterMenuScreensEvent event) {
