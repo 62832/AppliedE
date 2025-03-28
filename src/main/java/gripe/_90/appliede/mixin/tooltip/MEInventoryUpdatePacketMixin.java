@@ -20,6 +20,7 @@ import appeng.api.stacks.AEKey;
 import appeng.core.network.clientbound.MEInventoryUpdatePacket;
 import appeng.menu.me.common.GridInventoryEntry;
 
+import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.reporting.GridInventoryEMCEntry;
 import gripe._90.appliede.me.reporting.TransmutablePacketBuilder;
 
@@ -60,6 +61,13 @@ public abstract class MEInventoryUpdatePacketMixin {
             ((GridInventoryEMCEntry) original)
                     .appliede$setTransmutable(key instanceof AEItemKey item && appliede$transmutables.contains(item));
             return original;
+        }
+
+        @ModifyExpressionValue(
+                method = "addChanges",
+                at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z"))
+        private boolean excludeEMC(boolean original, @Local(ordinal = 0) AEKey key) {
+            return original && !(key instanceof EMCKey);
         }
     }
 }
