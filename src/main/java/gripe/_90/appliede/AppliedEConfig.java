@@ -58,27 +58,4 @@ public class AppliedEConfig {
     public int getSyncThrottleInterval() {
         return syncThrottleInterval.get();
     }
-
-    public static class Client {
-        public static final Client CONFIG;
-        public static final IConfigSpec SPEC;
-
-        static {
-            var configured = new ModConfigSpec.Builder().configure(Client::new);
-            CONFIG = configured.getKey();
-            SPEC = configured.getValue();
-        }
-
-        private final ModConfigSpec.IntValue emcTierColours;
-
-        private Client(ModConfigSpec.Builder builder) {
-            emcTierColours = builder.comment(
-                            "How many different colours should be used to represent higher tiers of EMC in storage")
-                    .defineInRange("emcTierColours", 10, 1, Integer.MAX_VALUE);
-        }
-
-        public int getEmcTierColours() {
-            return emcTierColours.getAsInt();
-        }
-    }
 }

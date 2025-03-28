@@ -19,7 +19,6 @@ import appeng.api.client.AEKeyRenderHandler;
 import appeng.client.gui.style.Blitter;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
 
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
@@ -33,7 +32,7 @@ public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
 
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics guiGraphics, int x, int y, EMCKey stack) {
-        var hueIntervals = AppliedEConfig.Client.CONFIG.getEmcTierColours();
+        var hueIntervals = AppliedEClientConfig.CONFIG.getEmcTierColours();
         var hue = ((stack.getTier() - 1) * 360F / hueIntervals) / 360;
 
         Blitter.sprite(sprite.get())

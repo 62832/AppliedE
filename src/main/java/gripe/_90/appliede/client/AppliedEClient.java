@@ -17,7 +17,6 @@ import appeng.client.render.StaticItemColor;
 import appeng.init.client.InitScreens;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
@@ -30,7 +29,7 @@ import gripe._90.appliede.menu.TransmutationTerminalMenu;
 @Mod(value = AppliedE.MODID, dist = Dist.CLIENT)
 public class AppliedEClient {
     public AppliedEClient(ModContainer container, IEventBus bus) {
-        container.registerConfig(ModConfig.Type.CLIENT, AppliedEConfig.Client.SPEC);
+        container.registerConfig(ModConfig.Type.CLIENT, AppliedEClientConfig.SPEC);
 
         bus.addListener(
                 FMLClientSetupEvent.class,
