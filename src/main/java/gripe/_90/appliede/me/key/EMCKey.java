@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -23,8 +22,7 @@ import appeng.api.stacks.AEKeyType;
 import gripe._90.appliede.AppliedE;
 
 public final class EMCKey extends AEKey {
-    static final MapCodec<EMCKey> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(Codec.INT.fieldOf("tier").forGetter(key -> key.tier)).apply(instance, EMCKey::of));
+    static final MapCodec<EMCKey> MAP_CODEC = Codec.INT.fieldOf("tier").xmap(EMCKey::of, key -> key.tier);
     static final Codec<EMCKey> CODEC = MAP_CODEC.codec();
 
     public static final EMCKey BASE = new EMCKey(1);
