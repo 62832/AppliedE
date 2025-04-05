@@ -4,14 +4,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 import appeng.api.crafting.IPatternDetails;
@@ -25,29 +29,31 @@ import gripe._90.appliede.me.key.EMCKey;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
 public final class TransmutationPattern implements IPatternDetails {
-    private final AEItemKey item;
+    private final Item output;
     private final long amount;
     private final int tier;
+    private final int job;
 
     private final AEItemKey definition;
 
-    public TransmutationPattern(AEItemKey item, long amount) {
+    public TransmutationPattern(Item output, long amount, int job) {
         tier = 1;
 
         var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
         definition.set(
                 AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(),
-                new Encoded((this.item = item).toStack(), this.amount = amount, tier));
+                new Encoded(this.output = output, this.amount = amount, tier, this.job = job));
         this.definition = AEItemKey.of(definition);
     }
 
     public TransmutationPattern(int tier) {
-        item = null;
+        output = Items.AIR;
         amount = 1;
+        job = 0;
 
         var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
         definition.set(
-                AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(ItemStack.EMPTY, amount, this.tier = tier));
+                AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(output, amount, this.tier = tier, job));
         this.definition = AEItemKey.of(definition);
     }
 
@@ -58,12 +64,12 @@ public final class TransmutationPattern implements IPatternDetails {
 
     @Override
     public IInput[] getInputs() {
-        if (item == null) {
+        if (output != Items.AIR) {
             return new IInput[] {new Input(1, tier)};
         }
 
         var inputs = new ArrayList<IInput>();
-        var itemEmc = IEMCProxy.INSTANCE.getValue(item.toStack());
+        var itemEmc = IEMCProxy.INSTANCE.getValue(output);
         var totalEmc = BigInteger.valueOf(itemEmc).multiply(BigInteger.valueOf(amount));
         var currentTier = 1;
 
@@ -81,19 +87,23 @@ public final class TransmutationPattern implements IPatternDetails {
     @Override
     public List<GenericStack> getOutputs() {
         return Collections.singletonList(
-                item != null
-                        ? new GenericStack(item, amount)
+                output != Items.AIR
+                        ? new GenericStack(AEItemKey.of(output), amount)
                         : new GenericStack(EMCKey.of(tier - 1), AppliedE.TIER_LIMIT.longValue()));
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof TransmutationPattern pattern && pattern.definition.equals(definition);
+        return obj instanceof TransmutationPattern pattern
+                && pattern.output.equals(output)
+                && pattern.amount == amount
+                && pattern.tier == tier
+                && pattern.job == job;
     }
 
     @Override
     public int hashCode() {
-        return definition.hashCode();
+        return Objects.hash(output, amount, tier, job);
     }
 
     private record Input(long amount, int tier) implements IInput {
@@ -118,20 +128,23 @@ public final class TransmutationPattern implements IPatternDetails {
         }
     }
 
-    public record Encoded(ItemStack item, long amount, int tier) {
+    public record Encoded(Item output, long amount, int tier, int job) {
         public static final Codec<Encoded> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-                        ItemStack.CODEC.fieldOf("item").forGetter(Encoded::item),
+                        BuiltInRegistries.ITEM.byNameCodec().fieldOf("output").forGetter(Encoded::output),
                         Codec.LONG.fieldOf("amount").forGetter(Encoded::amount),
-                        Codec.INT.fieldOf("tier").forGetter(Encoded::tier))
+                        Codec.INT.fieldOf("tier").forGetter(Encoded::tier),
+                        Codec.INT.fieldOf("job").forGetter(Encoded::job))
                 .apply(builder, Encoded::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Encoded> STREAM_CODEC = StreamCodec.composite(
-                ItemStack.STREAM_CODEC,
-                Encoded::item,
+                ByteBufCodecs.registry(Registries.ITEM),
+                Encoded::output,
                 ByteBufCodecs.VAR_LONG,
                 Encoded::amount,
                 ByteBufCodecs.VAR_INT,
                 Encoded::tier,
+                ByteBufCodecs.VAR_INT,
+                Encoded::job,
                 Encoded::new);
     }
 }

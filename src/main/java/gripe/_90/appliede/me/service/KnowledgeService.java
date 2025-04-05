@@ -45,7 +45,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
-    private final List<IPatternDetails> temporaryPatterns = new ArrayList<>();
+    private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     final IGrid grid;
@@ -189,7 +189,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             }
 
             for (var item : getKnownItems()) {
-                patterns.add(new TransmutationPattern(item, 1));
+                patterns.add(new TransmutationPattern(item.getItem(), 1, 0));
             }
 
             patterns.addAll(temporaryPatterns);
