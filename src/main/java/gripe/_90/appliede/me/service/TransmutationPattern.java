@@ -34,7 +34,7 @@ public final class TransmutationPattern implements IPatternDetails {
     public TransmutationPattern(AEItemKey item, long amount) {
         tier = 1;
 
-        var definition = new ItemStack(AppliedE.DUMMY_EMC_ITEM.asItem());
+        var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
         definition.set(
                 AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(),
                 new Encoded((this.item = item).toStack(), this.amount = amount, tier));
@@ -45,7 +45,7 @@ public final class TransmutationPattern implements IPatternDetails {
         item = null;
         amount = 1;
 
-        var definition = new ItemStack(AppliedE.DUMMY_EMC_ITEM.asItem());
+        var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
         definition.set(
                 AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(ItemStack.EMPTY, amount, this.tier = tier));
         this.definition = AEItemKey.of(definition);

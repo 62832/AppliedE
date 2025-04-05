@@ -1,10 +1,12 @@
 package gripe._90.appliede.mixin.crafting;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import java.util.ArrayList;
+
 import com.llamalad7.mixinextras.sugar.Local;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,6 +27,13 @@ import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftingTreeNode.class)
 public abstract class CraftingTreeNodeMixin {
+    @Shadow
+    private ArrayList<CraftingTreeProcess> nodes;
+
+    @Shadow
+    @Final
+    private CraftingCalculation job;
+
     @Unique
     private long appliede$requestedAmount;
 
@@ -35,27 +44,26 @@ public abstract class CraftingTreeNodeMixin {
     }
 
     // spotless:off
-    @WrapOperation(
+    @Inject(
             method = "buildChildPatterns",
             at = @At(
-                    value = "NEW",
-                    target = "(Lappeng/api/networking/crafting/ICraftingService;Lappeng/crafting/CraftingCalculation;Lappeng/api/crafting/IPatternDetails;Lappeng/crafting/CraftingTreeNode;)Lappeng/crafting/CraftingTreeProcess;"))
+                    value = "INVOKE",
+                    target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"),
+            cancellable = true)
     // spotless:on
-    private CraftingTreeProcess recalculatePattern(
-            ICraftingService craftingService,
-            CraftingCalculation job,
-            IPatternDetails details,
-            CraftingTreeNode node,
-            Operation<CraftingTreeProcess> original,
-            @Local IGridNode gridNode) {
+    private void recalculatePattern(
+            CallbackInfo ci,
+            @Local IPatternDetails details,
+            @Local IGridNode gridNode,
+            @Local ICraftingService craftingService) {
         if (details instanceof TransmutationPattern) {
             if (details.getOutputs().getFirst().what() instanceof AEItemKey item) {
+                ci.cancel();
                 details = new TransmutationPattern(item, appliede$requestedAmount);
+                nodes.add(new CraftingTreeProcess(craftingService, job, details, (CraftingTreeNode) (Object) this));
             }
 
             gridNode.getGrid().getService(KnowledgeService.class).addTemporaryPattern(details);
         }
-
-        return original.call(craftingService, job, details, node);
     }
 }
