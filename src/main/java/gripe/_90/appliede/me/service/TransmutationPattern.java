@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.misc;
+package gripe._90.appliede.me.service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

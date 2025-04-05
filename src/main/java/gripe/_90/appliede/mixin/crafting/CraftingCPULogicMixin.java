@@ -21,8 +21,8 @@ import appeng.crafting.execution.CraftingCpuLogic;
 import appeng.me.cluster.implementations.CraftingCPUCluster;
 import appeng.me.service.CraftingService;
 
-import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftingCpuLogic.class)
 public abstract class CraftingCPULogicMixin {

@@ -31,7 +31,6 @@ import appeng.api.storage.MEStorage;
 import appeng.me.storage.NullInventory;
 
 import gripe._90.appliede.AppliedEConfig;
-import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;

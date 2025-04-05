@@ -20,8 +20,8 @@ import appeng.crafting.CraftingTreeNode;
 import appeng.crafting.CraftingTreeProcess;
 import appeng.crafting.inv.CraftingSimulationState;
 
-import gripe._90.appliede.me.misc.TransmutationPattern;
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftingTreeNode.class)
 public abstract class CraftingTreeNodeMixin {
