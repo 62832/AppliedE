@@ -12,21 +12,7 @@
             "id": "ae2:singularity"
           }
         }
-      ],
-      "values": {
-        "before": [
-          {
-            "type": "projecte:item",
-            "emc_value": 512,
-            "id": "ae2:matter_ball"
-          },
-          {
-            "type": "projecte:item",
-            "emc_value": "free",
-            "id": "ae2:quantum_entangled_singularity"
-          }
-        ]
-      }
+      ]
     }
   },
   "values": {
@@ -57,7 +43,17 @@
         "id": "ae2:logic_processor_press"
       },
       { "type": "projecte:item", "emc_value": 2048, "id": "ae2:silicon_press" },
-      { "type": "projecte:item", "emc_value": 32, "id": "ae2:cable_anchor" }
+      { "type": "projecte:item", "emc_value": 32, "id": "ae2:cable_anchor" },
+      {
+        "type": "projecte:item",
+        "emc_value": 512,
+        "id": "ae2:matter_ball"
+      },
+      {
+        "type": "projecte:item",
+        "emc_value": "free",
+        "id": "ae2:quantum_entangled_singularity"
+      }
     ]
   }
 }
