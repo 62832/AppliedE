@@ -64,7 +64,7 @@ public final class TransmutationPattern implements IPatternDetails {
 
     @Override
     public IInput[] getInputs() {
-        if (output != Items.AIR) {
+        if (output == Items.AIR) {
             return new IInput[] {new Input(1, tier)};
         }
 
@@ -80,7 +80,6 @@ public final class TransmutationPattern implements IPatternDetails {
         }
 
         inputs.add(new Input(totalEmc.longValue(), currentTier));
-
         return inputs.toArray(new IInput[0]);
     }
 
