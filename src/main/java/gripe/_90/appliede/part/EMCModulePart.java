@@ -26,7 +26,6 @@ import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
-import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
 import appeng.helpers.IPriorityHost;
 import appeng.items.parts.PartModels;
@@ -42,8 +41,7 @@ import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.service.KnowledgeService;
 import gripe._90.appliede.me.service.TransmutationPattern;
 
-public final class EMCModulePart extends AEBasePart
-        implements IStorageProvider, ICraftingProvider, IPriorityHost, IGridTickable {
+public final class EMCModulePart extends AEBasePart implements ICraftingProvider, IPriorityHost, IGridTickable {
     @PartModels
     private static final IPartModel MODEL = new PartModel(AppliedE.id("part/emc_module"));
 
@@ -55,7 +53,6 @@ public final class EMCModulePart extends AEBasePart
         super(partItem);
         getMainNode()
                 .setFlags(GridFlags.REQUIRE_CHANNEL)
-                .addService(IStorageProvider.class, this)
                 .addService(ICraftingProvider.class, this)
                 .addService(IGridTickable.class, this)
                 .setIdlePowerUsage(AppliedEConfig.CONFIG.getModuleEnergyUsage());
@@ -76,17 +73,7 @@ public final class EMCModulePart extends AEBasePart
     @Override
     protected void onMainNodeStateChanged(IGridNodeListener.State reason) {
         super.onMainNodeStateChanged(reason);
-        IStorageProvider.requestUpdate(getMainNode());
         ICraftingProvider.requestUpdate(getMainNode());
-    }
-
-    @Override
-    public void mountInventories(IStorageMounts mounts) {
-        var grid = getMainNode().getGrid();
-
-        if (grid != null) {
-            mounts.mount(grid.getService(KnowledgeService.class).getStorage(getMainNode()));
-        }
     }
 
     @Override

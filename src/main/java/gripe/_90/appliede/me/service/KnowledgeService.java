@@ -25,10 +25,10 @@ import appeng.api.networking.IGridServiceProvider;
 import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.security.IActionHost;
+import appeng.api.networking.storage.IStorageService;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
-import appeng.api.storage.MEStorage;
-import appeng.me.storage.NullInventory;
 
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.part.EMCModulePart;
@@ -39,7 +39,7 @@ import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
-public class KnowledgeService implements IGridService, IGridServiceProvider {
+public class KnowledgeService implements IGridService, IGridServiceProvider, IStorageProvider {
     private static final int TICKS_PER_SYNC = AppliedEConfig.CONFIG.getSyncThrottleInterval();
 
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
@@ -53,8 +53,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private boolean needsSync;
     private int ticksSinceLastSync;
 
-    public KnowledgeService(IGrid grid) {
+    public KnowledgeService(IGrid grid, IStorageService storageService) {
         this.grid = grid;
+        storageService.addGlobalStorageProvider(this);
+
         NeoForge.EVENT_BUS.addListener(EMCRemapEvent.class, event -> updateKnownItems());
         NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> updateKnownItems());
     }
@@ -94,7 +96,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
                 }
             }
 
-            moduleNodes.forEach(IStorageProvider::requestUpdate);
             updatePatterns();
         }
     }
@@ -110,6 +111,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             needsSync = false;
             ticksSinceLastSync = 0;
         }
+    }
+
+    @Override
+    public void mountInventories(IStorageMounts storageMounts) {
+        storageMounts.mount(storage);
     }
 
     private void addProvider(UUID playerUUID) {
@@ -145,12 +151,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     public EMCStorage getStorage() {
         return storage;
-    }
-
-    public MEStorage getStorage(IManagedGridNode node) {
-        return !moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()
-                ? storage
-                : NullInventory.of();
     }
 
     public Set<AEItemKey> getKnownItems() {
