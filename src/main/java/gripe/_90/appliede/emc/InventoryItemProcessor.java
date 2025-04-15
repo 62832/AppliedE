@@ -1,14 +1,14 @@
 package gripe._90.appliede.emc;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.world.item.ItemStack;
 
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.IUpgradeableItem;
-import appeng.items.contents.NetworkToolMenuHost;
 import appeng.items.tools.NetworkToolItem;
-import appeng.menu.locator.MenuLocators;
 
 import gripe._90.appliede.AppliedE;
 
@@ -40,27 +40,27 @@ public class InventoryItemProcessor implements IDataComponentProcessor {
         var stack = itemInfo.createStack();
 
         if (stack.getItem() instanceof NetworkToolItem) {
-            var inventory = new NetworkToolMenuHost<>(null, null, MenuLocators.forStack(stack), null).getInventory();
+            var inventory = stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
 
-            for (var item : inventory) {
+            for (var item : inventory.nonEmptyItems()) {
                 currentEmc = addEmc(currentEmc, item);
             }
 
             return currentEmc;
-        }
+        } else {
+            var cell = StorageCells.getCellInventory(stack, null);
 
-        if (!(stack.getItem() instanceof IUpgradeableItem upgradeable)) {
-            return currentEmc;
-        }
+            if (cell != null && !cell.getAvailableStacks().isEmpty()) {
+                return 0;
+            }
 
-        for (var upgrade : upgradeable.getUpgrades(stack)) {
-            currentEmc = addEmc(currentEmc, upgrade);
-        }
+            if (!(stack.getItem() instanceof IUpgradeableItem upgradeable)) {
+                return currentEmc;
+            }
 
-        var cell = StorageCells.getCellInventory(stack, null);
-
-        if (cell != null && !cell.getAvailableStacks().isEmpty()) {
-            return 0;
+            for (var upgrade : upgradeable.getUpgrades(stack)) {
+                currentEmc = addEmc(currentEmc, upgrade);
+            }
         }
 
         return currentEmc;
