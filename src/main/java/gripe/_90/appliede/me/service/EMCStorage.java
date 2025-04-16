@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.features.IPlayerRegistry;
-import appeng.api.networking.energy.IEnergyService;
+import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
@@ -31,35 +31,15 @@ import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-class EMCStorage implements MEStorage {
-    private final KnowledgeService service;
-    private final IEnergyService energy;
-    private int highestTier = 1;
-
-    EMCStorage(KnowledgeService service, IEnergyService energy) {
-        this.service = service;
-        this.energy = energy;
-    }
-
+record EMCStorage(KnowledgeService service, IEnergySource energy) implements MEStorage {
     @Override
     public void getAvailableStacks(KeyCounter out) {
         var emc = service.getEmc();
-        var currentTier = 1;
 
-        while (emc.signum() == 1) {
-            out.add(EMCKey.of(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
+        for (var tier = 1; emc.signum() == 1; tier++) {
+            out.add(EMCKey.of(tier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
             emc = emc.divide(AppliedE.TIER_LIMIT);
-            currentTier++;
         }
-
-        if (highestTier != currentTier) {
-            highestTier = currentTier;
-            service.updatePatterns();
-        }
-    }
-
-    public int getHighestTier() {
-        return highestTier;
     }
 
     @Override
@@ -313,7 +293,7 @@ class EMCStorage implements MEStorage {
         }
     }
 
-    private static long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc, IEnergyService energy) {
+    private static long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc, IEnergySource energy) {
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
                 .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()))
                 .divide(BigDecimal.valueOf(EMCKeyType.TYPE.getAmountPerOperation()), 4, RoundingMode.HALF_UP);

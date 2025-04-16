@@ -46,7 +46,9 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     private final EMCStorage storage;
     private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
 
-    private Set<AEItemKey> knownItemCache;
+    private BigInteger cachedEMC;
+    private Set<AEItemKey> cachedKnownItems;
+
     private boolean needsSync;
     private int ticksSinceLastSync;
 
@@ -65,7 +67,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     @Override
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            knownItemCache = null;
+            cachedKnownItems = null;
             moduleNodes.add(module.getMainNode());
             var uuid = gridNode.getOwningPlayerProfileId();
 
@@ -80,7 +82,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     @Override
     public void removeNode(IGridNode gridNode) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            knownItemCache = null;
+            cachedKnownItems = null;
             moduleNodes.remove(module.getMainNode());
             providers.clear();
 
@@ -154,8 +156,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     }
 
     public Set<AEItemKey> getKnownItems() {
-        if (knownItemCache == null) {
-            knownItemCache = new HashSet<>();
+        if (cachedKnownItems == null) {
+            cachedKnownItems = new HashSet<>();
 
             for (var provider : providers.values()) {
                 for (var item : provider.getKnowledge()) {
@@ -166,17 +168,17 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
                     var key = AEItemKey.of(item.createStack());
 
                     if (key != null) {
-                        knownItemCache.add(key);
+                        cachedKnownItems.add(key);
                     }
                 }
             }
         }
 
-        return knownItemCache;
+        return cachedKnownItems;
     }
 
     private void updateKnownItems() {
-        knownItemCache = null;
+        cachedKnownItems = null;
         updatePatterns();
     }
 
@@ -184,7 +186,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         if (!moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()) {
             var patterns = new ArrayList<IPatternDetails>();
 
-            for (var tier = storage.getHighestTier(); tier > 1; tier--) {
+            for (var tier = storage.getAvailableStacks().size(); tier > 1; tier--) {
                 patterns.add(new TransmutationPattern(tier));
             }
 
@@ -214,22 +216,25 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     }
 
     BigInteger getEmc() {
-        var emc = BigInteger.ZERO;
+        if (cachedEMC == null) {
+            cachedEMC = BigInteger.ZERO;
 
-        for (var uuid : providers.keySet()) {
-            var provider = providers.get(uuid);
+            for (var uuid : providers.keySet()) {
+                var provider = providers.get(uuid);
 
-            if (tpeHandler != null && ((TeamProjectEHandler) tpeHandler).sharingEMC(uuid, provider)) {
-                continue;
+                if (tpeHandler != null && ((TeamProjectEHandler) tpeHandler).sharingEMC(uuid, provider)) {
+                    continue;
+                }
+
+                cachedEMC = cachedEMC.add(provider.getEmc());
             }
-
-            emc = emc.add(provider.getEmc());
         }
 
-        return emc;
+        return cachedEMC;
     }
 
     void syncEmc() {
+        cachedEMC = null;
         needsSync = true;
     }
 }
