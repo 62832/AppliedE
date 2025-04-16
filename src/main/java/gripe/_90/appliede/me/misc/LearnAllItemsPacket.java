@@ -1,7 +1,5 @@
 package gripe._90.appliede.me.misc;
 
-import java.util.Objects;
-
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -34,14 +32,18 @@ public class LearnAllItemsPacket implements CustomPacketPayload {
                 return;
             }
 
-            var node = Objects.requireNonNull(menu.getHost().getActionableNode());
-            var knowledge = node.getGrid().getService(KnowledgeService.class);
-            var provider = knowledge.getProviderFor(sender.getUUID());
+            var node = menu.getActionableNode();
+
+            if (node == null) {
+                return;
+            }
+
+            var provider = node.getGrid().getService(KnowledgeService.class).getProviderFor(sender.getUUID());
 
             if (provider != null) {
-                var storage = node.getGrid().getStorageService();
+                var storageService = node.getGrid().getStorageService();
 
-                for (var key : storage.getCachedInventory().keySet()) {
+                for (var key : storageService.getCachedInventory().keySet()) {
                     if (!(key instanceof AEItemKey item)) {
                         continue;
                     }
@@ -50,19 +52,9 @@ public class LearnAllItemsPacket implements CustomPacketPayload {
                         continue;
                     }
 
-                    var learned = knowledge
-                            .getStorage()
-                            .insertItem(
-                                    item,
-                                    1,
-                                    Actionable.MODULATE,
-                                    IActionSource.ofPlayer(sender),
-                                    true,
-                                    true,
-                                    menu::showLearned);
-
-                    var me = storage.getInventory();
-                    me.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(menu.getHost()));
+                    var storage = storageService.getInventory();
+                    var learned = storage.insert(item, 1, Actionable.MODULATE, IActionSource.ofPlayer(sender, menu));
+                    storage.extract(item, learned, Actionable.MODULATE, IActionSource.ofMachine(menu));
                 }
             }
         });

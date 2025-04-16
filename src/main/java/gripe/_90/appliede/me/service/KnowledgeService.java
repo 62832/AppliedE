@@ -13,20 +13,18 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.features.IPlayerRegistry;
-import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
 import appeng.api.networking.IGridServiceProvider;
 import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.crafting.ICraftingProvider;
-import appeng.api.networking.security.IActionHost;
+import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.storage.IStorageService;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.IStorageMounts;
@@ -45,18 +43,17 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
 
     final Map<UUID, IKnowledgeProvider> providers = new HashMap<>();
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
-    private final EMCStorage storage = new EMCStorage(this);
+    private final EMCStorage storage;
     private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
 
-    final IGrid grid;
     private Set<AEItemKey> knownItemCache;
     private boolean needsSync;
     private int ticksSinceLastSync;
 
     private final Object tpeHandler;
 
-    public KnowledgeService(IGrid grid, IStorageService storageService) {
-        this.grid = grid;
+    public KnowledgeService(IStorageService storageService, IEnergyService energyService) {
+        storage = new EMCStorage(this, energyService);
         storageService.addGlobalStorageProvider(this);
 
         NeoForge.EVENT_BUS.addListener(EMCRemapEvent.class, event -> updateKnownItems());
@@ -141,10 +138,6 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         storageMounts.mount(storage);
     }
 
-    List<IKnowledgeProvider> getProviders() {
-        return List.copyOf(providers.values());
-    }
-
     @Nullable
     public IKnowledgeProvider getProviderFor(UUID uuid) {
         if (uuid == null) {
@@ -160,30 +153,11 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         return provider;
     }
 
-    IKnowledgeProvider getProviderFor(Player player) {
-        return getProviderFor(player.getUUID());
-    }
-
-    IKnowledgeProvider getProviderFor(IActionHost host) {
-        var node = host.getActionableNode();
-
-        if (node != null) {
-            var uuid = node.getOwningPlayerProfileId();
-            return uuid != null ? getProviderFor(uuid) : null;
-        }
-
-        return null;
-    }
-
-    public EMCStorage getStorage() {
-        return storage;
-    }
-
     public Set<AEItemKey> getKnownItems() {
         if (knownItemCache == null) {
             knownItemCache = new HashSet<>();
 
-            for (var provider : getProviders()) {
+            for (var provider : providers.values()) {
                 for (var item : provider.getKnowledge()) {
                     if (!IEMCProxy.INSTANCE.hasValue(item)) {
                         continue;

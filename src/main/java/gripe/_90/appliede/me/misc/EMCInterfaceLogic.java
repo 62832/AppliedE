@@ -16,7 +16,6 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IManagedGridNode;
-import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
@@ -33,12 +32,11 @@ import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.service.EMCStorage;
 import gripe._90.appliede.me.service.KnowledgeService;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeableObject {
+public class EMCInterfaceLogic implements TransmutationCapable, IGridTickable, IUpgradeableObject {
     protected final EMCInterfaceLogicHost host;
     protected final IManagedGridNode mainNode;
 
@@ -50,9 +48,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     private final GenericStack[] plannedWork;
     private final IActionSource source = IActionSource.ofMachine(this);
 
-    @Nullable
-    private WrappedEMCStorage emcStorage;
-
+    private MEStorage networkStorage;
     private boolean hasConfig;
 
     public EMCInterfaceLogic(IManagedGridNode node, EMCInterfaceLogicHost host, Item is) {
@@ -91,7 +87,7 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     public MEStorage getInventory() {
-        return hasConfig ? localInvHandler : emcStorage;
+        return hasConfig ? localInvHandler : networkStorage;
     }
 
     @Override
@@ -99,24 +95,36 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
         return upgrades;
     }
 
-    private boolean storageFilter(AEKey what) {
+    @Override
+    public boolean mayLearn() {
+        return isUpgradedWith(AppliedE.LEARNING_CARD);
+    }
+
+    private boolean storageFilter(int slot, AEKey what) {
+        if (slot < config.size()) {
+            var configured = config.getKey(slot);
+
+            if (configured != null && !configured.equals(what)) {
+                return false;
+            }
+        }
+
         if (!(what instanceof AEItemKey item)) {
             return false;
         }
 
-        var grid = mainNode.getGrid();
         var node = mainNode.getNode();
 
-        if (grid == null || node == null) {
+        if (node == null) {
             // client-side, allow everything in order for items to actually display
             return true;
         }
 
-        var knowledge = grid.getService(KnowledgeService.class);
-        return knowledge.getKnownItems().contains(item)
-                || (isUpgradedWith(AppliedE.LEARNING_CARD)
-                        && IEMCProxy.INSTANCE.hasValue(item.toStack())
-                        && knowledge.getProviderFor(node.getOwningPlayerProfileId()) != null);
+        if (isUpgradedWith(AppliedE.LEARNING_CARD)) {
+            return IEMCProxy.INSTANCE.hasValue(item.toStack());
+        }
+
+        return node.getGrid().getService(KnowledgeService.class).getKnownItems().contains(item);
     }
 
     public void readFromNBT(CompoundTag tag, HolderLookup.Provider registries) {
@@ -220,10 +228,6 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     private boolean tryUsePlan(int slot, AEKey what, int amount) {
-        if (!(what instanceof AEItemKey item)) {
-            return false;
-        }
-
         var grid = mainNode.getGrid();
 
         if (grid == null) {
@@ -238,12 +242,10 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
                 return true;
             }
 
-            var depositedItems = grid.getService(KnowledgeService.class)
-                    .getStorage()
-                    .insertItem(item, amount, Actionable.MODULATE, source, isUpgradedWith(AppliedE.LEARNING_CARD));
+            var deposited = grid.getStorageService().getInventory().insert(what, amount, Actionable.MODULATE, source);
 
-            if (depositedItems > 0) {
-                storage.extract(slot, what, depositedItems, Actionable.MODULATE);
+            if (deposited > 0) {
+                storage.extract(slot, what, deposited, Actionable.MODULATE);
                 return true;
             }
         }
@@ -257,18 +259,12 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     private boolean acquireFromNetwork(IGrid grid, int slot, AEKey what, long amount) {
-        if (!(what instanceof AEItemKey item)) {
-            return false;
-        }
+        var acquired = grid.getStorageService().getInventory().extract(what, amount, Actionable.MODULATE, source);
 
-        var acquiredItems = grid.getService(KnowledgeService.class)
-                .getStorage()
-                .extractItem(item, amount, Actionable.MODULATE, source, true);
+        if (acquired > 0) {
+            var inserted = storage.insert(slot, what, acquired, Actionable.MODULATE);
 
-        if (acquiredItems > 0) {
-            var inserted = storage.insert(slot, what, acquiredItems, Actionable.MODULATE);
-
-            if (inserted < acquiredItems) {
+            if (inserted < acquired) {
                 throw new IllegalStateException("Bad attempt at managing inventory. Voided items: " + inserted);
             }
 
@@ -309,9 +305,8 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     public void gridChanged() {
-        emcStorage = new WrappedEMCStorage(Objects.requireNonNull(mainNode.getGrid())
-                .getService(KnowledgeService.class)
-                .getStorage());
+        networkStorage = new WrappedEMCStorage(
+                Objects.requireNonNull(mainNode.getGrid()).getStorageService().getInventory());
         notifyNeighbours();
     }
 
@@ -338,17 +333,40 @@ public class EMCInterfaceLogic implements IActionHost, IGridTickable, IUpgradeab
     }
 
     private class WrappedEMCStorage implements MEStorage {
-        private final EMCStorage storage;
+        private final MEStorage storage;
 
-        private WrappedEMCStorage(EMCStorage storage) {
+        private WrappedEMCStorage(MEStorage storage) {
             this.storage = storage;
         }
 
         @Override
         public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-            return what instanceof AEItemKey item && mainNode.isActive()
-                    ? storage.insertItem(item, amount, mode, source, isUpgradedWith(AppliedE.LEARNING_CARD))
-                    : 0;
+            if (!mainNode.isActive()) {
+                return 0;
+            }
+
+            if (!(what instanceof AEItemKey item)) {
+                return 0;
+            }
+
+            var node = mainNode.getNode();
+
+            if (node == null) {
+                return 0;
+            }
+
+            if (!EMCInterfaceLogic.this.mayLearn()) {
+                if (!node.getGrid()
+                        .getService(KnowledgeService.class)
+                        .getKnownItems()
+                        .contains(item)) {
+                    return 0;
+                }
+            }
+
+            var toNetwork = storage.insert(what, amount, mode, EMCInterfaceLogic.this.source);
+            var toInternal = EMCInterfaceLogic.this.storage.insert(what, amount - toNetwork, mode, source);
+            return toNetwork + toInternal;
         }
 
         @Override

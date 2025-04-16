@@ -1,5 +1,6 @@
 package gripe._90.appliede.part;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,12 +38,12 @@ import appeng.parts.automation.IOBusPart;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.misc.TransmutationCapable;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
-public class EMCExportBusPart extends IOBusPart {
+public class EMCExportBusPart extends IOBusPart implements TransmutationCapable {
     private static final ResourceLocation MODEL_BASE = AppliedE.id("part/emc_export_bus");
 
     @PartModels
@@ -87,7 +88,7 @@ public class EMCExportBusPart extends IOBusPart {
     @Override
     protected boolean doBusWork(IGrid grid) {
         if (itemCache == null || emcCache == null) {
-            var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+            var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(Objects.requireNonNull(getSide()));
             var facing = getSide().getOpposite();
             var level = (ServerLevel) getLevel();
             itemCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, level, adjacentPos, facing);
@@ -95,8 +96,6 @@ public class EMCExportBusPart extends IOBusPart {
         }
 
         var doneWork = false;
-
-        var networkEmc = grid.getService(KnowledgeService.class).getStorage();
         var schedulingMode = getConfigManager().getSetting(Settings.SCHEDULING_MODE);
         var remaining = new AtomicInteger(getOperationsPerTick());
         var slot = 0;
@@ -126,21 +125,22 @@ public class EMCExportBusPart extends IOBusPart {
                     remaining.addAndGet((int) -Math.max(1, extracted / EMCKeyType.TYPE.getAmountPerOperation()));
                 }
             } else if (what instanceof AEItemKey item && itemCache.getCapability() instanceof IItemHandler handler) {
+                var networkStorage = grid.getStorageService().getInventory();
+
                 var rem = remaining.get();
                 var stack = item.toStack(rem);
-                var extracted = networkEmc.extractItem(item, rem, Actionable.SIMULATE, source, true);
+                var extracted = networkStorage.extract(item, rem, Actionable.SIMULATE, source);
                 var remainder = ItemHandlerHelper.insertItem(handler, stack, true);
                 var wasInserted = extracted - remainder.getCount();
 
                 if (wasInserted > 0) {
-                    extracted = networkEmc.extractItem(item, rem, Actionable.MODULATE, source, true);
+                    extracted = networkStorage.extract(item, rem, Actionable.MODULATE, source);
                     remainder = ItemHandlerHelper.insertItem(handler, stack, false);
                     wasInserted = extracted - remainder.getCount();
 
                     if (wasInserted < extracted) {
                         var leftover = extracted - wasInserted;
-                        leftover -= networkEmc.insertItem(
-                                item, leftover, Actionable.MODULATE, source, false, false, () -> {});
+                        leftover -= networkStorage.insert(item, rem, Actionable.MODULATE, source);
 
                         if (leftover > 0) {
                             LOGGER.error(
@@ -166,6 +166,16 @@ public class EMCExportBusPart extends IOBusPart {
         }
 
         return doneWork;
+    }
+
+    @Override
+    public boolean mayLearn() {
+        return false;
+    }
+
+    @Override
+    public boolean consumePowerOnInsert() {
+        return false;
     }
 
     @Override
