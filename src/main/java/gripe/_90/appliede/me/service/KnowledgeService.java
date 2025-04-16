@@ -14,9 +14,12 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import appeng.api.crafting.IPatternDetails;
+import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridService;
@@ -44,12 +47,13 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
     private final EMCStorage storage = new EMCStorage(this);
     private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
-    private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     final IGrid grid;
     private Set<AEItemKey> knownItemCache;
     private boolean needsSync;
     private int ticksSinceLastSync;
+
+    private final Object tpeHandler;
 
     public KnowledgeService(IGrid grid, IStorageService storageService) {
         this.grid = grid;
@@ -57,6 +61,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
 
         NeoForge.EVENT_BUS.addListener(EMCRemapEvent.class, event -> updateKnownItems());
         NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> updateKnownItems());
+
+        tpeHandler = ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
     }
 
     @Override
@@ -80,7 +86,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
             knownItemCache = null;
             moduleNodes.remove(module.getMainNode());
             providers.clear();
-            tpeHandler.clear();
+
+            if (tpeHandler != null) {
+                ((TeamProjectEHandler) tpeHandler).clear();
+            }
 
             for (var mainNode : moduleNodes) {
                 var node = mainNode.getNode();
@@ -105,7 +114,23 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         }
 
         if (needsSync && ticksSinceLastSync == TICKS_PER_SYNC) {
-            tpeHandler.syncTeamProviders(providers);
+            var server = ServerLifecycleHooks.getCurrentServer();
+
+            if (server != null) {
+                for (var uuid : providers.keySet()) {
+                    var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
+                    var player = IPlayerRegistry.getConnected(server, id);
+
+                    if (player != null) {
+                        providers.get(uuid).syncEmc(player);
+                    }
+                }
+
+                if (tpeHandler != null) {
+                    ((TeamProjectEHandler) tpeHandler).syncTeamProviders(server);
+                }
+            }
+
             needsSync = false;
             ticksSinceLastSync = 0;
         }
@@ -122,7 +147,17 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
 
     @Nullable
     public IKnowledgeProvider getProviderFor(UUID uuid) {
-        return providers.getOrDefault(uuid, tpeHandler.getProviderFor(uuid));
+        if (uuid == null) {
+            return null;
+        }
+
+        var provider = providers.get(uuid);
+
+        if (provider == null && tpeHandler != null) {
+            return ((TeamProjectEHandler) tpeHandler).getProviderFor(uuid);
+        }
+
+        return provider;
     }
 
     IKnowledgeProvider getProviderFor(Player player) {
@@ -207,18 +242,17 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     BigInteger getEmc() {
         var emc = BigInteger.ZERO;
 
-        for (var entry : providers.entrySet()) {
-            if (tpeHandler.notSharingEmc(entry)) {
-                emc = emc.add(entry.getValue().getEmc());
+        for (var uuid : providers.keySet()) {
+            var provider = providers.get(uuid);
+
+            if (tpeHandler != null && ((TeamProjectEHandler) tpeHandler).sharingEMC(uuid, provider)) {
+                continue;
             }
+
+            emc = emc.add(provider.getEmc());
         }
 
         return emc;
-    }
-
-    public boolean isTrackingPlayer(Player player) {
-        var uuid = player.getUUID();
-        return providers.containsKey(uuid) || tpeHandler.isPlayerInTrackedTeam(uuid);
     }
 
     void syncEmc() {

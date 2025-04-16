@@ -82,17 +82,14 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
             if (node != null) {
                 var knowledge = node.getGrid().getService(KnowledgeService.class);
+                var provider = knowledge.getProviderFor(player.getUUID());
 
-                if (knowledge.isTrackingPlayer(player)) {
-                    var provider = knowledge.getProviderFor(player.getUUID());
-
-                    if (provider != null && provider.hasKnowledge(getCarried())) {
-                        provider.removeKnowledge(getCarried());
-                        provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
-                        unlearnedLabelTicks = 300;
-                        learnedLabelTicks = 0;
-                        broadcastChanges();
-                    }
+                if (provider != null && provider.hasKnowledge(getCarried())) {
+                    provider.removeKnowledge(getCarried());
+                    provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
+                    unlearnedLabelTicks = 300;
+                    learnedLabelTicks = 0;
+                    broadcastChanges();
                 }
             }
         }
@@ -108,7 +105,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
             var knowledge = node.getGrid().getService(KnowledgeService.class);
 
-            if (!knowledge.isTrackingPlayer(player)) {
+            if (knowledge.getProviderFor(player.getUUID()) == null) {
                 return 0;
             }
 

@@ -90,8 +90,8 @@ public final class EMCKey extends AEKey {
     public void addDrops(long l, List<ItemStack> list, Level level, BlockPos blockPos) {}
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof EMCKey key && tier == key.tier;
+    public boolean equals(Object o) {
+        return o != null && o.getClass() == getClass() && ((EMCKey) o).tier == tier;
     }
 
     @Override
