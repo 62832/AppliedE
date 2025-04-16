@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -37,13 +36,12 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.event.EMCRemapEvent;
 import moze_intel.projecte.api.event.PlayerKnowledgeChangeEvent;
 import moze_intel.projecte.api.proxy.IEMCProxy;
-import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 public class KnowledgeService implements IGridService, IGridServiceProvider, IStorageProvider {
     private static final int TICKS_PER_SYNC = AppliedEConfig.CONFIG.getSyncThrottleInterval();
 
+    final Map<UUID, IKnowledgeProvider> providers = new HashMap<>();
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
-    private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
     private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
@@ -69,7 +67,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
             var uuid = gridNode.getOwningPlayerProfileId();
 
             if (uuid != null) {
-                addProvider(uuid);
+                providers.putIfAbsent(uuid, new DelegateKnowledgeProvider(uuid));
             }
 
             updatePatterns();
@@ -91,7 +89,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
                     var uuid = node.getOwningPlayerProfileId();
 
                     if (uuid != null) {
-                        addProvider(uuid);
+                        providers.putIfAbsent(uuid, new DelegateKnowledgeProvider(uuid));
                     }
                 }
             }
@@ -118,27 +116,20 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         storageMounts.mount(storage);
     }
 
-    private void addProvider(UUID playerUUID) {
-        providers.putIfAbsent(playerUUID, retrieveProvider(playerUUID));
-    }
-
-    static Supplier<IKnowledgeProvider> retrieveProvider(UUID playerUUID) {
-        return () -> ITransmutationProxy.INSTANCE.getKnowledgeProviderFor(playerUUID);
-    }
-
     List<IKnowledgeProvider> getProviders() {
-        return providers.values().stream().map(Supplier::get).toList();
+        return List.copyOf(providers.values());
     }
 
-    public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+    @Nullable
+    public IKnowledgeProvider getProviderFor(UUID uuid) {
         return providers.getOrDefault(uuid, tpeHandler.getProviderFor(uuid));
     }
 
-    Supplier<IKnowledgeProvider> getProviderFor(Player player) {
+    IKnowledgeProvider getProviderFor(Player player) {
         return getProviderFor(player.getUUID());
     }
 
-    Supplier<IKnowledgeProvider> getProviderFor(IActionHost host) {
+    IKnowledgeProvider getProviderFor(IActionHost host) {
         var node = host.getActionableNode();
 
         if (node != null) {
@@ -218,7 +209,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
 
         for (var entry : providers.entrySet()) {
             if (tpeHandler.notSharingEmc(entry)) {
-                emc = emc.add(entry.getValue().get().getEmc());
+                emc = emc.add(entry.getValue().getEmc());
             }
         }
 

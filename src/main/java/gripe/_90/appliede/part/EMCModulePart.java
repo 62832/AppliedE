@@ -3,6 +3,7 @@ package gripe._90.appliede.part;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 import net.minecraft.core.HolderLookup;
@@ -26,7 +27,6 @@ import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
-import appeng.api.storage.IStorageProvider;
 import appeng.helpers.IPriorityHost;
 import appeng.items.parts.PartModels;
 import appeng.menu.ISubMenu;
@@ -114,7 +114,7 @@ public final class EMCModulePart extends AEBasePart implements ICraftingProvider
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
         var storage = node.getGrid().getStorageService().getInventory();
 
-        for (var output : new Object2LongOpenHashMap<>(outputs).object2LongEntrySet()) {
+        for (var output : Object2LongMaps.fastIterable(outputs)) {
             var what = output.getKey();
             var amount = output.getLongValue();
             var inserted = storage.insert(what, amount, Actionable.MODULATE, IActionSource.ofMachine(this));
@@ -158,7 +158,6 @@ public final class EMCModulePart extends AEBasePart implements ICraftingProvider
     public void setPriority(int newPriority) {
         priority = newPriority;
         getHost().markForSave();
-        IStorageProvider.requestUpdate(getMainNode());
         ICraftingProvider.requestUpdate(getMainNode());
     }
 

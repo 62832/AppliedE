@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
@@ -16,16 +15,17 @@ import appeng.api.features.IPlayerRegistry;
 import cn.leomc.teamprojecte.TPTeam;
 import cn.leomc.teamprojecte.TeamChangeEvent;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.proxy.ITransmutationProxy;
 
 final class TeamProjectEHandler {
-    private final Map<TPTeam, Supplier<IKnowledgeProvider>> providersPerTeam = new HashMap<>();
+    private final Map<TPTeam, IKnowledgeProvider> providersPerTeam = new HashMap<>();
 
     private TeamProjectEHandler() {
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, event -> clear());
         NeoForge.EVENT_BUS.addListener(TeamChangeEvent.class, event -> clear());
     }
 
-    private boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> entry) {
+    private boolean notSharingEmc(Map.Entry<UUID, IKnowledgeProvider> entry) {
         var team = TPTeam.getOrCreateTeam(entry.getKey());
         var provider = entry.getValue();
         return !team.isSharingEMC()
@@ -43,7 +43,7 @@ final class TeamProjectEHandler {
         return false;
     }
 
-    private Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+    private IKnowledgeProvider getProviderFor(UUID uuid) {
         if (uuid == null) {
             return null;
         }
@@ -70,7 +70,9 @@ final class TeamProjectEHandler {
                     var player = IPlayerRegistry.getConnected(server, id);
 
                     if (player != null) {
-                        KnowledgeService.retrieveProvider(member).get().syncEmc(player);
+                        ITransmutationProxy.INSTANCE
+                                .getKnowledgeProviderFor(member)
+                                .syncEmc(player);
                     }
                 }
             }
@@ -84,7 +86,7 @@ final class TeamProjectEHandler {
     static class Proxy {
         private final Object handler = ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
 
-        boolean notSharingEmc(Map.Entry<UUID, Supplier<IKnowledgeProvider>> provider) {
+        boolean notSharingEmc(Map.Entry<UUID, IKnowledgeProvider> provider) {
             return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);
         }
 
@@ -92,11 +94,11 @@ final class TeamProjectEHandler {
             return handler == null || ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
         }
 
-        Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
+        IKnowledgeProvider getProviderFor(UUID uuid) {
             return handler != null ? ((TeamProjectEHandler) handler).getProviderFor(uuid) : null;
         }
 
-        void syncTeamProviders(Map<UUID, Supplier<IKnowledgeProvider>> fallbackProviders) {
+        void syncTeamProviders(Map<UUID, IKnowledgeProvider> fallbackProviders) {
             if (handler != null) {
                 ((TeamProjectEHandler) handler).syncTeamProviders();
             } else {
@@ -108,7 +110,7 @@ final class TeamProjectEHandler {
                         var player = IPlayerRegistry.getConnected(server, id);
 
                         if (player != null) {
-                            provider.get().syncEmc(player);
+                            provider.syncEmc(player);
                         }
                     });
                 }

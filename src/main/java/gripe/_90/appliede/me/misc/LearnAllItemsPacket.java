@@ -44,7 +44,9 @@ public class LearnAllItemsPacket implements CustomPacketPayload {
                         continue;
                     }
 
-                    if (knowledge.getProviderFor(sender.getUUID()).get().hasKnowledge(item.toStack())) {
+                    var provider = knowledge.getProviderFor(sender.getUUID());
+
+                    if (provider == null || provider.hasKnowledge(item.toStack())) {
                         continue;
                     }
 

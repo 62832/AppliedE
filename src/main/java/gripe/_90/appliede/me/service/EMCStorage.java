@@ -61,14 +61,12 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0
-                || !(what instanceof EMCKey emc)
-                || service.getProviders().isEmpty()) {
+        if (amount <= 0 || !(what instanceof EMCKey emc) || service.providers.isEmpty()) {
             return 0;
         }
 
         if (mode == Actionable.MODULATE) {
-            var providers = new ArrayList<>(service.getProviders());
+            var providers = new ArrayList<>(service.providers.values());
             Collections.shuffle(providers);
 
             if (emc.getTier() == 1) {
@@ -92,7 +90,7 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0 || service.getProviders().isEmpty()) {
+        if (amount <= 0 || service.providers.isEmpty()) {
             return 0;
         }
 
@@ -157,7 +155,7 @@ public final class EMCStorage implements MEStorage {
             boolean mayLearn,
             boolean consumePower,
             Runnable onLearn) {
-        if (amount <= 0 || service.getProviders().isEmpty()) {
+        if (amount <= 0 || service.providers.isEmpty()) {
             return 0;
         }
 
@@ -192,21 +190,21 @@ public final class EMCStorage implements MEStorage {
                 return 0;
             }
 
-            var providers = new ArrayList<>(service.getProviders());
+            var providers = new ArrayList<>(service.providers.values());
             Collections.shuffle(providers);
             distributeEmc(totalEmc, providers);
             service.syncEmc();
 
             if (mayLearn) {
-                if (player != null && !playerProvider.get().hasKnowledge(what.toStack())) {
-                    addKnowledge(what, playerProvider.get(), player);
+                if (player != null && !playerProvider.hasKnowledge(what.toStack())) {
+                    addKnowledge(what, playerProvider, player);
                     onLearn.run();
                 }
 
-                if (machine != null && !machineProvider.get().hasKnowledge(what.toStack())) {
+                if (machine != null && !machineProvider.hasKnowledge(what.toStack())) {
                     var node = Objects.requireNonNull(machine.getActionableNode());
                     var owner = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
-                    addKnowledge(what, machineProvider.get(), owner);
+                    addKnowledge(what, machineProvider, owner);
                     onLearn.run();
                 }
             }
@@ -245,7 +243,7 @@ public final class EMCStorage implements MEStorage {
 
         var providers = getProvidersForExtraction(source);
         var availableEmc = totalEmc.min(
-                providers.equals(service.getProviders())
+                providers.equals(service.providers.values())
                         ? service.getEmc()
                         : providers.getFirst().getEmc());
 
@@ -309,16 +307,12 @@ public final class EMCStorage implements MEStorage {
     }
 
     private List<IKnowledgeProvider> getProvidersForExtraction(IActionSource source) {
-        var providers = new ArrayList<IKnowledgeProvider>();
-
         if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
             var provider = service.getProviderFor(source.player().get());
-            providers.add(provider.get());
+            return provider != null ? List.of(provider) : List.of();
         } else {
-            providers.addAll(service.getProviders());
+            return new ArrayList<>(service.providers.values());
         }
-
-        return providers;
     }
 
     private static long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc, IEnergyService energy) {
