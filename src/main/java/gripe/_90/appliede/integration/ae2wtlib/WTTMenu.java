@@ -32,7 +32,7 @@ public class WTTMenu extends TransmutationTerminalMenu {
     @Nullable
     @Override
     public IGridNode getGridNode() {
-        return getHost().getActionableNode();
+        return getActionableNode();
     }
 
     boolean isWUT() {

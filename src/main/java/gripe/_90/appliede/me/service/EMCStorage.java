@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,18 +25,20 @@ import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
-import gripe._90.appliede.menu.TransmutationTerminalMenu;
+import gripe._90.appliede.me.misc.TransmutationCapable;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-public final class EMCStorage implements MEStorage {
+class EMCStorage implements MEStorage {
     private final KnowledgeService service;
+    private final IEnergyService energy;
     private int highestTier = 1;
 
-    EMCStorage(KnowledgeService service) {
+    EMCStorage(KnowledgeService service, IEnergyService energy) {
         this.service = service;
+        this.energy = energy;
     }
 
     @Override
@@ -45,13 +46,11 @@ public final class EMCStorage implements MEStorage {
         var emc = service.getEmc();
         var currentTier = 1;
 
-        while (emc.divide(AppliedE.TIER_LIMIT).signum() == 1) {
+        while (emc.signum() == 1) {
             out.add(EMCKey.of(currentTier), emc.remainder(AppliedE.TIER_LIMIT).longValue());
             emc = emc.divide(AppliedE.TIER_LIMIT);
             currentTier++;
         }
-
-        out.add(EMCKey.of(currentTier), emc.longValue());
 
         if (highestTier != currentTier) {
             highestTier = currentTier;
@@ -59,9 +58,21 @@ public final class EMCStorage implements MEStorage {
         }
     }
 
+    public int getHighestTier() {
+        return highestTier;
+    }
+
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0 || !(what instanceof EMCKey emc) || service.providers.isEmpty()) {
+        if (amount <= 0) {
+            return 0;
+        }
+
+        if (what instanceof AEItemKey item) {
+            return insertItem(item, amount, mode, source);
+        }
+
+        if (!(what instanceof EMCKey emc)) {
             return 0;
         }
 
@@ -90,23 +101,29 @@ public final class EMCStorage implements MEStorage {
 
     @Override
     public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if (amount <= 0 || service.providers.isEmpty()) {
+        if (amount <= 0) {
             return 0;
         }
 
-        if (what instanceof AEItemKey item && source.player().isPresent()) {
-            return extractItem(item, amount, mode, source, false);
+        if (what instanceof AEItemKey item) {
+            return source.machine().isPresent() && source.machine().get() instanceof TransmutationCapable
+                    ? extractItem(item, amount, mode, source)
+                    : 0;
         }
 
         if (!(what instanceof EMCKey emc)) {
             return 0;
         }
 
+        var providers = extractionProviders(source);
+
+        if (providers.isEmpty()) {
+            return 0;
+        }
+
         var multiplier = AppliedE.TIER_LIMIT.pow(emc.getTier() - 1);
         var rawEmc = BigInteger.valueOf(amount).multiply(multiplier);
         var extracted = BigInteger.ZERO;
-
-        var providers = getProvidersForExtraction(source);
 
         while (!providers.isEmpty() && extracted.compareTo(rawEmc) < 0) {
             Collections.shuffle(providers);
@@ -147,33 +164,36 @@ public final class EMCStorage implements MEStorage {
         return extracted.divide(multiplier).longValue();
     }
 
-    public long insertItem(
-            AEItemKey what,
-            long amount,
-            Actionable mode,
-            IActionSource source,
-            boolean mayLearn,
-            boolean consumePower,
-            Runnable onLearn) {
-        if (amount <= 0 || service.providers.isEmpty()) {
+    private long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+        if (!IEMCProxy.INSTANCE.hasValue(what.toStack())) {
             return 0;
         }
 
-        if (!mayLearn && !service.getKnownItems().contains(what) || !IEMCProxy.INSTANCE.hasValue(what.toStack())) {
+        if (source.machine().isEmpty() || !(source.machine().get() instanceof TransmutationCapable tc)) {
             return 0;
         }
 
-        var player = source.player().orElse(null);
-        var machine = source.machine().orElse(null);
-        var playerProvider = player != null ? service.getProviderFor(player) : null;
-        var machineProvider = machine != null ? service.getProviderFor(machine) : null;
+        var needsLearning = tc.mayLearn() && !service.getKnownItems().contains(what);
 
-        if (mayLearn) {
-            if (player != null && playerProvider == null) {
-                return 0;
+        IKnowledgeProvider learningProvider = null;
+        Player learningPlayer = null;
+
+        if (needsLearning) {
+            if (source.player().isPresent()) {
+                learningPlayer = source.player().get();
+                learningProvider = service.getProviderFor(learningPlayer.getUUID());
+            } else {
+                var node = tc.getActionableNode();
+
+                if (node == null) {
+                    return 0;
+                }
+
+                learningProvider = service.getProviderFor(node.getOwningPlayerProfileId());
+                learningPlayer = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
             }
 
-            if (machine != null && machineProvider == null) {
+            if (learningProvider == null) {
                 return 0;
             }
         }
@@ -182,8 +202,8 @@ public final class EMCStorage implements MEStorage {
             var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
-            if (consumePower) {
-                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc, service.grid.getEnergyService());
+            if (tc.consumePowerOnInsert()) {
+                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc, energy);
             }
 
             if (amount == 0) {
@@ -195,41 +215,23 @@ public final class EMCStorage implements MEStorage {
             distributeEmc(totalEmc, providers);
             service.syncEmc();
 
-            if (mayLearn) {
-                if (player != null && !playerProvider.hasKnowledge(what.toStack())) {
-                    addKnowledge(what, playerProvider, player);
-                    onLearn.run();
-                }
-
-                if (machine != null && !machineProvider.hasKnowledge(what.toStack())) {
-                    var node = Objects.requireNonNull(machine.getActionableNode());
-                    var owner = IPlayerRegistry.getConnected(node.getLevel().getServer(), node.getOwningPlayerId());
-                    addKnowledge(what, machineProvider, owner);
-                    onLearn.run();
-                }
+            if (needsLearning) {
+                addKnowledge(what, learningProvider, learningPlayer);
+                tc.onLearn();
             }
         }
 
         return amount;
     }
 
-    public long insertItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean mayLearn) {
-        return insertItem(what, amount, mode, source, mayLearn, true, () -> {});
-    }
+    private long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source) {
+        var providers = extractionProviders(source);
 
-    public long extractItem(AEItemKey what, long amount, Actionable mode, IActionSource source, boolean skipStored) {
-        if (source.player().isPresent()
-                && !(source.player().get().containerMenu instanceof TransmutationTerminalMenu)) {
+        if (providers.isEmpty()) {
             return 0;
         }
 
         if (amount <= 0 || !service.getKnownItems().contains(what)) {
-            return 0;
-        }
-
-        var existingStored = service.grid.getStorageService().getCachedInventory();
-
-        if (!skipStored && existingStored.get(what) > 0) {
             return 0;
         }
 
@@ -240,21 +242,17 @@ public final class EMCStorage implements MEStorage {
         }
 
         var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
+        var available = totalEmc.min(
+                providers.stream().map(IKnowledgeProvider::getEmc).reduce(BigInteger.ZERO, BigInteger::add));
 
-        var providers = getProvidersForExtraction(source);
-        var availableEmc = totalEmc.min(
-                providers.equals(service.providers.values())
-                        ? service.getEmc()
-                        : providers.getFirst().getEmc());
-
-        amount = availableEmc.divide(itemEmc).longValue();
+        amount = available.divide(itemEmc).longValue();
 
         if (amount == 0) {
             return 0;
         }
 
         if (mode == Actionable.MODULATE) {
-            amount = getAmountAfterPowerExpenditure(availableEmc, itemEmc, service.grid.getEnergyService());
+            amount = getAmountAfterPowerExpenditure(available, itemEmc, energy);
 
             if (amount == 0) {
                 return 0;
@@ -262,10 +260,10 @@ public final class EMCStorage implements MEStorage {
 
             var withdrawn = BigInteger.ZERO;
 
-            while (!providers.isEmpty() && withdrawn.compareTo(availableEmc) < 0) {
+            while (!providers.isEmpty() && withdrawn.compareTo(available) < 0) {
                 Collections.shuffle(providers);
 
-                var toWithdraw = availableEmc.subtract(withdrawn);
+                var toWithdraw = available.subtract(withdrawn);
                 var divisor = BigInteger.valueOf(providers.size());
                 var quotient = toWithdraw.divide(divisor);
                 var remainder = toWithdraw.remainder(divisor).longValue();
@@ -306,9 +304,9 @@ public final class EMCStorage implements MEStorage {
         }
     }
 
-    private List<IKnowledgeProvider> getProvidersForExtraction(IActionSource source) {
+    private List<IKnowledgeProvider> extractionProviders(IActionSource source) {
         if (source.player().isPresent() && AppliedEConfig.CONFIG.terminalExtractFromOwnEmcOnly()) {
-            var provider = service.getProviderFor(source.player().get());
+            var provider = service.getProviderFor(source.player().get().getUUID());
             return provider != null ? List.of(provider) : List.of();
         } else {
             return new ArrayList<>(service.providers.values());
@@ -346,8 +344,9 @@ public final class EMCStorage implements MEStorage {
         }
     }
 
-    int getHighestTier() {
-        return highestTier;
+    @Override
+    public boolean isPreferredStorageFor(AEKey what, IActionSource source) {
+        return source.machine().isPresent() && source.machine().get() instanceof TransmutationCapable;
     }
 
     @Override

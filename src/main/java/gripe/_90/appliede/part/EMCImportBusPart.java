@@ -1,5 +1,6 @@
 package gripe._90.appliede.part;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,12 +31,12 @@ import appeng.parts.automation.IOBusPart;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.misc.TransmutationCapable;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;
 
-public class EMCImportBusPart extends IOBusPart {
+public class EMCImportBusPart extends IOBusPart implements TransmutationCapable {
     private static final ResourceLocation MODEL_BASE = AppliedE.id("part/emc_import_bus");
 
     @PartModels
@@ -63,7 +64,7 @@ public class EMCImportBusPart extends IOBusPart {
     @Override
     protected boolean doBusWork(IGrid grid) {
         if (itemCache == null || emcCache == null) {
-            var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(getSide());
+            var adjacentPos = getHost().getBlockEntity().getBlockPos().relative(Objects.requireNonNull(getSide()));
             var facing = getSide().getOpposite();
             var level = (ServerLevel) getLevel();
             itemCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, level, adjacentPos, facing);
@@ -71,8 +72,6 @@ public class EMCImportBusPart extends IOBusPart {
         }
 
         var doneWork = false;
-
-        var networkEmc = grid.getService(KnowledgeService.class).getStorage();
         var remaining = new AtomicInteger(getOperationsPerTick());
 
         if (emcCache.getCapability() instanceof IEmcStorage handler) {
@@ -107,8 +106,7 @@ public class EMCImportBusPart extends IOBusPart {
                 var amount = adjacentStorage.extract(item, remaining.get(), Actionable.SIMULATE, source);
 
                 if (amount > 0) {
-                    var mayLearn = isUpgradedWith(AppliedE.LEARNING_CARD);
-                    amount = networkEmc.insertItem(item, amount, Actionable.MODULATE, source, mayLearn);
+                    amount = grid.getStorageService().getInventory().insert(item, amount, Actionable.MODULATE, source);
                     adjacentStorage.extract(item, amount, Actionable.MODULATE, source);
                     remaining.addAndGet(-(int) amount);
                 }
@@ -120,6 +118,11 @@ public class EMCImportBusPart extends IOBusPart {
         }
 
         return doneWork;
+    }
+
+    @Override
+    public boolean mayLearn() {
+        return isUpgradedWith(AppliedE.LEARNING_CARD);
     }
 
     @Override
