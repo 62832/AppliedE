@@ -1,10 +1,10 @@
 package gripe._90.appliede.emc;
 
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.NotNull;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.IUpgradeableItem;
