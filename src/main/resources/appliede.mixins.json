@@ -6,7 +6,6 @@
     "crafting.CraftConfirmMenuMixin",
     "crafting.CraftingCPULogicMixin",
     "crafting.CraftingTreeNodeMixin",
-    "misc.MEStorageMenuMixin",
     "misc.P2PTunnelAttunementAccessor",
     "tooltip.GridInventoryEntryMixin",
     "tooltip.MEInventoryUpdatePacketMixin",

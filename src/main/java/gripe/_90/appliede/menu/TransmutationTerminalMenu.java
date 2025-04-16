@@ -1,6 +1,7 @@
 package gripe._90.appliede.menu;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,6 +14,7 @@ import appeng.api.config.Actionable;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
 import appeng.helpers.InventoryAction;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
@@ -21,6 +23,7 @@ import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
 
@@ -122,6 +125,15 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
         }
 
         return 0;
+    }
+
+    @Override
+    protected void handleNetworkInteraction(ServerPlayer player, @Nullable AEKey clickedKey, InventoryAction action) {
+        if (clickedKey instanceof EMCKey) {
+            clickedKey = EMCKey.BASE;
+        }
+
+        super.handleNetworkInteraction(player, clickedKey, action);
     }
 
     public void setShiftToTransmute(boolean transmute) {
