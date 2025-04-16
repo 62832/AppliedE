@@ -35,18 +35,18 @@ public class LearnAllItemsPacket implements CustomPacketPayload {
             }
 
             var node = Objects.requireNonNull(menu.getHost().getActionableNode());
-            var storage = node.getGrid().getStorageService();
             var knowledge = node.getGrid().getService(KnowledgeService.class);
+            var provider = knowledge.getProviderFor(sender.getUUID());
 
-            if (knowledge.isTrackingPlayer(sender)) {
+            if (provider != null) {
+                var storage = node.getGrid().getStorageService();
+
                 for (var key : storage.getCachedInventory().keySet()) {
                     if (!(key instanceof AEItemKey item)) {
                         continue;
                     }
 
-                    var provider = knowledge.getProviderFor(sender.getUUID());
-
-                    if (provider == null || provider.hasKnowledge(item.toStack())) {
+                    if (provider.hasKnowledge(item.toStack())) {
                         continue;
                     }
 

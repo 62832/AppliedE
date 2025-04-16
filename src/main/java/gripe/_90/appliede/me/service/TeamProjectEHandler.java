@@ -1,14 +1,12 @@
 package gripe._90.appliede.me.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import net.neoforged.fml.ModList;
+import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import appeng.api.features.IPlayerRegistry;
 
@@ -20,107 +18,43 @@ import moze_intel.projecte.api.proxy.ITransmutationProxy;
 final class TeamProjectEHandler {
     private final Map<TPTeam, IKnowledgeProvider> providersPerTeam = new HashMap<>();
 
-    private TeamProjectEHandler() {
+    TeamProjectEHandler() {
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, event -> clear());
         NeoForge.EVENT_BUS.addListener(TeamChangeEvent.class, event -> clear());
     }
 
-    private boolean notSharingEmc(Map.Entry<UUID, IKnowledgeProvider> entry) {
-        var team = TPTeam.getOrCreateTeam(entry.getKey());
-        var provider = entry.getValue();
-        return !team.isSharingEMC()
-                || providersPerTeam.containsValue(provider)
-                || providersPerTeam.putIfAbsent(team, provider) == null;
+    boolean sharingEMC(UUID uuid, IKnowledgeProvider provider) {
+        var team = TPTeam.getOrCreateTeam(uuid);
+        return team.isSharingEMC() && providersPerTeam.putIfAbsent(team, provider) == null;
     }
 
-    private boolean isPlayerInTrackedTeam(UUID uuid) {
+    IKnowledgeProvider getProviderFor(UUID uuid) {
         for (var team : providersPerTeam.keySet()) {
             if (team.getMembers().contains(uuid)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private IKnowledgeProvider getProviderFor(UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-
-        for (var entry : providersPerTeam.entrySet()) {
-            if (entry.getKey().getMembers().contains(uuid)) {
-                return entry.getValue();
+                return providersPerTeam.get(team);
             }
         }
 
         return null;
     }
 
-    private void syncTeamProviders() {
-        var server = ServerLifecycleHooks.getCurrentServer();
+    void syncTeamProviders(MinecraftServer server) {
+        for (var team : providersPerTeam.keySet()) {
+            for (var i = -1; i < team.getMembers().size(); i++) {
+                var member = i == -1 ? team.getOwner() : team.getMembers().get(i);
+                var id = IPlayerRegistry.getMapping(server).getPlayerId(member);
+                var player = IPlayerRegistry.getConnected(server, id);
 
-        if (server != null) {
-            for (var team : providersPerTeam.keySet()) {
-                var members = new ArrayList<>(team.getMembers());
-                members.add(team.getOwner());
-
-                for (var member : members) {
-                    var id = IPlayerRegistry.getMapping(server).getPlayerId(member);
-                    var player = IPlayerRegistry.getConnected(server, id);
-
-                    if (player != null) {
-                        ITransmutationProxy.INSTANCE
-                                .getKnowledgeProviderFor(member)
-                                .syncEmc(player);
-                    }
+                if (player != null) {
+                    ITransmutationProxy.INSTANCE
+                            .getKnowledgeProviderFor(player.getUUID())
+                            .syncEmc(player);
                 }
             }
         }
     }
 
-    private void clear() {
+    void clear() {
         providersPerTeam.clear();
-    }
-
-    static class Proxy {
-        private final Object handler = ModList.get().isLoaded("teamprojecte") ? new TeamProjectEHandler() : null;
-
-        boolean notSharingEmc(Map.Entry<UUID, IKnowledgeProvider> provider) {
-            return handler == null || ((TeamProjectEHandler) handler).notSharingEmc(provider);
-        }
-
-        boolean isPlayerInTrackedTeam(UUID uuid) {
-            return handler == null || ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
-        }
-
-        IKnowledgeProvider getProviderFor(UUID uuid) {
-            return handler != null ? ((TeamProjectEHandler) handler).getProviderFor(uuid) : null;
-        }
-
-        void syncTeamProviders(Map<UUID, IKnowledgeProvider> fallbackProviders) {
-            if (handler != null) {
-                ((TeamProjectEHandler) handler).syncTeamProviders();
-            } else {
-                var server = ServerLifecycleHooks.getCurrentServer();
-
-                if (server != null) {
-                    fallbackProviders.forEach((uuid, provider) -> {
-                        var id = IPlayerRegistry.getMapping(server).getPlayerId(uuid);
-                        var player = IPlayerRegistry.getConnected(server, id);
-
-                        if (player != null) {
-                            provider.syncEmc(player);
-                        }
-                    });
-                }
-            }
-        }
-
-        void clear() {
-            if (handler != null) {
-                ((TeamProjectEHandler) handler).clear();
-            }
-        }
     }
 }
