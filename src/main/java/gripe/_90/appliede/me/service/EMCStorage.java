@@ -3,7 +3,6 @@ package gripe._90.appliede.me.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -57,7 +56,7 @@ record EMCStorage(KnowledgeService service, IEnergySource energy) implements MES
         }
 
         if (mode == Actionable.MODULATE) {
-            var providers = new ArrayList<>(service.providers.values());
+            var providers = service.getAllProviders();
             Collections.shuffle(providers);
 
             if (emc.getTier() == 1) {
@@ -190,7 +189,7 @@ record EMCStorage(KnowledgeService service, IEnergySource energy) implements MES
                 return 0;
             }
 
-            var providers = new ArrayList<>(service.providers.values());
+            var providers = service.getAllProviders();
             Collections.shuffle(providers);
             distributeEmc(totalEmc, providers);
             service.syncEmc();
@@ -272,7 +271,7 @@ record EMCStorage(KnowledgeService service, IEnergySource energy) implements MES
         return amount;
     }
 
-    private static void distributeEmc(BigInteger totalEmc, ArrayList<IKnowledgeProvider> providers) {
+    private static void distributeEmc(BigInteger totalEmc, List<IKnowledgeProvider> providers) {
         var divisor = BigInteger.valueOf(providers.size());
         var quotient = totalEmc.divide(divisor);
         var remainder = totalEmc.remainder(divisor).longValue();
@@ -289,7 +288,7 @@ record EMCStorage(KnowledgeService service, IEnergySource energy) implements MES
             var provider = service.getProviderFor(source.player().get().getUUID());
             return provider != null ? List.of(provider) : List.of();
         } else {
-            return new ArrayList<>(service.providers.values());
+            return service.getAllProviders();
         }
     }
 

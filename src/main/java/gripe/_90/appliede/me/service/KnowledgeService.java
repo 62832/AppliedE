@@ -29,6 +29,7 @@ import appeng.api.networking.storage.IStorageService;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
+import appeng.api.storage.MEStorage;
 
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.part.EMCModulePart;
@@ -41,11 +42,11 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 public class KnowledgeService implements IGridService, IGridServiceProvider, IStorageProvider {
     private static final int TICKS_PER_SYNC = AppliedEConfig.CONFIG.getSyncThrottleInterval();
 
-    final Map<UUID, IKnowledgeProvider> providers = new HashMap<>();
+    private final Map<UUID, IKnowledgeProvider> providers = new HashMap<>();
     private final List<IManagedGridNode> moduleNodes = new ArrayList<>();
-    private final EMCStorage storage;
-    private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
+    private final List<IPatternDetails> temporaryPatterns = new ArrayList<>();
 
+    private final MEStorage storage;
     private BigInteger cachedEMC;
     private Set<AEItemKey> cachedKnownItems;
 
@@ -138,6 +139,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     @Override
     public void mountInventories(IStorageMounts storageMounts) {
         storageMounts.mount(storage);
+    }
+
+    List<IKnowledgeProvider> getAllProviders() {
+        return new ArrayList<>(providers.values());
     }
 
     @Nullable
