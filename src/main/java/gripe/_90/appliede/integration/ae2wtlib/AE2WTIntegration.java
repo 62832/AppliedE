@@ -22,7 +22,6 @@ public class AE2WTIntegration {
         var icon = new Icon(0, 0, 16, 16, iconTexture);
         AddTerminalEvent.register(
                 event -> event.builder("transmutation", WTTMenuHost::new, WTTMenu.TYPE, (WTTItem) TERMINAL, icon)
-                        .translationKey(TERMINAL.getDescriptionId())
                         .addTerminal());
 
         GridLinkables.register(TERMINAL, WirelessTerminalItem.LINKABLE_HANDLER);

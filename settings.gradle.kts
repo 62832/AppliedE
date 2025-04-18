@@ -49,7 +49,7 @@ run {
                 library("ae2", "org.appliedenergistics", "appliedenergistics2").version("19.2.5-beta")
                 library("projecte", "curse.maven", "projecte-226410").version("6301953-api-6301954")
 
-                version("ae2wtlib", "19.2.2")
+                version("ae2wtlib", "19.2.3")
                 library("ae2wtlib", "de.mari_023", "ae2wtlib").versionRef("ae2wtlib")
                 library("ae2wtlibapi", "de.mari_023", "ae2wtlib_api").versionRef("ae2wtlib")
 
