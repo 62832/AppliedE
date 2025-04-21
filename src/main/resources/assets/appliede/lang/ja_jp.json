@@ -22,5 +22,5 @@
   "key.appliede.emc_tiered": "EMC^%s",
   "tooltip.appliede.transmutable": "EMCから変換可能(Shift+クリック/スクロール)",
   "tooltip.appliede.owner": "オーナー: %s",
-  "tooltip.appliede.not_installed.ae2wtlib": "AE2WTLibがインストールされていません。"
+  "tooltip.appliede.not_installed": "%sがインストールされていません。"
 }
