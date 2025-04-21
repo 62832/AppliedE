@@ -1,9 +1,11 @@
 package gripe._90.appliede.menu;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -109,12 +111,13 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
         }
     }
 
+    @NotNull
     @Override
-    protected ItemStack transferStackToMenu(ItemStack input) {
+    public ItemStack quickMoveStack(Player player, int idx) {
         isTransmuting = shiftToTransmute;
-        var transferred = super.transferStackToMenu(input);
+        var moved = super.quickMoveStack(player, idx);
         isTransmuting = false;
-        return transferred;
+        return moved;
     }
 
     @Override
