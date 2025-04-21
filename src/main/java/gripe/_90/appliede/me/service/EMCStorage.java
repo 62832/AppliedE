@@ -33,7 +33,7 @@ import moze_intel.projecte.api.proxy.IEMCProxy;
 record EMCStorage(KnowledgeService service, IEnergySource energy) implements MEStorage {
     @Override
     public void getAvailableStacks(KeyCounter out) {
-        var emc = service.getEmc();
+        var emc = service.getEMC();
 
         for (var tier = 1; emc.signum() == 1; tier++) {
             out.add(EMCKey.of(tier), emc.remainder(AppliedE.TIER_LIMIT).longValue());

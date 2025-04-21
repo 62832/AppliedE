@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import appeng.api.crafting.IPatternDetails;
@@ -47,8 +48,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     private final List<IPatternDetails> temporaryPatterns = new ArrayList<>();
 
     private final MEStorage storage;
-    private BigInteger cachedEMC;
-    private Set<AEItemKey> cachedKnownItems;
+    private final Lazy<BigInteger> cachedEMC;
+    private final Lazy<Set<AEItemKey>> cachedKnownItems;
 
     private boolean needsSync;
     private int ticksSinceLastSync;
@@ -59,6 +60,9 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         storage = new EMCStorage(this, energyService);
         storageService.addGlobalStorageProvider(this);
 
+        cachedEMC = Lazy.of(this::gatherEMC);
+        cachedKnownItems = Lazy.of(this::gatherKnownItems);
+
         NeoForge.EVENT_BUS.addListener(EMCRemapEvent.class, event -> updateKnownItems());
         NeoForge.EVENT_BUS.addListener(PlayerKnowledgeChangeEvent.class, event -> updateKnownItems());
 
@@ -68,7 +72,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     @Override
     public void addNode(IGridNode gridNode, @Nullable CompoundTag savedData) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            cachedKnownItems = null;
+            cachedEMC.invalidate();
+            cachedKnownItems.invalidate();
             moduleNodes.add(module.getMainNode());
             var uuid = gridNode.getOwningPlayerProfileId();
 
@@ -83,7 +88,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
     @Override
     public void removeNode(IGridNode gridNode) {
         if (gridNode.getOwner() instanceof EMCModulePart module) {
-            cachedKnownItems = null;
+            cachedEMC.invalidate();
+            cachedKnownItems.invalidate();
             moduleNodes.remove(module.getMainNode());
             providers.clear();
 
@@ -160,30 +166,52 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         return provider;
     }
 
+    BigInteger getEMC() {
+        return cachedEMC.get();
+    }
+
+    private BigInteger gatherEMC() {
+        var emc = BigInteger.ZERO;
+
+        for (var uuid : providers.keySet()) {
+            var provider = providers.get(uuid);
+
+            if (tpeHandler != null && ((TeamProjectEHandler) tpeHandler).sharingEMC(uuid, provider)) {
+                continue;
+            }
+
+            emc = emc.add(provider.getEmc());
+        }
+
+        return emc;
+    }
+
     public Set<AEItemKey> getKnownItems() {
-        if (cachedKnownItems == null) {
-            cachedKnownItems = new HashSet<>();
+        return cachedKnownItems.get();
+    }
 
-            for (var provider : providers.values()) {
-                for (var item : provider.getKnowledge()) {
-                    if (!IEMCProxy.INSTANCE.hasValue(item)) {
-                        continue;
-                    }
+    private Set<AEItemKey> gatherKnownItems() {
+        var items = new HashSet<AEItemKey>();
 
-                    var key = AEItemKey.of(item.createStack());
+        for (var provider : providers.values()) {
+            for (var item : provider.getKnowledge()) {
+                if (!IEMCProxy.INSTANCE.hasValue(item)) {
+                    continue;
+                }
 
-                    if (key != null) {
-                        cachedKnownItems.add(key);
-                    }
+                var key = AEItemKey.of(item.createStack());
+
+                if (key != null) {
+                    items.add(key);
                 }
             }
         }
 
-        return cachedKnownItems;
+        return items;
     }
 
     private void updateKnownItems() {
-        cachedKnownItems = null;
+        cachedKnownItems.invalidate();
         updatePatterns();
     }
 
@@ -220,26 +248,8 @@ public class KnowledgeService implements IGridService, IGridServiceProvider, ISt
         moduleNodes.forEach(ICraftingProvider::requestUpdate);
     }
 
-    BigInteger getEmc() {
-        if (cachedEMC == null) {
-            cachedEMC = BigInteger.ZERO;
-
-            for (var uuid : providers.keySet()) {
-                var provider = providers.get(uuid);
-
-                if (tpeHandler != null && ((TeamProjectEHandler) tpeHandler).sharingEMC(uuid, provider)) {
-                    continue;
-                }
-
-                cachedEMC = cachedEMC.add(provider.getEmc());
-            }
-        }
-
-        return cachedEMC;
-    }
-
     void syncEmc() {
-        cachedEMC = null;
+        cachedEMC.invalidate();
         needsSync = true;
     }
 }
