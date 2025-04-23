@@ -20,7 +20,7 @@ config = "appliede.mixins.json"
 
 [[dependencies]]
 modId = "ae2"
-versionRange = "[19,)"
+versionRange = "[19.2.9,)"
 
 [[dependencies]]
 modId = "projecte"
