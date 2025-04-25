@@ -18,20 +18,20 @@ description = "Direct EMC integration with Applied Energistics 2."
 [[mixins]]
 config = "appliede.mixins.json"
 
-[[dependencies]]
+[[dependencies.appliede]]
 modId = "ae2"
 versionRange = "[19.2.9,)"
 
-[[dependencies]]
+[[dependencies.appliede]]
 modId = "projecte"
 versionRange = "[1.0.1,)"
 
-[[dependencies]]
+[[dependencies.appliede]]
 modId = "ae2wtlib"
 type = "optional"
 versionRange = "[19,)"
 
-[[dependencies]]
+[[dependencies.appliede]]
 modId = "teamprojecte"
 type = "optional"
 versionRange = "[1.1.3,)"
