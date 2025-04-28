@@ -2,8 +2,8 @@
   "credit": "Made with Blockbench by Sea_Kerman",
   "parent": "ae2:item/part_base",
   "textures": {
-    "1": "appliede:part/emc_module_side",
     "front": "appliede:part/emc_module",
+    "side": "appliede:part/emc_module_side",
     "particle": "appliede:part/emc_module_side"
   },
   "elements": [
