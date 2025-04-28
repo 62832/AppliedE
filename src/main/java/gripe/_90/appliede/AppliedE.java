@@ -58,6 +58,7 @@ import gripe._90.appliede.me.misc.EMCInterfaceLogicHost;
 import gripe._90.appliede.me.misc.LearnAllItemsPacket;
 import gripe._90.appliede.me.misc.TransmutationTerminalHost;
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.EMCSetStockAmountMenu;
@@ -85,7 +86,7 @@ public final class AppliedE {
     @SuppressWarnings("UnstableApiUsage")
     public static final DeferredItem<Item> EMC_MODULE = ITEMS.register("emc_module", () -> {
         AEKeyTypes.register(EMCKeyType.TYPE);
-        GridServices.register(KnowledgeService.class, KnowledgeService.class);
+        GridServices.register(KnowledgeService.class, KnowledgeServiceImpl.class);
         ContainerItemStrategy.register(EMCKeyType.TYPE, EMCKey.class, EMCContainerItemStrategy.INSTANCE);
         return part(EMCModulePart.class, EMCModulePart::new);
     });

@@ -14,6 +14,7 @@ import appeng.api.networking.crafting.ICraftingPlan;
 import appeng.menu.me.crafting.CraftConfirmMenu;
 
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftConfirmMenu.class)
@@ -43,7 +44,8 @@ public abstract class CraftConfirmMenuMixin {
         if (getGrid() != null && result != null && !appliede$submitted) {
             for (var pattern : result.patternTimes().keySet()) {
                 if (pattern instanceof TransmutationPattern) {
-                    getGrid().getService(KnowledgeService.class).removeTemporaryPattern(pattern);
+                    ((KnowledgeServiceImpl) getGrid().getService(KnowledgeService.class))
+                            .removeTemporaryPattern(pattern);
                 }
             }
         }

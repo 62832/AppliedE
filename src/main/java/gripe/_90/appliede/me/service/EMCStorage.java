@@ -30,7 +30,7 @@ import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-record EMCStorage(KnowledgeService service, IEnergySource energy) implements MEStorage {
+record EMCStorage(KnowledgeServiceImpl service, IEnergySource energy) implements MEStorage {
     @Override
     public void getAvailableStacks(KeyCounter out) {
         var emc = service.getEMC();

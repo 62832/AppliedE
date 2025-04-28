@@ -22,6 +22,7 @@ import appeng.me.cluster.implementations.CraftingCPUCluster;
 import appeng.me.service.CraftingService;
 
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftingCpuLogic.class)
@@ -54,7 +55,7 @@ public abstract class CraftingCPULogicMixin {
             var grid = cluster.getGrid();
 
             if (grid != null) {
-                grid.getService(KnowledgeService.class).removeTemporaryPattern(pattern);
+                ((KnowledgeServiceImpl) grid.getService(KnowledgeService.class)).removeTemporaryPattern(pattern);
             }
         }
     }

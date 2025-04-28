@@ -21,6 +21,7 @@ import appeng.parts.PartModel;
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 
 public final class EMCModulePart extends AEBasePart implements IPriorityHost {
     @PartModels
@@ -52,7 +53,7 @@ public final class EMCModulePart extends AEBasePart implements IPriorityHost {
     @Override
     public int getPriority() {
         var grid = getMainNode().getGrid();
-        return grid != null ? grid.getService(KnowledgeService.class).getPatternPriority() : 0;
+        return grid != null ? ((KnowledgeServiceImpl) grid.getService(KnowledgeService.class)).getPatternPriority() : 0;
     }
 
     @Override
@@ -60,7 +61,8 @@ public final class EMCModulePart extends AEBasePart implements IPriorityHost {
         var node = getMainNode().getNode();
 
         if (node != null) {
-            node.getGrid().getService(KnowledgeService.class).setPatternPriority(priority, node);
+            ((KnowledgeServiceImpl) node.getGrid().getService(KnowledgeService.class))
+                    .setPatternPriority(priority, node);
             getHost().markForSave();
         }
     }

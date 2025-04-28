@@ -21,6 +21,7 @@ import appeng.crafting.CraftingTreeProcess;
 import appeng.crafting.inv.CraftingSimulationState;
 
 import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 
 @Mixin(CraftingTreeNode.class)
@@ -53,7 +54,7 @@ public abstract class CraftingTreeNodeMixin {
                 details = new TransmutationPattern(item, appliede$requestedAmount, job.hashCode());
             }
 
-            gridNode.getGrid().getService(KnowledgeService.class).addTemporaryPattern(details);
+            ((KnowledgeServiceImpl) gridNode.getGrid().getService(KnowledgeService.class)).addTemporaryPattern(details);
         }
 
         return original.call(craftingService, job, details, node);
