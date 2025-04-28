@@ -47,7 +47,7 @@ run {
                 version("parchment", "2024.11.17")
 
                 library("ae2", "org.appliedenergistics", "appliedenergistics2").version("19.2.9")
-                library("projecte", "curse.maven", "projecte-226410").version("6301953-api-6301954")
+                library("projecte", "curse.maven", "projecte-226410").version("6323142-api-6323144")
 
                 version("ae2wtlib", "19.2.3")
                 library("ae2wtlib", "de.mari_023", "ae2wtlib").versionRef("ae2wtlib")
