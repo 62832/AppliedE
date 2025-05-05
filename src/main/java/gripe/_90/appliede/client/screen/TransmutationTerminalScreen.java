@@ -31,7 +31,7 @@ public class TransmutationTerminalScreen<C extends TransmutationTerminalMenu> ex
 
     public TransmutationTerminalScreen(C menu, Inventory playerInventory, Component title, ScreenStyle style) {
         super(menu, playerInventory, title, style);
-        toggleShiftButton = new ToggleButton(Icon.ARROW_LEFT, Icon.ARROW_UP, menu::setShiftToTransmute);
+        toggleShiftButton = new ToggleButton(Icon.ARROW_LEFT, Icon.ARROW_UP, b -> menu.toggleShiftToTransmute());
         toggleShiftButton.setTooltipOn(List.of(SHIFT_TRANSMUTING, TOGGLE_STORING));
         toggleShiftButton.setTooltipOff(List.of(SHIFT_STORING, TOGGLE_TRANSMUTING));
         widgets.add("toggleShiftToTransmute", toggleShiftButton);

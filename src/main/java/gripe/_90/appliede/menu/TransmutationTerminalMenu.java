@@ -35,7 +35,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
     protected static final SlotSemantic TRANSMUTE = SlotSemantics.register("APPLIEDE_TRANSMUTE", false);
     protected static final SlotSemantic UNLEARN = SlotSemantics.register("APPLIEDE_UNLEARN", false);
 
-    private static final String ACTION_SET_SHIFT = "setShiftDestination";
+    private static final String ACTION_TOGGLE_SHIFT = "toggleShiftDestination";
     private static final String ACTION_HIDE_LEARNED = "hideLearnedText";
     private static final String ACTION_HIDE_UNLEARNED = "hideUnlearnedText";
 
@@ -65,7 +65,7 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
         this.host = host;
         transmutationSource = IActionSource.ofPlayer(getPlayer(), this);
 
-        registerClientAction(ACTION_SET_SHIFT, Boolean.class, host::setShiftToTransmute);
+        registerClientAction(ACTION_TOGGLE_SHIFT, host::toggleShiftToTransmute);
         registerClientAction(ACTION_HIDE_LEARNED, () -> learnedLabelTicks--);
         registerClientAction(ACTION_HIDE_UNLEARNED, () -> unlearnedLabelTicks--);
         addSlot(transmuteSlot, TRANSMUTE);
@@ -166,13 +166,13 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
         broadcastChanges();
     }
 
-    public void setShiftToTransmute(boolean transmute) {
+    public void toggleShiftToTransmute() {
         if (isClientSide()) {
-            sendClientAction(ACTION_SET_SHIFT, transmute);
+            sendClientAction(ACTION_TOGGLE_SHIFT);
             return;
         }
 
-        shiftToTransmute = transmute;
+        shiftToTransmute = !shiftToTransmute;
     }
 
     public void decrementLearnedTicks() {

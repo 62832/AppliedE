@@ -38,8 +38,8 @@ public class TransmutationTerminalPart extends AbstractTerminalPart implements T
     }
 
     @Override
-    public void setShiftToTransmute(boolean shift) {
-        shiftToTransmute = shift;
+    public void toggleShiftToTransmute() {
+        shiftToTransmute = !shiftToTransmute;
         saveChanges();
     }
 

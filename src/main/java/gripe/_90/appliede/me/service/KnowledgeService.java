@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import appeng.api.networking.IGridService;
@@ -19,9 +20,11 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
  * implements {@link gripe._90.appliede.me.misc.TransmutationCapable TransmutationCapable} as the "action source" for
  * these operations to be able to transmute items into / out of EMC.
  */
+@ApiStatus.NonExtendable
 public interface KnowledgeService extends IGridService {
     /**
-     * @param uuid The UUID for a given player's Minecraft profile
+     * @param uuid The UUID for a given player's Minecraft profile. Can be {@code null}, but the returned provider will
+     *             also be {@code null} as a result.
      * @return The {@link IKnowledgeProvider} for the (tracked) player with the given UUID (typically via player
      * {@linkplain net.neoforged.neoforge.capabilities.EntityCapability entity capabilities}), or {@code null} if the
      * UUID is not being tracked (i.e. the player with the given UUID does not have a Transmutation Module installed

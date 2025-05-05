@@ -34,8 +34,8 @@ public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, Transmu
     }
 
     @Override
-    public void setShiftToTransmute(boolean shift) {
-        shiftToTransmute = shift;
+    public void toggleShiftToTransmute() {
+        shiftToTransmute = !shiftToTransmute;
         getItemStack().set(AppliedE.SHIFT_TO_TRANSMUTE.get(), shiftToTransmute);
     }
 }
