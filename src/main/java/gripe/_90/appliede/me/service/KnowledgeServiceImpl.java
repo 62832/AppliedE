@@ -284,7 +284,7 @@ public final class KnowledgeServiceImpl
         }
 
         for (var item : getKnownItems()) {
-            patterns.add(new TransmutationPattern(item.getItem(), 1, 0));
+            patterns.add(new TransmutationPattern(item, 1, 0));
         }
 
         patterns.addAll(temporaryPatterns);
