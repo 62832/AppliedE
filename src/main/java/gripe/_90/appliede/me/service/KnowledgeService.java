@@ -189,7 +189,7 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
             }
 
             for (var item : getKnownItems()) {
-                patterns.add(new TransmutationPattern(item.getItem(), 1, 0));
+                patterns.add(new TransmutationPattern(item, 1, 0));
             }
 
             patterns.addAll(temporaryPatterns);
