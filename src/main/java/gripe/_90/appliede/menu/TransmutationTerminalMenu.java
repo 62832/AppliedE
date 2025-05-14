@@ -40,11 +40,12 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
     private static final String ACTION_HIDE_UNLEARNED = "hideUnlearnedText";
 
     private final TransmutationTerminalHost host;
-    private final IActionSource transmutationSource;
-    private boolean isTransmuting;
 
     private final Slot transmuteSlot = new FakeSlot(InternalInventory.empty(), 0);
     private final Slot unlearnSlot = new FakeSlot(InternalInventory.empty(), 0);
+
+    private final IActionSource transmutationSource = IActionSource.ofPlayer(getPlayer(), this);
+    private boolean isTransmuting;
 
     @GuiSync(1)
     public boolean shiftToTransmute;
@@ -63,7 +64,6 @@ public class TransmutationTerminalMenu extends MEStorageMenu implements Transmut
             MenuType<?> menuType, int id, Inventory ip, TransmutationTerminalHost host, boolean bindInventory) {
         super(menuType, id, ip, host, bindInventory);
         this.host = host;
-        transmutationSource = IActionSource.ofPlayer(getPlayer(), this);
 
         registerClientAction(ACTION_TOGGLE_SHIFT, host::toggleShiftToTransmute);
         registerClientAction(ACTION_HIDE_LEARNED, () -> learnedLabelTicks--);

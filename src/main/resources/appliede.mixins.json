@@ -12,11 +12,7 @@
     "tooltip.MEInventoryUpdatePacketMixin$BuilderMixin",
     "tooltip.MEStorageMenuMixin"
   ],
-  "client": [
-    "misc.MEStorageScreenMixin",
-    "tooltip.MEStorageScreenMixin",
-    "tooltip.RepoMixin"
-  ],
+  "client": ["misc.MEStorageScreenMixin", "tooltip.RepoMixin"],
   "injectors": {
     "defaultRequire": 1
   }
