@@ -27,27 +27,27 @@ public final class TransmutationPattern implements IPatternDetails {
     private final AEItemKey output;
     private final long amount;
     private final int tier;
-    private final int job;
+    private final int node;
 
     private final AEItemKey definition;
 
-    public TransmutationPattern(AEItemKey output, long amount, int job) {
+    public TransmutationPattern(AEItemKey output, long amount, int node) {
         tier = 1;
 
         var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
         definition.set(
                 AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(),
-                new Encoded(this.output = output, this.amount = amount, tier, this.job = job));
+                new Encoded(this.output = output, this.amount = amount, tier, this.node = node));
         this.definition = AEItemKey.of(definition);
     }
 
     public TransmutationPattern(int tier) {
         output = null;
         amount = 1;
-        job = 0;
+        node = 0;
 
         var definition = AppliedE.DUMMY_EMC_ITEM.toStack();
-        definition.set(AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(null, amount, this.tier = tier, job));
+        definition.set(AppliedE.ENCODED_TRANSMUTATION_PATTERN.get(), new Encoded(null, amount, this.tier = tier, node));
         this.definition = AEItemKey.of(definition);
     }
 
@@ -119,12 +119,12 @@ public final class TransmutationPattern implements IPatternDetails {
         }
     }
 
-    public record Encoded(AEKey output, long amount, int tier, int job) {
+    public record Encoded(AEKey output, long amount, int tier, int node) {
         public static final Codec<Encoded> CODEC = RecordCodecBuilder.create(builder -> builder.group(
                         AEKey.CODEC.optionalFieldOf("output", null).forGetter(Encoded::output),
                         Codec.LONG.fieldOf("amount").forGetter(Encoded::amount),
                         Codec.INT.fieldOf("tier").forGetter(Encoded::tier),
-                        Codec.INT.fieldOf("job").forGetter(Encoded::job))
+                        Codec.INT.fieldOf("node").forGetter(Encoded::node))
                 .apply(builder, Encoded::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Encoded> STREAM_CODEC = StreamCodec.composite(
@@ -135,7 +135,7 @@ public final class TransmutationPattern implements IPatternDetails {
                 ByteBufCodecs.VAR_INT,
                 Encoded::tier,
                 ByteBufCodecs.VAR_INT,
-                Encoded::job,
+                Encoded::node,
                 Encoded::new);
     }
 }

@@ -51,7 +51,7 @@ public abstract class CraftingTreeNodeMixin {
             @Local IGridNode gridNode) {
         if (details instanceof TransmutationPattern) {
             if (details.getOutputs().getFirst().what() instanceof AEItemKey item) {
-                details = new TransmutationPattern(item, appliede$requestedAmount, job.hashCode());
+                details = new TransmutationPattern(item, appliede$requestedAmount, node.hashCode());
             }
 
             ((KnowledgeServiceImpl) gridNode.getGrid().getService(KnowledgeService.class)).addTemporaryPattern(details);
