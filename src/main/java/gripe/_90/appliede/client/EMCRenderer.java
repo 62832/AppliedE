@@ -19,7 +19,7 @@ import appeng.api.client.AEKeyRenderHandler;
 import appeng.client.gui.style.Blitter;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.api.EMCKey;
 
 public final class EMCRenderer implements AEKeyRenderHandler<EMCKey> {
     public static final EMCRenderer INSTANCE = new EMCRenderer();

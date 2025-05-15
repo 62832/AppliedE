@@ -13,7 +13,7 @@ import appeng.parts.PartModel;
 import appeng.parts.reporting.AbstractTerminalPart;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.misc.TransmutationTerminalHost;
+import gripe._90.appliede.api.TransmutationTerminalHost;
 
 public class TransmutationTerminalPart extends AbstractTerminalPart implements TransmutationTerminalHost {
     @PartModels

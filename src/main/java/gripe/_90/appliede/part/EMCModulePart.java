@@ -20,7 +20,7 @@ import appeng.parts.PartModel;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 
 public final class EMCModulePart extends AEBasePart implements IPriorityHost {

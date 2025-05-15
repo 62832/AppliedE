@@ -13,7 +13,7 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.crafting.ICraftingPlan;
 import appeng.menu.me.crafting.CraftConfirmMenu;
 
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 

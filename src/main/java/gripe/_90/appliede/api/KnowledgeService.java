@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.service;
+package gripe._90.appliede.api;
 
 import java.math.BigInteger;
 import java.util.Set;
@@ -17,7 +17,7 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
  *
  * @apiNote For item transmutation, insertion/extraction operations are carried out through regular means via AE2's
  * {@link appeng.api.networking.storage.IStorageService IStorageService}, but must be done with a machine that
- * implements {@link gripe._90.appliede.me.misc.TransmutationCapable TransmutationCapable} as the "action source" for
+ * implements {@link TransmutationCapable TransmutationCapable} as the "action source" for
  * these operations to be able to transmute items into / out of EMC.
  */
 @ApiStatus.NonExtendable
@@ -40,7 +40,8 @@ public interface KnowledgeService extends IGridService {
     BigInteger getEMC();
 
     /**
-     * @return The items currently "learned" by all players tracked by Transmutation Modules on this network.
+     * @return The items currently "learned" by all players tracked by Transmutation Modules on this network, as a set
+     * of {@link AEItemKey}s.
      */
     Set<AEItemKey> getKnownItems();
 }

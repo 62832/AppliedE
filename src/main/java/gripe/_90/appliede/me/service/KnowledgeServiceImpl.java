@@ -30,7 +30,6 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridServiceProvider;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.crafting.ICraftingService;
-import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageService;
 import appeng.api.stacks.AEItemKey;
@@ -41,6 +40,7 @@ import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 
 import gripe._90.appliede.AppliedEConfig;
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.part.EMCModulePart;
 
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
@@ -56,7 +56,7 @@ public final class KnowledgeServiceImpl
 
     private final Map<UUID, IKnowledgeProvider> providers = new Object2ObjectOpenHashMap<>();
     private final Object2LongMap<AEKey> patternOutputs = new Object2LongOpenHashMap<>();
-    private final List<IPatternDetails> temporaryPatterns = new ObjectArrayList<>();
+    private final Set<IPatternDetails> temporaryPatterns = new ObjectOpenHashSet<>();
 
     private final MEStorage storage;
     private final Lazy<BigInteger> cachedEMC = Lazy.of(this::gatherEMC);
@@ -67,15 +67,11 @@ public final class KnowledgeServiceImpl
     private int patternPriority;
     private boolean priorityLocked;
 
-    private final IGrid grid;
+    final IGrid grid;
     private final Object tpeHandler;
 
-    public KnowledgeServiceImpl(
-            IGrid grid,
-            IStorageService storageService,
-            ICraftingService craftingService,
-            IEnergyService energyService) {
-        storage = new EMCStorage(this, energyService);
+    public KnowledgeServiceImpl(IGrid grid, IStorageService storageService, ICraftingService craftingService) {
+        storage = new EMCStorage(this);
         storageService.addGlobalStorageProvider(this);
         craftingService.addGlobalCraftingProvider(this);
         this.grid = grid;

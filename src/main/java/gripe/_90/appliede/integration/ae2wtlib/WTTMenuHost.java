@@ -13,7 +13,7 @@ import de.mari_023.ae2wtlib.api.terminal.ItemWT;
 import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.misc.TransmutationTerminalHost;
+import gripe._90.appliede.api.TransmutationTerminalHost;
 
 public class WTTMenuHost extends WTMenuHost implements IViewCellStorage, TransmutationTerminalHost {
     private boolean shiftToTransmute = getItemStack().getOrDefault(AppliedE.SHIFT_TO_TRANSMUTE.get(), false);

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.features.IPlayerRegistry;
-import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
@@ -22,15 +21,15 @@ import appeng.api.storage.MEStorage;
 
 import gripe._90.appliede.AppliedE;
 import gripe._90.appliede.AppliedEConfig;
-import gripe._90.appliede.me.key.EMCKey;
-import gripe._90.appliede.me.key.EMCKeyType;
-import gripe._90.appliede.me.misc.TransmutationCapable;
+import gripe._90.appliede.api.EMCKey;
+import gripe._90.appliede.api.EMCKeyType;
+import gripe._90.appliede.api.TransmutationCapable;
 
 import moze_intel.projecte.api.ItemInfo;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
-record EMCStorage(KnowledgeServiceImpl service, IEnergySource energy) implements MEStorage {
+record EMCStorage(KnowledgeServiceImpl service) implements MEStorage {
     @Override
     public void getAvailableStacks(KeyCounter out) {
         var emc = service.getEMC();
@@ -182,7 +181,7 @@ record EMCStorage(KnowledgeServiceImpl service, IEnergySource energy) implements
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
             if (tc.consumePowerOnInsert()) {
-                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc, energy);
+                amount = getAmountAfterPowerExpenditure(totalEmc, itemEmc);
             }
 
             if (amount == 0) {
@@ -231,7 +230,7 @@ record EMCStorage(KnowledgeServiceImpl service, IEnergySource energy) implements
         }
 
         if (mode == Actionable.MODULATE) {
-            amount = getAmountAfterPowerExpenditure(available, itemEmc, energy);
+            amount = getAmountAfterPowerExpenditure(available, itemEmc);
 
             if (amount == 0) {
                 return 0;
@@ -292,12 +291,13 @@ record EMCStorage(KnowledgeServiceImpl service, IEnergySource energy) implements
         }
     }
 
-    private static long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc, IEnergySource energy) {
+    private long getAmountAfterPowerExpenditure(BigInteger maxEmc, BigInteger itemEmc) {
         var multiplier = BigDecimal.valueOf(PowerMultiplier.CONFIG.multiplier)
                 .multiply(BigDecimal.valueOf(AppliedEConfig.CONFIG.getTransmutationPowerMultiplier()))
                 .divide(BigDecimal.valueOf(EMCKeyType.TYPE.getAmountPerOperation()), 4, RoundingMode.HALF_UP);
         var toExpend = new BigDecimal(maxEmc).multiply(multiplier).min(BigDecimal.valueOf(Double.MAX_VALUE));
 
+        var energy = service.grid.getEnergyService();
         var available = energy.extractAEPower(toExpend.doubleValue(), Actionable.SIMULATE, PowerMultiplier.ONE);
         var expended = Math.min(available, toExpend.doubleValue());
         var amount = BigDecimal.valueOf(available)

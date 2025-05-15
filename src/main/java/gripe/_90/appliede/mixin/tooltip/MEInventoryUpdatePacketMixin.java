@@ -20,7 +20,7 @@ import appeng.api.stacks.AEKey;
 import appeng.core.network.clientbound.MEInventoryUpdatePacket;
 import appeng.menu.me.common.GridInventoryEntry;
 
-import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.api.EMCKey;
 import gripe._90.appliede.me.reporting.GridInventoryEMCEntry;
 import gripe._90.appliede.me.reporting.TransmutablePacketBuilder;
 

@@ -17,12 +17,12 @@ import appeng.client.render.StaticItemColor;
 import appeng.init.client.InitScreens;
 
 import gripe._90.appliede.AppliedE;
+import gripe._90.appliede.api.EMCKey;
+import gripe._90.appliede.api.EMCKeyType;
 import gripe._90.appliede.client.screen.EMCInterfaceScreen;
 import gripe._90.appliede.client.screen.EMCSetStockAmountScreen;
 import gripe._90.appliede.client.screen.TransmutationTerminalScreen;
 import gripe._90.appliede.integration.ae2wtlib.WTTScreen;
-import gripe._90.appliede.me.key.EMCKey;
-import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.menu.EMCInterfaceMenu;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 

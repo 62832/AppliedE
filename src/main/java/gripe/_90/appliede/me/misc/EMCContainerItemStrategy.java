@@ -11,7 +11,7 @@ import appeng.api.behaviors.ContainerItemStrategy;
 import appeng.api.config.Actionable;
 import appeng.api.stacks.GenericStack;
 
-import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.api.EMCKey;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;

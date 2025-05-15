@@ -20,7 +20,7 @@ import appeng.crafting.CraftingTreeNode;
 import appeng.crafting.CraftingTreeProcess;
 import appeng.crafting.inv.CraftingSimulationState;
 
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.me.service.KnowledgeServiceImpl;
 import gripe._90.appliede.me.service.TransmutationPattern;
 

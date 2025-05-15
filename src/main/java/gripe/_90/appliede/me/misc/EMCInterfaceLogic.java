@@ -32,7 +32,8 @@ import appeng.util.ConfigInventory;
 import appeng.util.Platform;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.KnowledgeService;
+import gripe._90.appliede.api.TransmutationCapable;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
 

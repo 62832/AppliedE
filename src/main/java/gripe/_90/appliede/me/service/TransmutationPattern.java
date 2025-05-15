@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,7 +19,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.api.EMCKey;
 
 import moze_intel.projecte.api.proxy.IEMCProxy;
 
@@ -88,16 +87,14 @@ public final class TransmutationPattern implements IPatternDetails {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof TransmutationPattern pattern
-                && pattern.output.equals(output)
-                && pattern.amount == amount
-                && pattern.tier == tier
-                && pattern.job == job;
+        return obj != null
+                && obj.getClass() == getClass()
+                && ((TransmutationPattern) obj).definition.equals(definition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(output, amount, tier, job);
+        return definition.hashCode();
     }
 
     private record Input(long amount, int tier) implements IInput {

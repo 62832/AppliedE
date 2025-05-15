@@ -26,7 +26,7 @@ public class AppliedEConfig {
                 .defineInRange("transmutationPowerMultiplier", 1.0, 0, Double.MAX_VALUE);
         emcPerByte = builder.comment(
                         "The number of EMC units (of any tier) per byte as used in AE2 auto-crafting.",
-                        "It is not recommended to set this very low as this will require unreasonably large",
+                        "It is not recommended to set this very low, as this will require unreasonably large",
                         "amounts of crafting storage for some jobs.")
                 .defineInRange("emcPerByte", 1000000, 1, Integer.MAX_VALUE);
         terminalExtractFromOwnEmcOnly = builder.comment(
@@ -35,7 +35,9 @@ public class AppliedEConfig {
                         "This option does not cover re-insertion and conversion back into EMC.")
                 .define("terminalExtractFromOwnEmcOnly", false);
         syncThrottleInterval = builder.comment(
-                        "How many ticks to wait before the next player EMC sync when manipulating stored EMC.")
+                        "How many ticks to wait before the next player EMC sync when manipulating stored EMC.",
+                        "It is not recommended to set this very low, as this may cause the server to hang when",
+                        "carrying out a lot of repeated EMC insertion/extraction operations too quickly.")
                 .defineInRange("syncThrottleInterval", 20, 1, 200);
     }
 

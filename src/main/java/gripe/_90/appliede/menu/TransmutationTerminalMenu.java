@@ -24,10 +24,10 @@ import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.FakeSlot;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.key.EMCKey;
-import gripe._90.appliede.me.misc.TransmutationCapable;
-import gripe._90.appliede.me.misc.TransmutationTerminalHost;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.EMCKey;
+import gripe._90.appliede.api.KnowledgeService;
+import gripe._90.appliede.api.TransmutationCapable;
+import gripe._90.appliede.api.TransmutationTerminalHost;
 
 import moze_intel.projecte.api.ItemInfo;
 

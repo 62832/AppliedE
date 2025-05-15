@@ -29,8 +29,8 @@ import appeng.menu.AEBaseMenu;
 import appeng.menu.me.common.IncrementalUpdateHelper;
 import appeng.menu.me.common.MEStorageMenu;
 
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.me.reporting.TransmutablePacketBuilder;
-import gripe._90.appliede.me.service.KnowledgeService;
 
 @Mixin(MEStorageMenu.class)
 public abstract class MEStorageMenuMixin extends AEBaseMenu {

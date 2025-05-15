@@ -29,9 +29,9 @@ import appeng.parts.PartModel;
 import appeng.parts.automation.IOBusPart;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.key.EMCKey;
-import gripe._90.appliede.me.key.EMCKeyType;
-import gripe._90.appliede.me.misc.TransmutationCapable;
+import gripe._90.appliede.api.EMCKey;
+import gripe._90.appliede.api.EMCKeyType;
+import gripe._90.appliede.api.TransmutationCapable;
 
 import moze_intel.projecte.api.capabilities.PECapabilities;
 import moze_intel.projecte.api.capabilities.block_entity.IEmcStorage;

@@ -1,4 +1,4 @@
-package gripe._90.appliede.me.key;
+package gripe._90.appliede.api;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,9 +21,25 @@ import appeng.api.stacks.AEKeyType;
 
 import gripe._90.appliede.AppliedE;
 
+/**
+ * Represents <i>ProjectE</i>'s "EMC" as a key resource within ME networks.
+ *
+ * <p>Accounting for the fact that EMC is typically stored as a {@link java.math.BigInteger BigInteger} while ME
+ * networks may only support {@code long} amounts of a given resource/stack, this key uses a "tier" approach to
+ * represent larger amounts of EMC, which a network may otherwise be unable to cope with. The "base" EMC key corresponds
+ * to some amount of a single (1 EMC) unit as the first tier, up to a maximum of <i>10 trillion</i> ({@code 10^12}) for
+ * its corresponding stack/entry.</p>
+ *
+ * <p>Successive tier entries each represent higher powers of 10 trillion, so an "EMC^2" entry, for example, will have
+ * its reported amount correspond to how many lots of {@code 10^12} EMC the system is currently tracking. Similarly, an
+ * "EMC^3" entry would represent amounts of {@code (10^12)^2} EMC, with the general progression of "EMC^<b>n</b>"
+ * representing amounts of {@code (10^12)^(n - 1)} EMC currently in the system.</p>
+ *
+ * <p>See also: {@link EMCKeyType}</p>
+ */
 public final class EMCKey extends AEKey {
     static final MapCodec<EMCKey> MAP_CODEC = Codec.INT.fieldOf("tier").xmap(EMCKey::of, key -> key.tier);
-    static final Codec<EMCKey> CODEC = MAP_CODEC.codec();
+    private static final Codec<EMCKey> CODEC = MAP_CODEC.codec();
 
     public static final EMCKey BASE = new EMCKey(1);
 

@@ -10,7 +10,7 @@ import appeng.api.stacks.AEKey;
 import appeng.client.gui.me.common.MEStorageScreen;
 import appeng.menu.me.common.MEStorageMenu;
 
-import gripe._90.appliede.me.key.EMCKey;
+import gripe._90.appliede.api.EMCKey;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 @Mixin(MEStorageScreen.class)

@@ -12,7 +12,7 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 
 import gripe._90.appliede.AppliedE;
-import gripe._90.appliede.me.service.KnowledgeService;
+import gripe._90.appliede.api.KnowledgeService;
 import gripe._90.appliede.menu.TransmutationTerminalMenu;
 
 public class LearnAllItemsPacket implements CustomPacketPayload {
