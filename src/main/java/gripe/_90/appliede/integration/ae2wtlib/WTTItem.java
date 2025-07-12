@@ -10,6 +10,10 @@ import appeng.menu.locator.ItemMenuHostLocator;
 import de.mari_023.ae2wtlib.api.terminal.ItemWT;
 
 public class WTTItem extends ItemWT {
+    public WTTItem() {
+        super(new Properties().stacksTo(1));
+    }
+
     @NotNull
     @Override
     public MenuType<?> getMenuType(@NotNull ItemMenuHostLocator locator, @NotNull Player player) {
