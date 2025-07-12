@@ -15,7 +15,7 @@ import de.mari_023.ae2wtlib.api.registration.AddTerminalEvent;
 import gripe._90.appliede.AppliedE;
 
 public class AE2WTIntegration {
-    public static final Item TERMINAL = new WTTItem();
+    public static final Item TERMINAL = AppliedE.WIRELESS_TRANSMUTATION_TERMINAL.get();
 
     static {
         var iconTexture = new Icon.Texture(AppliedE.id("textures/item/wireless_terminal_icon.png"), 16, 16);

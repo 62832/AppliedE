@@ -51,6 +51,7 @@ import gripe._90.appliede.block.EMCInterfaceBlock;
 import gripe._90.appliede.block.EMCInterfaceBlockEntity;
 import gripe._90.appliede.integration.DummyIntegrationItem;
 import gripe._90.appliede.integration.ae2wtlib.AE2WTIntegration;
+import gripe._90.appliede.integration.ae2wtlib.WTTItem;
 import gripe._90.appliede.me.key.EMCKey;
 import gripe._90.appliede.me.key.EMCKeyType;
 import gripe._90.appliede.me.misc.EMCContainerItemStrategy;
@@ -99,33 +100,34 @@ public final class AppliedE {
 
     @SuppressWarnings("DataFlowIssue")
     public static final Supplier<BlockEntityType<EMCInterfaceBlockEntity>> EMC_INTERFACE_BE = BE_TYPES.register("emc_interface", () -> {
-        var type = BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get()).build(null);
-        EMC_INTERFACE.get().setBlockEntity(EMCInterfaceBlockEntity.class, type, null, null);
-        return type;
+        return BlockEntityType.Builder.of(EMCInterfaceBlockEntity::new, EMC_INTERFACE.get()).build(null);
     });
-
-    public static final Supplier<MenuType<EMCInterfaceMenu>> EMC_INTERFACE_MENU = menu("emc_interface", EMCInterfaceMenu::new, EMCInterfaceLogicHost.class);
-    public static final Supplier<MenuType<EMCSetStockAmountMenu>> EMC_SET_STOCK_AMOUNT_MENU = menu("emc_set_stock_amount", EMCSetStockAmountMenu::new, EMCInterfaceLogicHost.class);
 
     public static final DeferredItem<Item> EMC_EXPORT_BUS = ITEMS.register("emc_export_bus", () -> part(EMCExportBusPart.class, EMCExportBusPart::new));
     public static final DeferredItem<Item> EMC_IMPORT_BUS = ITEMS.register("emc_import_bus", () -> part(EMCImportBusPart.class, EMCImportBusPart::new));
-    public static final Supplier<MenuType<IOBusMenu>> EMC_EXPORT_BUS_MENU = menu("emc_export_bus", IOBusMenu::new, EMCExportBusPart.class);
-    public static final Supplier<MenuType<IOBusMenu>> EMC_IMPORT_BUS_MENU = menu("emc_import_bus", IOBusMenu::new, EMCImportBusPart.class);
-
     public static final DeferredItem<Item> TRANSMUTATION_TERMINAL = ITEMS.register("transmutation_terminal", () -> part(TransmutationTerminalPart.class, TransmutationTerminalPart::new));
-    public static final Supplier<MenuType<TransmutationTerminalMenu>> TRANSMUTATION_TERMINAL_MENU = menu("transmutation_terminal", TransmutationTerminalMenu::new, TransmutationTerminalHost.class);
-    public static final DeferredItem<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> Upgrades.createUpgradeCardItem(new Item.Properties()));
 
-    public static final DeferredItem<Item> DUMMY_EMC_ITEM = ITEMS.register("dummy_emc_item", () -> new Item(new Item.Properties()));
-    public static final Supplier<DataComponentType<TransmutationPattern.Encoded>> ENCODED_TRANSMUTATION_PATTERN = COMPONENT_TYPES.register(
-            "encoded_transmutation_pattern",
+    public static final DeferredItem<Item> LEARNING_CARD = ITEMS.register("learning_card", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    public static final Supplier<MenuType<EMCInterfaceMenu>> EMC_INTERFACE_MENU = MENU_TYPES.register("emc_interface", () -> {
+        return MenuTypeBuilder.create(EMCInterfaceMenu::new, EMCInterfaceLogicHost.class).build();
+    });
+    public static final Supplier<MenuType<TransmutationTerminalMenu>> TRANSMUTATION_TERMINAL_MENU = MENU_TYPES.register("transmutation_terminal", () -> {
+        return MenuTypeBuilder.create(TransmutationTerminalMenu::new, TransmutationTerminalHost.class).build();
+    });
+    public static final Supplier<MenuType<EMCSetStockAmountMenu>> SET_STOCK_AMOUNT_MENU = MENU_TYPES.register("set_stock_amount", () -> {
+        return MenuTypeBuilder.create(EMCSetStockAmountMenu::new, TransmutationTerminalHost.class).build();
+    });
+
+    public static final Supplier<DataComponentType<TransmutationPattern.Encoded>> TRANSMUTATION_PATTERN = COMPONENT_TYPES.register(
+            "transmutation_pattern",
             () -> DataComponentType.<TransmutationPattern.Encoded>builder()
                     .persistent(TransmutationPattern.Encoded.CODEC)
                     .networkSynchronized(TransmutationPattern.Encoded.STREAM_CODEC)
                     .build());
 
     public static final DeferredItem<Item> WIRELESS_TRANSMUTATION_TERMINAL = ITEMS.register("wireless_transmutation_terminal", () -> ModList.get().isLoaded("ae2wtlib")
-            ? AE2WTIntegration.TERMINAL
+            ? new WTTItem()
             : new DummyIntegrationItem(new Item.Properties().stacksTo(1), "AE2WTLib"));
     public static final Supplier<DataComponentType<Boolean>> SHIFT_TO_TRANSMUTE = COMPONENT_TYPES.register(
             "shift_to_transmute",
@@ -147,74 +149,89 @@ public final class AppliedE {
                     output.accept(TRANSMUTATION_TERMINAL);
                     output.accept(LEARNING_CARD);
                     output.accept(WIRELESS_TRANSMUTATION_TERMINAL);
-
-                    if (ModList.get().isLoaded("ae2wtlib")) {
-                        output.accept(AE2WTIntegration.getChargedTerminal());
-                    }
                 })
                 .build());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public AppliedE(ModContainer container, IEventBus eventBus) {
-        container.registerConfig(ModConfig.Type.COMMON, AppliedEConfig.SPEC);
+    private static final Function<Class<? extends IPart>, IPartItem<?>> part = clazz -> {
+        var impl = new PartItem<>(new Item.Properties(), clazz);
+        PartModels.registerModels(PartModelsHelper.createModels(clazz));
+        return impl;
+    };
 
-        ITEMS.register(eventBus);
-        BLOCKS.register(eventBus);
-        MENU_TYPES.register(eventBus);
-        BE_TYPES.register(eventBus);
-        COMPONENT_TYPES.register(eventBus);
-        TABS.register(eventBus);
+    @SuppressWarnings("unchecked")
+    private static <T extends IPart> IPartItem<T> part(Class<T> clazz, Function<IPartItem<T>, T> factory) {
+        return (IPartItem<T>) part.apply(clazz);
+    }
 
-        eventBus.addListener((FMLCommonSetupEvent event) -> {
-            var busesGroup = GuiText.IOBuses.getTranslationKey();
-            Upgrades.add(AEItems.REDSTONE_CARD, EMC_EXPORT_BUS, 1, busesGroup);
-            Upgrades.add(AEItems.CAPACITY_CARD, EMC_EXPORT_BUS, 5, busesGroup);
-            Upgrades.add(AEItems.SPEED_CARD, EMC_EXPORT_BUS, 4, busesGroup);
-            Upgrades.add(AEItems.REDSTONE_CARD, EMC_IMPORT_BUS, 1, busesGroup);
-            Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS, 5, busesGroup);
-            Upgrades.add(AEItems.SPEED_CARD, EMC_IMPORT_BUS, 4, busesGroup);
-            Upgrades.add(AEItems.INVERTER_CARD, EMC_IMPORT_BUS, 1, busesGroup);
+    public static ResourceLocation id(String id) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, id);
+    }
 
-            var emcInterfaceGroup = EMC_INTERFACE.get().getDescriptionId();
-            Upgrades.add(LEARNING_CARD, EMC_INTERFACE, 1, emcInterfaceGroup);
-            Upgrades.add(LEARNING_CARD, CABLE_EMC_INTERFACE, 1, emcInterfaceGroup);
-            Upgrades.add(LEARNING_CARD, EMC_IMPORT_BUS, 1);
+    public AppliedE(IEventBus bus, ModContainer container) {
+        ITEMS.register(bus);
+        BLOCKS.register(bus);
+        BE_TYPES.register(bus);
+        MENU_TYPES.register(bus);
+        COMPONENT_TYPES.register(bus);
+        TABS.register(bus);
+
+        var config = new AppliedEConfig();
+        container.registerConfig(ModConfig.Type.COMMON, config.spec());
+
+        bus.addListener(this::registerCapabilities);
+        bus.addListener(this::commonSetup);
+        bus.addListener(this::registerPayloads);
+        bus.addListener((RegisterEvent event) -> {
+            if (ModList.get().isLoaded("ae2wtlib")) {
+                AE2WTIntegration.registerTerminalMenu(event);
+            }
         });
-
-        eventBus.addListener(RegisterCapabilitiesEvent.class, event -> {
-            event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, EMC_INTERFACE_BE.get(), (be, $) -> be);
-            event.registerBlockEntity(AECapabilities.ME_STORAGE, EMC_INTERFACE_BE.get(), (be, $) -> be.getInterfaceLogic().getInventory());
-            event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, EMC_INTERFACE_BE.get(), (be, $) -> new GenericStackItemStorage(be.getInterfaceLogic().getStorage()));
+        bus.addListener((RegisterPartCapabilitiesEvent event) -> {
+            event.register(AECapabilities.GENERIC_INTERNAL_INV, EMCImportBusPart.class, EMCExportBusPart.class, EMCInterfacePart.class);
         });
+    }
 
-        eventBus.addListener(RegisterPartCapabilitiesEvent.class, event -> {
-            event.register(AECapabilities.ME_STORAGE, (part, $) -> part.getInterfaceLogic().getInventory(), EMCInterfacePart.class);
-            event.register(Capabilities.ItemHandler.BLOCK, (part, $) -> new GenericStackItemStorage(part.getInterfaceLogic().getStorage()), EMCInterfacePart.class);
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerItem(Capabilities.ItemHandler.ITEM, (stack, context) -> new GenericStackItemStorage(() -> stack, EMCKeyType.TYPE), LEARNING_CARD);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            Upgrades.add(AEItems.FUZZY_CARD, EMC_EXPORT_BUS, 1);
+            Upgrades.add(AEItems.FUZZY_CARD, EMC_IMPORT_BUS, 1);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_EXPORT_BUS, 2);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_IMPORT_BUS, 2);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_EXPORT_BUS, 1);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_IMPORT_BUS, 1);
+            Upgrades.add(AEItems.ACCELERATION_CARD, EMC_EXPORT_BUS, 5);
+            Upgrades.add(AEItems.ACCELERATION_CARD, EMC_IMPORT_BUS, 5);
+
+            Upgrades.add(AEItems.REDSTONE_CARD, TRANSMUTATION_TERMINAL, 1);
+            Upgrades.add(AEItems.CRAFTING_CARD, TRANSMUTATION_TERMINAL, 1);
+
+            Upgrades.add(AEItems.FUZZY_CARD, CABLE_EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.REDSTONE_CARD, CABLE_EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.CAPACITY_CARD, CABLE_EMC_INTERFACE, 2);
+            Upgrades.add(AEItems.CRAFTING_CARD, CABLE_EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.PATTERN_EXPANSION_CARD, CABLE_EMC_INTERFACE, 3);
+
+            Upgrades.add(AEItems.FUZZY_CARD, EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.REDSTONE_CARD, EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.CAPACITY_CARD, EMC_INTERFACE, 2);
+            Upgrades.add(AEItems.CRAFTING_CARD, EMC_INTERFACE, 1);
+            Upgrades.add(AEItems.PATTERN_EXPANSION_CARD, EMC_INTERFACE, 3);
+
+            AEBaseMenu.registerMenuType(EMC_INTERFACE_MENU.get(), EMCInterfaceMenu.class);
+            AEBaseMenu.registerMenuType(TRANSMUTATION_TERMINAL_MENU.get(), TransmutationTerminalMenu.class);
+            AEBaseMenu.registerMenuType(SET_STOCK_AMOUNT_MENU.get(), EMCSetStockAmountMenu.class);
+
+            GuiText.TERMINAL.setTranslationKey("gui." + MODID + ".terminal");
         });
-
-        eventBus.addListener(RegisterPayloadHandlersEvent.class, event -> event.registrar("1").playToServer(LearnAllItemsPacket.TYPE, LearnAllItemsPacket.STREAM_CODEC, LearnAllItemsPacket::handle));
-
-        if (ModList.get().isLoaded("ae2wtlib")) {
-            eventBus.addListener(AE2WTIntegration::registerTerminalMenu);
-        }
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
-    }
-
-    private static <P extends IPart> Item part(Class<P> partClass, Function<IPartItem<P>, P> factory) {
-        PartModels.registerModels(PartModelsHelper.createModels(partClass));
-        return new PartItem<>(new Item.Properties(), partClass, factory);
-    }
-
-    private static <M extends AEBaseMenu, H> Supplier<MenuType<M>> menu(String id, MenuTypeBuilder.MenuFactory<M, H> factory, Class<H> host) {
-        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).buildUnregistered(id(id)));
-    }
-
-    private static <M extends AEBaseMenu, H> Supplier<MenuType<M>> menu(String id, MenuTypeBuilder.TypedMenuFactory<M, H> factory, Class<H> host) {
-        return MENU_TYPES.register(id, () -> MenuTypeBuilder.create(factory, host).buildUnregistered(id(id)));
+    private void registerPayloads(RegisterPayloadHandlersEvent event) {
+        var version = event.registrar(MODID).versioned("1.0.0");
+        version.playToServer(LearnAllItemsPacket.TYPE, LearnAllItemsPacket.STREAM_CODEC, LearnAllItemsPacket::handle);
     }
 }
-// spotless:on
