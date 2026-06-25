@@ -89,7 +89,7 @@ public final class TransmutationPattern implements IPatternDetails {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof TransmutationPattern pattern
-                && pattern.output.equals(output)
+                && Objects.equals(pattern.output, output)
                 && pattern.amount == amount
                 && pattern.tier == tier
                 && pattern.job == job;
