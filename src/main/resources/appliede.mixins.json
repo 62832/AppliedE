@@ -5,7 +5,12 @@
   "mixins": [
     "crafting.CraftConfirmMenuMixin",
     "crafting.CraftingCPULogicMixin",
+    "crafting.CraftingProviderListAccess",
+    "crafting.CraftingServiceAccess",
     "crafting.CraftingTreeNodeMixin",
+    "crafting.NetworkCraftingProvidersMixin",
+    "crafting.PatternsForKeyAccess",
+    "crafting.ProviderStateAccess",
     "misc.MEStorageMenuMixin",
     "misc.P2PTunnelAttunementAccessor",
     "tooltip.GridInventoryEntryMixin",

@@ -46,10 +46,15 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     private final Map<UUID, Supplier<IKnowledgeProvider>> providers = new HashMap<>();
     private final EMCStorage storage = new EMCStorage(this);
     private final Set<IPatternDetails> temporaryPatterns = new HashSet<>();
+    private final List<IPatternDetails> publishedPatterns = new ArrayList<>();
+    private final Map<AEItemKey, TransmutationPattern> itemPatterns = new HashMap<>();
+    private final List<TransmutationPattern> tierPatterns = new ArrayList<>();
     private final TeamProjectEHandler.Proxy tpeHandler = new TeamProjectEHandler.Proxy();
 
     final IGrid grid;
     private Set<AEItemKey> knownItemCache;
+    private int publishedHighestTier = 1;
+    private boolean patternsReady;
     private boolean needsSync;
     private int ticksSinceLastSync;
 
@@ -177,40 +182,170 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
 
     private void updateKnownItems() {
         knownItemCache = null;
-        updatePatterns();
+        syncPatterns();
     }
 
     public List<IPatternDetails> getPatterns(IManagedGridNode node) {
-        if (!moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive()) {
-            var patterns = new ArrayList<IPatternDetails>();
-
-            for (var tier = storage.getHighestTier(); tier > 1; tier--) {
-                patterns.add(new TransmutationPattern(tier));
-            }
-
-            for (var item : getKnownItems()) {
-                patterns.add(new TransmutationPattern(item, 1, 0));
-            }
-
-            patterns.addAll(temporaryPatterns);
-            return patterns;
+        if (!isActiveModule(node)) {
+            return List.of();
         }
 
-        return Collections.emptyList();
+        if (!patternsReady) {
+            rebuildPatternCache();
+        }
+
+        return Collections.unmodifiableList(publishedPatterns);
     }
 
     public void addTemporaryPattern(IPatternDetails pattern) {
-        temporaryPatterns.add(pattern);
-        updatePatterns();
+        if (!temporaryPatterns.add(pattern)) {
+            return;
+        }
+
+        if (!patternsReady) {
+            rebuildPatternCache();
+            return;
+        }
+
+        publishedPatterns.add(pattern);
+        pushPatternChange(List.of(), List.of(pattern));
     }
 
     public void removeTemporaryPattern(IPatternDetails pattern) {
-        temporaryPatterns.remove(pattern);
-        updatePatterns();
+        if (!temporaryPatterns.remove(pattern)) {
+            return;
+        }
+
+        if (!patternsReady) {
+            rebuildPatternCache();
+            return;
+        }
+
+        publishedPatterns.remove(pattern);
+        pushPatternChange(List.of(pattern), List.of());
     }
 
     void updatePatterns() {
+        patternsReady = false;
         moduleNodes.forEach(ICraftingProvider::requestUpdate);
+    }
+
+    void syncPatterns() {
+        if (!patternsReady) {
+            rebuildPatternCache();
+            return;
+        }
+
+        var removed = new ArrayList<IPatternDetails>();
+        var added = new ArrayList<IPatternDetails>();
+        syncItems(removed, added);
+        syncTiers(removed, added);
+
+        if (removed.isEmpty() && added.isEmpty()) {
+            return;
+        }
+
+        rebuildPublishedList();
+        pushPatternChange(removed, added);
+    }
+
+    private void syncItems(List<IPatternDetails> removed, List<IPatternDetails> added) {
+        var next = getKnownItems();
+        var iterator = itemPatterns.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+
+            if (!next.contains(entry.getKey())) {
+                removed.add(entry.getValue());
+                iterator.remove();
+            }
+        }
+
+        for (var item : next) {
+            if (itemPatterns.containsKey(item)) {
+                continue;
+            }
+
+            var pattern = new TransmutationPattern(item, 1, 0);
+            itemPatterns.put(item, pattern);
+            added.add(pattern);
+        }
+    }
+
+    private void syncTiers(List<IPatternDetails> removed, List<IPatternDetails> added) {
+        var highest = storage.getHighestTier();
+
+        if (highest == publishedHighestTier) {
+            return;
+        }
+
+        removed.addAll(tierPatterns);
+        tierPatterns.clear();
+
+        for (var tier = highest; tier > 1; tier--) {
+            var pattern = new TransmutationPattern(tier);
+            tierPatterns.add(pattern);
+            added.add(pattern);
+        }
+
+        publishedHighestTier = highest;
+    }
+
+    private void rebuildPatternCache() {
+        itemPatterns.clear();
+        tierPatterns.clear();
+        publishedHighestTier = storage.getHighestTier();
+
+        for (var tier = publishedHighestTier; tier > 1; tier--) {
+            tierPatterns.add(new TransmutationPattern(tier));
+        }
+
+        for (var item : getKnownItems()) {
+            itemPatterns.put(item, new TransmutationPattern(item, 1, 0));
+        }
+
+        rebuildPublishedList();
+        patternsReady = true;
+    }
+
+    private void rebuildPublishedList() {
+        publishedPatterns.clear();
+        publishedPatterns.addAll(tierPatterns);
+        publishedPatterns.addAll(itemPatterns.values());
+        publishedPatterns.addAll(temporaryPatterns);
+    }
+
+    private void pushPatternChange(List<IPatternDetails> removed, List<IPatternDetails> added) {
+        var node = activeCraftingNode();
+
+        if (node == null) {
+            return;
+        }
+
+        var index = PatternIndex.of(grid);
+
+        if (index == null) {
+            updatePatterns();
+            return;
+        }
+
+        if (index.appliede$hasProvider(node)) {
+            index.appliede$replacePatterns(node, removed, added);
+        }
+    }
+
+    private boolean isActiveModule(IManagedGridNode node) {
+        return !moduleNodes.isEmpty() && node.equals(moduleNodes.getFirst()) && node.isActive();
+    }
+
+    private IGridNode activeCraftingNode() {
+        if (moduleNodes.isEmpty()) {
+            return null;
+        }
+
+        var module = moduleNodes.getFirst();
+        return module.isActive() ? module.getNode() : null;
     }
 
     BigInteger getEmc() {
