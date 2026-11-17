@@ -10,11 +10,6 @@ import appeng.api.networking.crafting.ICraftingProvider;
 
 @Mixin(targets = "appeng.me.service.helpers.NetworkCraftingProviders$CraftingProviderList")
 public interface CraftingProviderListAccess {
-    @Invoker("<init>")
-    static CraftingProviderListAccess appliede$create() {
-        throw new AssertionError();
-    }
-
     @Invoker("add")
     void appliede$add(ICraftingProvider provider);
 

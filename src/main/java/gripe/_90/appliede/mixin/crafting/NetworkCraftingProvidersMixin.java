@@ -35,6 +35,12 @@ public class NetworkCraftingProvidersMixin implements PatternIndex {
     @Unique
     private static MethodHandle appliede$patternInfoConstructor;
 
+    @Unique
+    private static MethodHandle appliede$patternsForKeyConstructor;
+
+    @Unique
+    private static MethodHandle appliede$providerListConstructor;
+
     @Shadow
     private void setLastModifiedOnTick() {}
 
@@ -72,12 +78,12 @@ public class NetworkCraftingProvidersMixin implements PatternIndex {
         var output = pattern.getPrimaryOutput().what();
         craftableItemsList.add(output, 1);
 
-        var patternsForKey = (PatternsForKeyAccess) craftableItems.computeIfAbsent(output, key -> PatternsForKeyAccess.appliede$create());
+        var patternsForKey = (PatternsForKeyAccess) craftableItems.computeIfAbsent(output, key -> appliede$newPatternsForKey());
         patternsForKey.appliede$infos().add(appliede$patternInfo(pattern, state));
         patternsForKey.appliede$setNeedsSorting(true);
 
         var providers = (CraftingProviderListAccess)
-                craftingMethods.computeIfAbsent(pattern, key -> CraftingProviderListAccess.appliede$create());
+                craftingMethods.computeIfAbsent(pattern, key -> appliede$newProviderList());
         providers.appliede$add(state.appliede$provider());
     }
 
@@ -108,12 +114,57 @@ public class NetworkCraftingProvidersMixin implements PatternIndex {
     }
 
     @Unique
+    private Object appliede$newPatternsForKey() {
+        return appliede$invoke(appliede$constructor("appeng.me.service.helpers.NetworkCraftingProviders$PatternsForKey"));
+    }
+
+    @Unique
+    private Object appliede$newProviderList() {
+        return appliede$invoke(appliede$constructor("appeng.me.service.helpers.NetworkCraftingProviders$CraftingProviderList"));
+    }
+
+    @Unique
+    private MethodHandle appliede$constructor(String className) {
+        try {
+            if (className.endsWith("PatternsForKey")) {
+                if (appliede$patternsForKeyConstructor == null) {
+                    appliede$patternsForKeyConstructor = appliede$findConstructor(className);
+                }
+                return appliede$patternsForKeyConstructor;
+            }
+
+            if (appliede$providerListConstructor == null) {
+                appliede$providerListConstructor = appliede$findConstructor(className);
+            }
+            return appliede$providerListConstructor;
+        } catch (Throwable failure) {
+            throw new IllegalStateException("Could not find an AE2 pattern-map constructor", failure);
+        }
+    }
+
+    @Unique
+    private static MethodHandle appliede$findConstructor(String className) throws ReflectiveOperationException {
+        var lookup = MethodHandles.privateLookupIn(NetworkCraftingProviders.class, MethodHandles.lookup());
+        return lookup.findConstructor(Class.forName(className), MethodType.methodType(void.class));
+    }
+
+    @Unique
+    private static Object appliede$invoke(MethodHandle constructor) {
+        try {
+            return constructor.invoke();
+        } catch (Throwable failure) {
+            throw new IllegalStateException("Could not create an AE2 pattern-map entry", failure);
+        }
+    }
+
+    @Unique
     private Object appliede$patternInfo(IPatternDetails pattern, Object state) {
         try {
             if (appliede$patternInfoConstructor == null) {
                 var type = Class.forName("appeng.me.service.helpers.NetworkCraftingProviders$PatternInfo");
-                appliede$patternInfoConstructor = MethodHandles.lookup()
-                        .findConstructor(type, MethodType.methodType(void.class, IPatternDetails.class, state.getClass()));
+                var lookup = MethodHandles.privateLookupIn(NetworkCraftingProviders.class, MethodHandles.lookup());
+                appliede$patternInfoConstructor = lookup.findConstructor(
+                        type, MethodType.methodType(void.class, IPatternDetails.class, state.getClass()));
             }
 
             return appliede$patternInfoConstructor.invoke(pattern, state);
