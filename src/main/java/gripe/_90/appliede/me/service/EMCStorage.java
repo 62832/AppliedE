@@ -181,7 +181,13 @@ public final class EMCStorage implements MEStorage {
         }
 
         if (mode == Actionable.MODULATE) {
-            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getSellValue(what.toStack()));
+            // Same figure extractItem charges, so putting an item back returns the EMC it cost.
+            var itemEmc = BigInteger.valueOf(IEMCProxy.INSTANCE.getValue(what.toStack()));
+
+            if (itemEmc.signum() <= 0) {
+                return 0;
+            }
+
             var totalEmc = itemEmc.multiply(BigInteger.valueOf(amount));
 
             if (consumePower) {
@@ -194,7 +200,7 @@ public final class EMCStorage implements MEStorage {
 
             var providers = new ArrayList<>(service.getProviders());
             Collections.shuffle(providers);
-            distributeEmc(totalEmc, providers);
+            distributeEmc(itemEmc.multiply(BigInteger.valueOf(amount)), providers);
             service.syncEmc();
 
             if (mayLearn) {
@@ -262,12 +268,13 @@ public final class EMCStorage implements MEStorage {
                 return 0;
             }
 
+            var emcToWithdraw = itemEmc.multiply(BigInteger.valueOf(amount));
             var withdrawn = BigInteger.ZERO;
 
-            while (!providers.isEmpty() && withdrawn.compareTo(availableEmc) < 0) {
+            while (!providers.isEmpty() && withdrawn.compareTo(emcToWithdraw) < 0) {
                 Collections.shuffle(providers);
 
-                var toWithdraw = availableEmc.subtract(withdrawn);
+                var toWithdraw = emcToWithdraw.subtract(withdrawn);
                 var divisor = BigInteger.valueOf(providers.size());
                 var quotient = toWithdraw.divide(divisor);
                 var remainder = toWithdraw.remainder(divisor).longValue();
