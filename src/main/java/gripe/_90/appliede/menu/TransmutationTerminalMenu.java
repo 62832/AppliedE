@@ -79,13 +79,15 @@ public class TransmutationTerminalMenu extends MEStorageMenu {
 
             if (node != null) {
                 var knowledge = node.getGrid().getService(KnowledgeService.class);
+                var providerSupplier = knowledge.getProviderFor(player.getUUID());
 
-                if (knowledge.isTrackingPlayer(player)) {
-                    var provider = knowledge.getProviderFor(player.getUUID()).get();
+                if (providerSupplier != null) {
+                    var provider = providerSupplier.get();
 
                     if (provider.hasKnowledge(getCarried())) {
                         provider.removeKnowledge(getCarried());
                         provider.syncKnowledgeChange(player, ItemInfo.fromStack(getCarried()), false);
+                        knowledge.refreshKnownItems();
                         unlearnedLabelTicks = 300;
                         learnedLabelTicks = 0;
                         broadcastChanges();

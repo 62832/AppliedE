@@ -89,7 +89,7 @@ final class TeamProjectEHandler {
         }
 
         boolean isPlayerInTrackedTeam(UUID uuid) {
-            return handler == null || ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
+            return handler != null && ((TeamProjectEHandler) handler).isPlayerInTrackedTeam(uuid);
         }
 
         Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {

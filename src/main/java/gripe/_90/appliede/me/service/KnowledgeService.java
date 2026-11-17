@@ -130,7 +130,18 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
     }
 
     public Supplier<IKnowledgeProvider> getProviderFor(UUID uuid) {
-        return providers.getOrDefault(uuid, tpeHandler.getProviderFor(uuid));
+        if (uuid == null) {
+            return null;
+        }
+
+        var provider = providers.get(uuid);
+
+        if (provider != null) {
+            return provider;
+        }
+
+        var teamProvider = tpeHandler.getProviderFor(uuid);
+        return teamProvider != null ? teamProvider : retrieveProvider(uuid);
     }
 
     Supplier<IKnowledgeProvider> getProviderFor(Player player) {
@@ -358,6 +369,10 @@ public class KnowledgeService implements IGridService, IGridServiceProvider {
         }
 
         return emc;
+    }
+
+    public void refreshKnownItems() {
+        updateKnownItems();
     }
 
     public boolean isTrackingPlayer(Player player) {
